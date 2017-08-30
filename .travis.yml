@@ -1,0 +1,20 @@
+language: clojure
+lein: 2.6.1
+jdk:
+  - oraclejdk8
+sudo: required
+fail_fast: true
+cache:
+  directories:
+    - $HOME/.m2
+
+script:
+  - cp -r resources/public/* ../resources/public/
+  - lein with-profile prod cljsbuild once
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  on:
+    branch: master
