@@ -5,6 +5,7 @@
             [garden.core :as garden]
             [clojure.string :as str]
             [re-form.select :as select]
+            [re-form.switchbox :as switchbox]
             [re-form.validators :as validators]
             ))
 
@@ -25,7 +26,9 @@
 
 (rf/reg-sub-raw
  :re-form/data
- (fn [db [_ path]] (reaction (get-in @db path))))
+ (fn [db [_ path]]
+   (let [cur (reagent/cursor db path)]
+     (reaction @cur))))
 
 (rf/reg-sub-raw
  :re-form/error
@@ -61,7 +64,7 @@
       (fn [x]
         (cond
           (and (map? x) (:fields x)) (:fields x)
-          (and (map? x) (:value x)) (:value x)
+          (and (map? x) (some? (:value x))) (:value x)
           (and (map? x) (:items x)) (:items x)
           (map? x) nil
           :else x))
@@ -115,9 +118,11 @@
 (def re-select select/re-select)
 (def re-radio-group select/re-radio-group)
 (def re-radio-buttons select/re-radio-buttons)
+(def re-switch-box switchbox/switch-box)
 
 (def form-style
   [:*
    select/re-select-style
+   switchbox/re-switch-box-style
    select/re-radio-group-style
    select/re-radio-buttons-style])

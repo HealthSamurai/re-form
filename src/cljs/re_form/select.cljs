@@ -1,7 +1,5 @@
 (ns re-form.select
-  (:require-macros [reagent.ratom :refer [reaction]])
   (:require
-   [cljsjs.react]
    [reagent.core :as reagent]
    [garden.core :as garden]
    [garden.color :as c]
@@ -45,8 +43,10 @@
                   :padding (u/px 10)}
      [:&:hover {:background-color "#f1f1f1"}]]]])
 
-(defn re-select [{pth :path options-path :options-path}]
-  (let [sub (rf/subscribe [:re-form/data pth])
+(defn re-select [{pth :path options-path :options-path
+                  lbl-fn :label-fn}]
+  (let [label-fn (or lbl-fn pr-str)
+        sub (rf/subscribe [:re-form/data pth])
         items (rf/subscribe [:re-form/data options-path])
         activate (fn [ev] (rf/dispatch [:re-form.select/activate pth (not (:active @sub))]))
         set-value (fn [v]
@@ -56,7 +56,7 @@
       [:div.re-select
        (if-let [v (:value @sub)]
          [:span.value
-          [:span.value {:on-click activate} (pr-str v) ]
+          [:span.value {:on-click activate} (label-fn v) ]
           [:span.clear {:on-click #(set-value nil)} "x"]]
          [:span.choose-value {:on-click activate} (or (:placeholder props) "Select...")])
        (when (:active @sub)
@@ -66,7 +66,7 @@
             [:div.option
              {:key (pr-str i)
               :on-click #(set-value i)}
-             (pr-str i)])])])))
+             (label-fn i)])])])))
 
 (def re-radio-group-style
   [:div.re-radio-group
@@ -84,8 +84,9 @@
      [:.radio {:background-color "#888"}]]
     [:&:hover {}]]])
 
-(defn re-radio-group [{pth :path options-path :options-path}]
-  (let [sub (rf/subscribe [:re-form/data pth])
+(defn re-radio-group [{pth :path options-path :options-path lbl-fn :label-fn}]
+  (let [label-fn (or lbl-fn pr-str)
+        sub (rf/subscribe [:re-form/data pth])
         items (rf/subscribe [:re-form/data options-path])
         set-value (fn [v] (rf/dispatch [:re-form/on-change pth v]))]
     (fn [props]
@@ -97,10 +98,8 @@
             :class (when (= i (:value @sub)) "active")
             :on-click #(set-value i)}
            [:span.radio]
-           [:span.value (pr-str i)]]))
+           [:span.value (label-fn i)]]))
        [:div.option.clear {:on-click #(set-value nil)} "Clear x"]])))
-
- 
 
 (def re-radio-buttons-style
   [:div.re-radio-buttons
@@ -113,8 +112,11 @@
     [:&.active {:background-color "#007bff"
                 :color "white"}]]])
 
-(defn re-radio-buttons [{pth :path options-path :options-path}]
-  (let [sub (rf/subscribe [:re-form/data pth])
+(defn re-radio-buttons [{pth :path
+                         options-path :options-path
+                         lbl-fn :label-fn}]
+  (let [label-fn (or lbl-fn pr-str)
+        sub (rf/subscribe [:re-form/data pth])
         items (rf/subscribe [:re-form/data options-path])
         set-value (fn [v] (rf/dispatch [:re-form/on-change pth v]))]
     (fn [props]
@@ -125,6 +127,5 @@
            {:key (pr-str i)
             :class (when (= i (:value @sub)) "active")
             :on-click #(set-value i)}
-           [:span.value (pr-str i)]]))])))
-
+           [:span.value (label-fn i)]]))])))
  

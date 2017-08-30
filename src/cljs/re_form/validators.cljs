@@ -8,6 +8,5 @@
 (defn email? [v]
   (when (not (= "a@b.com" v)) "Should be a@b.com"))
 
-
 (def validators {:not-blank? not-blank?
                  :email? email?})

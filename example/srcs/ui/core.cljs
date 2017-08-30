@@ -79,21 +79,38 @@
        [:pre.value [:code (pr-str @v)]]
        [:lable "Owner: "]
        [form/re-select {:path [:forms :myform :fields :owner]
+                        :label-fn :name
                         :options-path [:forms :myform :fields :owner :options]}]
 
        [:br]
        [:br]
        [:lable "Owner: "]
        [form/re-radio-buttons {:path [:forms :myform :fields :owner]
+                               :label-fn :name
                                :options-path [:forms :myform :fields :owner :options]}]
 
        [:br]
        [:br]
        [:lable "Owner: "]
        [form/re-radio-group {:path [:forms :myform :fields :owner]
-                        :options-path [:forms :myform :fields :owner :options]}]
+                             :label-fn :name
+                             :options-path [:forms :myform :fields :owner :options]}]
 
        ])))
+
+(defn switchbox-page []
+  (rf/dispatch [:re-form/manifest {:name :myform
+                                   :fields {:admin {:type :boolean}}}])
+
+  (let [v (rf/subscribe [:re-form/value [:forms :myform]])]
+    (fn []
+      [:div
+       [:h1 "Select widget"]
+       (style [:pre.value {:background-color "#f1f1f1"
+                        :padding (u/px 20)}])
+       [:hr]
+       [:pre.value [:code (pr-str @v)]]
+       [form/re-switch-box {:path [:forms :myform :fields :admin] :label "admin?"}]])))
 
 (defn inputs-page []
   (rf/dispatch [:re-form/manifest {:name :myform
@@ -138,6 +155,9 @@
    :datetime {:title "Date/Time"
                  :w 5
                  :cmp multiselect-page}
+   :switchbox {:title "Switch"
+              :w 6
+               :cmp switchbox-page}
    :upload {:title "Upload"
               :w 5
               :cmp multiselect-page}})
