@@ -321,8 +321,7 @@
             :on-click #(set-value i)}
            [:span.radio]
            [:span.value (pr-str i)]]))
-       [:div.option.clear {:on-click #(set-value nil)} "Clear x"]
-       ])))
+       [:div.option.clear {:on-click #(set-value nil)} "Clear x"]])))
 
 (defn select-page []
   (rf/dispatch [:re-form/manifest {:name :myform
@@ -354,6 +353,31 @@
 
        ])))
 
+(defn inputs-page []
+  (rf/dispatch [:re-form/manifest {:name :myform
+                                   :fields {:name {:type :string}
+                                            :email {:type :string}
+                                            :password {:type :password}}}])
+  (let [v (rf/subscribe [:re-form/value [:forms :myform]])]
+    (fn []
+      [:div
+       (style [:body
+               re-select-style
+               re-radio-group-style])
+       [:h1 "Select widget"]
+       [:hr]
+       [:pre [:code (pr-str @v)]]
+       [:lable "Name: "]
+       [re-input {:path [:forms :myform :fields :name]}]
+
+       [:lable "Email: "]
+       [re-input {:path [:forms :myform :fields :email]}]
+
+       [:lable "Password: "]
+       [re-input {:path [:forms :myform :fields :password]}]
+
+       ])))
+
 (defn multiselect-page []
   [:h1 "Index"])
 
@@ -363,7 +387,7 @@
            :cmp index}
    :inputs {:title "Inputs"
             :w 2
-            :cmp select-page}
+            :cmp inputs-page}
    :select {:title "Select"
             :w 3
             :cmp select-page}
