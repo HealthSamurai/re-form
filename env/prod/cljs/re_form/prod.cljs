@@ -1,5 +1,5 @@
 (ns ^:figwheel-no-load re-form.prod
-  (:require [ui.core :as core]))
+  (:require [re-form.core :as core]))
 
 (enable-console-print!)
 
