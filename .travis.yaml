@@ -1,7 +1,5 @@
 language: clojure
-env:
-  global:
-  - secure: "D5pOPimhhpjEyQPSRtz7K9KOd6x5Y7WdWX0STsJW+KdMQXY2xIeNSxqWt9gEj6IEtO5OYjBLCR+GaF2E/WTve6Y2dO2JxnJbatervRx4Vtdoi0l0tghiPVDUqVoF8eIIXiFGhZemDCw0wknVLkxG12mizTBDrXpagUooq9QGz6s="
+lein: lein2
 
 script:
 - cd example && lein with-profile prod cljsbuild once  && ls build
@@ -9,4 +7,4 @@ script:
 after_success:
 - 'git config --global user.email "robot@health-samurai.io"'
 - 'git config --global user.name "Travis CI Deployer"'
-- 'if [ -n "$TRAVIS_TAG" ]; then ./script/release.sh; fi'
+# - 'if [ -n "$TRAVIS_TAG" ]; then ./script/release.sh; fi'
