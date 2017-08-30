@@ -9,7 +9,9 @@ cache:
     - $HOME/.m2
 
 script:
-  - cp -r resources/public/* ../resources/public/
+  - cd example
+  - mkdir build
+  - cp -r resources/public/* build
   - lein with-profile prod cljsbuild once
 
 deploy:
