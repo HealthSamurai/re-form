@@ -47,6 +47,15 @@
         :on-click on-change}
        [:span.re-switch-span [:span.re-box]] (when lbl [:span.re-label lbl])])))
 
+(defn not-blank? [v]
+  (when (str/blank? v) "Should not be blank"))
+
+(defn email? [v]
+  (when (not (= "a@b.com" v)) "Should be a@b.com"))
+
+
+(def validators {:not-blank? not-blank?
+                 :email? email?})
 
 (defn errors [{pth :path f :validator} cmp]
   (let [err (rf/subscribe [:re-form/error pth f])]
@@ -72,6 +81,7 @@
 
 (def form-style
   [:body
+   [:h1 {:font-family "Rubik"}]
    [:.re-checkbox
     [:.re-box {:width (u/px 20)
                :display "inline-block"
@@ -116,12 +126,6 @@
  :re-form/manifest
  (fn [db [_ manifest]]
    (assoc-in db [:forms (:name manifest)] manifest)))
-
-(defn not-blank? [v]
-  (when (str/blank? v) "Should not be blank"))
-
-(defn email? [v]
-  (when (not (= "a@b.com" v)) "Should be a@b.com"))
 
 
 
@@ -204,8 +208,7 @@
                                      :item form-address
                                      :items []}}})
 
-(def validators {:not-blank? not-blank?
-                 :email? email?})
+
 (defn index []
   (rf/dispatch [:re-form/manifest form-manifest])
   (let [v (rf/subscribe [:re-form/value [:forms :user]])]
@@ -238,13 +241,27 @@
 (defn multiselect-page []
   [:h1 "Index"])
 
-(def routes {:. :index
-             "select" {:. :select}
-             "multiselect" {:. :multiselect}})
 (def pages
-  {:index index
-   :select select-page
-   :multiselect multiselect-page})
+  {:index {:title "Form builder"
+           :w 1
+           :cmp index}
+   :inputs {:title "Inputs"
+            :w 2
+            :cmp select-page}
+   :select {:title "Select"
+            :w 3
+            :cmp select-page}
+   :multiselect {:title "MultiSelect"
+                 :w 4
+                 :cmp multiselect-page}
+   :datetime {:title "Date/Time"
+                 :w 5
+                 :cmp multiselect-page}
+   :upload {:title "Upload"
+              :w 5
+              :cmp multiselect-page}})
+
+(def routes (reduce (fn [acc [k v]] (assoc acc (name k) {:. (assoc (dissoc v :cmp) :id k)})) {:. :index} pages))
 
 (defn href
   [& parts]
@@ -254,23 +271,49 @@
     (str "#" url)))
 
 (defn current-page []
-  (let [{page :match params :params} @(rf/subscribe [:route-map/current-route])]
-    (if page
-      (if-let [cmp (get pages page)]
-        [:div [cmp params]]
-        [:div.not-found (str "Page not found [" (str page) "]" )])
-      [:div.not-found (str "Route not found ")])))
+  (let [current-route (rf/subscribe [:route-map/current-route])]
+    (fn []
+      (let [{page :match params :params} @current-route]
+        (.log js/console page (:id page))
+        (if page
+          (if-let [cmp (:cmp (get pages (:id page)))]
+            [:div [cmp params]]
+            [:div.not-found (str "Page not found [" (str page) "]" )])
+          [:div.not-found (str "Route not found ")])))))
+
+(defn navigation []
+  (let [current-route (rf/subscribe [:route-map/current-route])]
+    (fn []
+      [:div.navigation
+       (style [:.navigation {:padding (u/px 20)}
+               [:a.navitem {:display "block"
+                            :padding (u/px 10)}
+                [:&.active {:background-color "#f1f1f1"}]]])
+       (doall
+        (for [[i p] (sort-by (fn [[_ x]] (:w x)) pages)]
+          [:a.navitem {:key i
+                       :class (when (= i (get-in @current-route [:match :id]))
+                                "active")
+                       :href (href (name i))} (:title p)]))])))
 
 (defn root-component []
-  [:div.container-fluid
-   (style [:body
-           [:.navigation {:width (u/px 200) :float "left"}
-            [:a.navitem {:display "block" :padding (u/px 10)}]]
-           [:.pane {:margin-left (u/px 210) :margin {:top (u/px 20)}}]])
-   [:div.navigation
-    [:a.navitem {:href (href)} "re-form"]
-    [:a.navitem {:href (href "select")} "Select"]
-    [:a.navitem {:href (href "multiselect")} "MultiSelect"]]
+  [:div
+   (style
+    (let [nav-width 300]
+      [:body
+       [:.topnav {:border-bottom "1px solid #ddd"}
+        [:.brand {:display "inline-block"
+                  :font-size (u/px 30)
+                  :font-weight "bold"
+                  :font-family "lato"
+                  :padding (u/px 10)}]]
+       [:.navigation {:width (u/px nav-width)
+                      :padding (u/px 20)
+                      :float "left"}]
+       [:.pane {:margin {:left (u/px (+ nav-width 20))
+                         :top (u/px 20)}}]]))
+   [:div.topnav [:a.brand "re-form"]]
+   [navigation]
    [:div.pane [current-page]]])
 
 (rf/reg-event-fx
