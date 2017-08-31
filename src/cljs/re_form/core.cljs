@@ -63,10 +63,9 @@
      (clojure.walk/prewalk
       (fn [x]
         (cond
+          (and (map? x) (:items x)) (:items x)
           (and (map? x) (:fields x)) (:fields x)
           (and (map? x) (some? (:value x))) (:value x)
-          (and (map? x) (:items x)) (:items x)
-          (map? x) nil
           :else x))
       form))))
 
@@ -89,9 +88,7 @@
         sub (rf/subscribe [:re-form/data input-path])
         on-change (fn [ev] (rf/dispatch [:re-form/on-change input-path (.. ev -target -value)]))]
     (fn [props]
-      [:div
-       [:input.form-control {:type "text" :value (:value @sub)  :on-change on-change}]
-       [:pre (:error @sub)]])))
+      [:input.form-control {:type "text" :value (:value @sub)  :on-change on-change}])))
 
 (rf/reg-event-db
  :re-form/add-item
