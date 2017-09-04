@@ -12,6 +12,7 @@ script:
   - cd example
   - mkdir build
   - cp -r resources/public/* build
+  - lein test
   - lein with-profile prod cljsbuild once
 
 deploy:

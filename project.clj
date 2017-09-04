@@ -6,7 +6,7 @@
 
   :min-lein-version "2.5.0"
 
-  :source-paths ["src/clj" "src/cljs"]
+  :source-paths ["src/clj" "src/cljs" "src/cljc" "test/cljs" "test/cljc"]
 
   :dependencies [[org.clojure/clojure "1.9.0-alpha16"]
                  [org.clojure/clojurescript "1.9.671" :scope "provided"] 
