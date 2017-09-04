@@ -49,10 +49,11 @@
   (let [pth (if pth (into (conj fpth :value) pth) (conj fpth :value))]
     (conj pth nm)))
 
-(defn meta-path [{frm :form :as opts}]
-  (concat (:path frm)
-          [:state]
-          (conj (or (:path opts) []) (:name opts))))
+(defn state-path [{frm :form :as opts}]
+  (into []
+        (concat (:path frm)
+                [:state]
+                (conj (or (:path opts) []) (:name opts)))))
 
 (defn errors-path [{frm :form :as opts}]
   (concat (:path frm)

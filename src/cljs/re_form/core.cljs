@@ -16,6 +16,21 @@
    (let [cur (reagent/cursor db path)]
      (reaction @cur))))
 
+(rf/reg-sub-raw
+ :re-form/value
+ (fn [db [_ opts]]
+   (let [path (shared/input-path opts)
+         cur (reagent/cursor db path)]
+     (reaction @cur))))
+
+(rf/reg-sub-raw
+ :re-form/state
+ (fn [db [_ opts]]
+   (let [path (shared/state-path opts)
+         cur (reagent/cursor db path)]
+     (reaction @cur))))
+
+
 (rf/reg-event-db
  :re-form/init
  (fn [db [_ manifest]]
@@ -37,6 +52,13 @@
 (rf/reg-event-db
  :re-form/update
  (fn [db [_ opts v]] (shared/on-change db opts v)))
+
+(rf/reg-event-db
+ :re-form/state
+ (fn [db [_ opts v]]
+   (let [spath (shared/state-path opts)]
+     (update-in db spath (fn [o] (merge (or o {}) v))))))
+
 
 (defn input [{{pth :path :as frm} :form  nm :name :as opts}]
   (let [v (rf/subscribe [:re-form/data (shared/input-path opts)])

@@ -16,34 +16,14 @@
   [:style (garden/css gcss)])
 
 
-(defn data []
-  (let [d (rf/subscribe [:reform/data [:forms :user]])]
-    (fn [] [:pre (pr-str @d)])))
 
-
-(defn subform [{pth :path}]
-  (let [sub (rf/subscribe [:re-form/data pth])]
+(defn form-data [form]
+  (let [ data (rf/subscribe [:re-form/data (:path form)])]
     (fn [props]
-      [:div [:h3 "Address"]
-       [:pre (pr-str pth)]
-       [form/re-input {:path (into pth [:fields :city])}]
-       [form/re-input {:path (into pth [:fields :line])}]])))
+      [:pre [:code (with-out-str (cljs.pprint/pprint @data))]])))
 
-
-;; user space
-
-(def form-address {:name :address
-                   :fields {:city {:validator :not-blank :type :string}}})
-
-(def form-manifest {:name :user
-                    :fields {:name {:validator :not-blank :type :string}
-                             :email {:validator :email :type :password}
-                             :roles {:type :collection
-                                     :item form-address
-                                     :items []}}})
 
 (defn index []
-  (rf/dispatch [:re-form/manifest form-manifest])
   (let [v (rf/subscribe [:re-form/value [:forms :user]])]
     (fn []
       [:div
@@ -56,45 +36,52 @@
 
        [:h3 "Collection"]
 
-       [form/re-collection {:path [:forms :user :fields :roles]} subform]
-
-       ])))
+       #_[form/re-collection {:path [:forms :user :fields :roles]} subform]])))
 
 (defn select-page []
-  (rf/dispatch [:re-form/manifest {:name :myform
-                                   :fields {:owner {:type :object
-                                                    :options [{:name "Nikolai"}
-                                                              {:name "Mike"}
-                                                              {:name "Max"}
-                                                              {:name "Marat"}
-                                                              {:name "Tim"}
-                                                              {:name "Slava"}]}}}])
-  (let [v (rf/subscribe [:re-form/value [:forms :myform]])]
+  (let [form-path [:forms :myform]
+        form {:path form-path
+              :options [{:name "Nikolai"}
+                        {:name "Mike"}
+                        {:name "Max"}
+                        {:name "Marat"}
+                        {:name "Tim"}
+                        {:name "Slava"}]
+              :meta {:properties {:owner  {:validators {:not-blank true}}}}
+              :value {:owner "Mike"}}]
+    (rf/dispatch [:re-form/init form])
     (fn []
-      [:div
-       [:h1 "Select widget"]
-       (style [:pre.value {:background-color "#f1f1f1"
-                        :padding (u/px 20)}])
-       [:hr]
-       [:pre.value [:code (pr-str @v)]]
-       [:label "Owner: "]
-       [form/re-select {:path [:forms :myform :fields :owner]
-                        :label-fn :name
-                        :options-path [:forms :myform :fields :owner :options]}]
+      [:div.row
 
-       [:br]
-       [:br]
-       [:label "Owner: "]
-       [form/re-radio-buttons {:path [:forms :myform :fields :owner]
-                               :label-fn :name
-                               :options-path [:forms :myform :fields :owner :options]}]
+       [:div.col
+        [:h1 "Select widget"]
+        (style [:pre.value {:background-color "#f1f1f1"
+                            :padding (u/px 20)}])
+        [:label "Owner: "]
+        [form/re-select {:form form
+                         :options-path (conj form-path :options)
+                         :name :owner
+                         :label-fn :name}]
 
-       [:br]
-       [:br]
-       [:label "Owner: "]
-       [form/re-radio-group {:path [:forms :myform :fields :owner]
-                             :label-fn :name
-                             :options-path [:forms :myform :fields :owner :options]}]
+        [:br]
+        [:br]
+        [:label "Owner: "]
+        [form/re-radio-buttons {:form form
+                                :name :owner
+                                :options-path (conj form-path :options)
+                                :label-fn :name}]
+
+        [:br]
+        [:br]
+        [:label "Owner: "]
+        [form/re-radio-group {:form form
+                              :name :owner
+                              :options-path (conj form-path :options)
+                              :label-fn :name}]
+        ]
+       [:div.col
+        [form-data form]
+        ]
 
        ])))
 
@@ -112,16 +99,9 @@
        [:pre.value [:code (pr-str @v)]]
        [form/re-switch-box {:path [:forms :myform :fields :admin] :label "admin?"}]])))
 
-(defn form-data [form]
-  (let [ data (rf/subscribe [:re-form/data (:path form)])]
-    (fn [props]
-      [:pre [:code (with-out-str (cljs.pprint/pprint @data))]])))
+
 
 (defn inputs-page []
-  (rf/dispatch [:re-form/manifest {:name :myform
-                                   :fields {:name {:type :string}
-                                            :email {:type :string}
-                                            :password {:type :password}}}])
   (let [form-path [:forms :myform]
         form {:path form-path
               :meta {:properties {:name  {:validators {:not-blank true}}
