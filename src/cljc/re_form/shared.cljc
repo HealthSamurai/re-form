@@ -38,10 +38,10 @@
 
 (defn insert-by-path [m [k & ks :as path] value]
   (if ks
-    (if (int? k)
+    (if (integer? k)
       (assoc (or m []) k (insert-by-path (get m k) ks value))
       (assoc (or m {}) k (insert-by-path (get m k) ks value)))
-    (if (int? k)
+    (if (integer? k)
       (assoc (or m []) k value)
       (assoc (or m {}) k value))))
 
