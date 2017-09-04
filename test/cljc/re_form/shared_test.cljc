@@ -47,7 +47,6 @@
                      :state {:name {:errors {:not-blank "Could not be blank!"
                                              :min-length "Lenght should be more then 5"}}}}}}))
 
-
 (deftest nested-form-logic
   (def db {:forms {:myform {:value {:address {:city "LA"}}
                             :meta {:properties {:address {:properties {:city {:validators {:not-blank true
