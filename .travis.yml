@@ -9,10 +9,10 @@ cache:
     - $HOME/.m2
 
 script:
+  - lein test
   - cd example
   - mkdir build
   - cp -r resources/public/* build
-  - lein test
   - lein with-profile prod cljsbuild once
 
 deploy:
