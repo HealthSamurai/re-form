@@ -1,7 +1,6 @@
 (ns re-form.validators
   (:require [clojure.string :as str]))
 
-
 (defn not-blank? [v]
   (when (str/blank? v) "Should not be blank"))
 

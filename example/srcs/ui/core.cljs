@@ -33,11 +33,11 @@
 ;; user space
 
 (def form-address {:name :address
-                   :fields {:city {:validator :not-blank? :type :string}}})
+                   :fields {:city {:validator :not-blank :type :string}}})
 
 (def form-manifest {:name :user
-                    :fields {:name {:validator :not-blank? :type :string}
-                             :email {:validator :email? :type :password}
+                    :fields {:name {:validator :not-blank :type :string}
+                             :email {:validator :email :type :password}
                              :roles {:type :collection
                                      :item form-address
                                      :items []}}})
@@ -77,21 +77,21 @@
                         :padding (u/px 20)}])
        [:hr]
        [:pre.value [:code (pr-str @v)]]
-       [:lable "Owner: "]
+       [:label "Owner: "]
        [form/re-select {:path [:forms :myform :fields :owner]
                         :label-fn :name
                         :options-path [:forms :myform :fields :owner :options]}]
 
        [:br]
        [:br]
-       [:lable "Owner: "]
+       [:label "Owner: "]
        [form/re-radio-buttons {:path [:forms :myform :fields :owner]
                                :label-fn :name
                                :options-path [:forms :myform :fields :owner :options]}]
 
        [:br]
        [:br]
-       [:lable "Owner: "]
+       [:label "Owner: "]
        [form/re-radio-group {:path [:forms :myform :fields :owner]
                              :label-fn :name
                              :options-path [:forms :myform :fields :owner :options]}]
@@ -112,26 +112,77 @@
        [:pre.value [:code (pr-str @v)]]
        [form/re-switch-box {:path [:forms :myform :fields :admin] :label "admin?"}]])))
 
+(defn form-data [form]
+  (let [ data (rf/subscribe [:re-form/data (:path form)])]
+    (fn [props]
+      [:pre [:code (with-out-str (cljs.pprint/pprint @data))]])))
+
 (defn inputs-page []
   (rf/dispatch [:re-form/manifest {:name :myform
                                    :fields {:name {:type :string}
                                             :email {:type :string}
                                             :password {:type :password}}}])
-  (let [v (rf/subscribe [:re-form/value [:forms :myform]])]
+  (let [form-path [:forms :myform]
+        form {:path form-path
+              :meta {:properties {:name  {:validators {:not-blank true}}
+                                  :email {:validators {:email true}}
+                                  :organization {:properties {:name {:validators {:not-blank true}}
+                                                              :url {:validators {:uri true}}}}
+                                  :groups {:items {:properties {:name {:validators {:not-blank true}}}}}}}
+              :value {:name "nicola"
+                      :email "niquola@mail.com"
+                      :organization {:name "github" :url "github.com"}
+                      :groups [{:name "admin"} {:name "physician"}]}}]
+    (rf/dispatch [:re-form/init form])
     (fn []
       [:div
-
        [:h1 "Select widget"]
+       [style [:body
+               [:.form-row {:padding "5px 0px"}]
+               [:pre {:background-color "#f1f1f1" :padding "20px" :border "1px solid #ddd"} ]
+               [:label {:width "10em" :display "inline-block" :text-align "right" :padding-right "10px"}]
+               [:.errors {:color "red" :margin-left "10em"}]]]
        [:hr]
-       [:pre [:code (pr-str @v)]]
-       [:lable "Name: "]
-       [form/re-input {:path [:forms :myform :fields :name]}]
+       [:div.row
+        [:div.col
+         [:div.form-row
+          [:label "Name: "]
+          [form/input {:form form :name :name}]
+          [form/errors-for {:form form :name :name}]]
 
-       [:lable "Email: "]
-       [form/re-input {:path [:forms :myform :fields :email]}]
+         [:div.form-row
+          [:label "Email: "]
+          [form/input {:form form :name :email}]
+          [form/errors-for {:form form :name :email}]]
 
-       [:lable "Password: "]
-       [form/re-input {:path [:forms :myform :fields :password]}]
+         [:label "Password: "]
+         [form/input {:form form :name :password}]
+
+         [:div.form-row
+          [:label "Organization.name: "]
+          [form/input {:form form :path [:organization] :name :name}]
+          [form/errors-for {:form form :path [:organization] :name :name}]]
+
+         [:div.form-row
+          [:label "Organization.url: "]
+          [form/input {:form form :path [:organization] :name :url}]
+          [form/errors-for {:form form :path [:organization] :name :url}]]
+
+
+         [:div.form-row
+          [:label "group.0.name: "]
+          [form/input {:form form :path [:groups 0] :name :name}]
+          [form/errors-for {:form form :path [:groups 0] :name :name}]]
+
+         [:div.form-row
+          [:label "group.1.name: "]
+          [form/input {:form form :path [:groups 1] :name :name}]
+          [form/errors-for {:form form :path [:groups 1] :name :name}]]
+         ]
+        [:div.col
+         [form-data form]]]
+       
+
 
        ])))
 
@@ -153,14 +204,14 @@
                  :w 4
                  :cmp multiselect-page}
    :datetime {:title "Date/Time"
-                 :w 5
-                 :cmp multiselect-page}
+              :w 5
+              :cmp multiselect-page}
    :switchbox {:title "Switch"
-              :w 6
+               :w 6
                :cmp switchbox-page}
    :upload {:title "Upload"
-              :w 5
-              :cmp multiselect-page}})
+            :w 5
+            :cmp multiselect-page}})
 
 (def routes (reduce (fn [acc [k v]] (assoc acc (name k) {:. (assoc (dissoc v :cmp) :id k)})) {:. :index} pages))
 

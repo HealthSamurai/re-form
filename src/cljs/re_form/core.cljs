@@ -6,23 +6,9 @@
             [clojure.string :as str]
             [re-form.select :as select]
             [re-form.switchbox :as switchbox]
-            [re-form.validators :as validators]
-            ))
+            [re-form.shared :as shared]
+            [re-form.validators :as validators]))
 
-
-(defn insert-by-path [m [k & ks :as path] value]
-  (if ks
-    (if (int? k)
-      (assoc (or m []) k (insert-by-path (get m k) ks value))
-      (assoc (or m {}) k (insert-by-path (get m k) ks value)))
-    (if (int? k)
-      (assoc (or m []) k value)
-      (assoc (or m {}) k value))))
-
-(rf/reg-event-db
- :re-form/change
- (fn [db [_ path value]]
-   (insert-by-path db path value)))
 
 (rf/reg-sub-raw
  :re-form/data
@@ -30,52 +16,35 @@
    (let [cur (reagent/cursor db path)]
      (reaction @cur))))
 
-(rf/reg-sub-raw
- :re-form/error
- (fn [db [_ path f]]
-   (let [cur (reagent/cursor db path)]
-     (reaction (f @cur)))))
+(rf/reg-event-db
+ :re-form/init
+ (fn [db [_ manifest]]
+   (assoc-in db (:path manifest) manifest)))
+
 
 (rf/reg-sub-raw
- :reform/data
- (fn [db [_ path]]
-   (let [cur (reagent/cursor db path)]
+ :re-form/errors-for
+ (fn [db [_ opts]]
+   (let [cur (reagent/cursor db (shared/errors-path opts))]
      (reaction @cur))))
 
-(rf/reg-event-db
- :re-form/manifest
- (fn [db [_ manifest]]
-   (assoc-in db [:forms (:name manifest)] manifest)))
-
-(rf/reg-event-db
- :re-form/on-change
- (fn [db [_ pth v]]
-   (let [manifest (get-in db pth)
-         db (if-let [valid (get validators/validators (:validator manifest))]
-              (re-form.core/insert-by-path db (conj pth :error) (valid v))
-              db)]
-     (re-form.core/insert-by-path db (conj pth :value) v))))
-
-(rf/reg-sub
- :re-form/value
- (fn [db [_ pth]]
-   (let [form (get-in db pth)]
-     (clojure.walk/prewalk
-      (fn [x]
-        (cond
-          (and (map? x) (:items x)) (:items x)
-          (and (map? x) (:fields x)) (:fields x)
-          (and (map? x) (some? (:value x))) (:value x)
-          :else x))
-      form))))
-
-
-(defn input [{pth :path :as opts}]
-  (let [sub (rf/subscribe [:re-form/data pth])
-        on-change (fn [ev] (rf/dispatch [:re-form/change pth (.. ev -target -value)]))]
+(defn errors-for [opts]
+  (let [errs (rf/subscribe [:re-form/errors-for opts])]
     (fn [props]
-      [:input.form-control (merge (dissoc opts :path)
-                                  {:type "text" :value @sub  :on-change on-change})])))
+      (when @errs [:div.errors
+                   (doall (for [[k v] @errs] [:span.error {:key k} v]))]))))
+
+(rf/reg-event-db
+ :re-form/update
+ (fn [db [_ opts v]] (shared/on-change db opts v)))
+
+(defn input [{{pth :path :as frm} :form  nm :name :as opts}]
+  (let [v (rf/subscribe [:re-form/data (shared/input-path opts)])
+        on-change (fn [ev] (rf/dispatch [:re-form/update opts (.. ev -target -value)]))]
+    (fn [props]
+      [:input
+       (merge (dissoc opts :form :path)
+              {:type "text" :value @v  :on-change on-change})])))
 
 (defn errors [{pth :path f :validator} cmp]
   (let [err (rf/subscribe [:re-form/error pth f])]
@@ -84,33 +53,10 @@
        cmp [:br] "Errors:" (pr-str @err)])))
 
 (defn re-input [{pth :path}]
-  (let [input-path pth
-        sub (rf/subscribe [:re-form/data input-path])
-        on-change (fn [ev] (rf/dispatch [:re-form/on-change input-path (.. ev -target -value)]))]
-    (fn [props]
-      [:input.form-control {:type "text" :value (:value @sub)  :on-change on-change}])))
-
-(rf/reg-event-db
- :re-form/add-item
- (fn [db [_ path metadata]]
-   (update-in db path conj metadata)))
-
-(rf/reg-event-db
- :re-form/remove-item
- (fn [db [_ path i]]
-   (update-in db path (fn [v] (into (subvec v 0 i) (subvec v (inc i)))))))
-
+  [:b "remove me"])
 
 (defn re-collection [{pth :path} input]
-  (let [sub (rf/subscribe [:re-form/data pth])
-        add-item (fn [] (rf/dispatch [:re-form/add-item (conj pth :items) (:item @sub)]))]
-    (fn [props]
-      [:div 
-       (for [i (range (count (:items @sub)))]
-         [:div {:key i} [input {:path (into pth [:items i])}]
-          [:button {:on-click #(rf/dispatch [:re-form/remove-item (conj pth :items) i])} "x"]])
-       [:br]
-       [:button {:on-click add-item} "+"]])))
+  (.log js/console "obsolete"))
 
 (def re-select select/re-select)
 (def re-radio-group select/re-radio-group)

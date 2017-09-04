@@ -14,11 +14,8 @@
                  [reagent "0.7.0" :exclusions [cljsjs/react]]
                  [reagent-utils "0.2.1" :exclusions [cljsjs/react]]
                  [re-frame "0.9.4" :exclusions [cljsjs/react]]
-                 [re-frisk "0.4.5" :exclusions [cljsjs/react]]
-                 [binaryage/devtools "0.9.4"]
                  [hiccup "1.0.5"]
-                 [garden "1.3.2"]
-                 [matcho "0.1.0-RC5"]]
+                 [garden "1.3.2"]]
 
   :clean-targets ^{:protect false}
   [:target-path
@@ -34,15 +31,18 @@
   :profiles {:dev {:repl-options {:init-ns re-form.repl
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
-                   :dependencies [[ring/ring-mock "0.3.0"]
+                   :dependencies [[re-frisk "0.4.5" :exclusions [cljsjs/react]]
+                                  [binaryage/devtools "0.9.4"]
+                                  [ring/ring-mock "0.3.0"]
                                   [ring/ring-devel "1.5.1"]
                                   [prone "1.1.4"]
                                   [figwheel-sidecar "0.5.10-SNAPSHOT"]
                                   [org.clojure/tools.nrepl "0.2.13"]
                                   [com.cemerick/piggieback "0.2.2-SNAPSHOT"]
+                                  [matcho "0.1.0-RC5"]
                                   [pjstadig/humane-test-output "0.8.1"]]
 
-                   :source-paths ["src" "env/dev/clj"]
+                   :source-paths ["src/cljs" "src/cljc" "env/dev/clj"]
                    :plugins [[lein-figwheel "0.5.12"]]
 
                    :env {:dev true}
@@ -50,7 +50,7 @@
                    :cljsbuild
                    {:builds
                     {:re-form
-                     {:source-paths ["src" "env/dev/cljs"]
+                     {:source-paths ["src/cljs" "src/cljc" "env/dev/cljs"]
                       :compiler
                       {:main "re-form.dev"
                        :asset-path "/js/out"
@@ -64,7 +64,7 @@
              :prod {:cljsbuild
                     {:builds
                      {:re-form
-                      {:source-paths ["src" "env/prod/cljs"]
+                      {:source-paths ["src/cljs" "src/cljc" "env/prod/cljs"]
                        :verbose true
                        :compiler
                        {:main "re-form.prod"

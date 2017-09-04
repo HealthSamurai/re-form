@@ -51,7 +51,7 @@
                                   [com.cemerick/piggieback "0.2.2-SNAPSHOT"]
                                   [pjstadig/humane-test-output "0.8.1"]]
 
-                   :source-paths ["srcs" "srcc" "../src/cljs" "env/dev/clj"]
+                   :source-paths ["srcs" "srcc" "../src/cljc" "../src/cljs" "env/dev/clj"]
                    :plugins [[lein-figwheel "0.5.10-SNAPSHOT"]]
 
                    :env {:dev true}
@@ -78,7 +78,7 @@
              :prod {:cljsbuild
 
                     {:builds
-                     {:ui {:source-paths ["srcs" "env/prod/cljs" "../src/cljs"]
+                     {:ui {:source-paths ["srcs" "env/prod/cljs" "../src/cljc" "../src/cljs"]
                            :verbose true
                            :compiler
                            {:main "ui.prod"
