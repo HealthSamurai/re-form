@@ -64,7 +64,8 @@
 
 
 (defn input [{{pth :path :as frm} :form  nm :name :as opts}]
-  (let [v (rf/subscribe [:re-form/data (shared/input-path opts)])
+  (let [ip (shared/input-path opts)
+        v (rf/subscribe [:re-form/data ip])
         on-change (fn [ev] (rf/dispatch [:re-form/update opts (.. ev -target -value)]))]
     (fn [props]
       [:input
@@ -96,4 +97,10 @@
    switchbox/re-switch-box-style
    select/re-radio-group-style
    select/re-radio-buttons-style
-   calendar/re-calendar-style])
+   calendar/re-calendar-style
+   select/re-radio-buttons-style])
+
+(defn form-data [form]
+  (let [ data (rf/subscribe [:re-form/data (:path form)])]
+    (fn [props]
+      [:pre [:Code (with-out-str (cljs.pprint/pprint @data))]])))
