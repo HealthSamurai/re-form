@@ -27,16 +27,16 @@
                :left (u/px -10)}]]
    [:&.re-checked [:.re-box {:left (u/px 10)}]]])
 
-(defn switch-box [{pth :path lbl :label}]
-  (let [sub (rf/subscribe [:re-form/data pth])
-        on-change (fn [ev]
-                    (rf/dispatch [:re-form/on-change pth (not (:value @sub))]))
+(defn switch-box [{ lbl :label :as opts}]
+  (let [v (rf/subscribe [:re-form/value opts])
+        on-change (fn [ev] (rf/dispatch [:re-form/update opts (not @v)]))
         on-key-press  (fn [ev] (when (= 32 (.. ev -which)) (on-change ev)))]
     (fn [props]
       [:a.re-switch
-       {:href "javascript:void()"
-        :class (when (:value @sub) "re-checked")
+       {:href "javascript:void(0)"
+        :class (when @v "re-checked")
         :on-key-press on-key-press
         :on-click on-change}
+       [:pre (pr-str @v)]
        [:span.re-switch-line [:span.re-box]]
        (when lbl [:span.re-label lbl])])))

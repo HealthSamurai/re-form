@@ -86,18 +86,20 @@
        ])))
 
 (defn switchbox-page []
-  (rf/dispatch [:re-form/manifest {:name :myform
-                                   :fields {:admin {:type :boolean}}}])
-
-  (let [v (rf/subscribe [:re-form/value [:forms :myform]])]
-    (fn []
-      [:div
-       [:h1 "Select widget"]
-       (style [:pre.value {:background-color "#f1f1f1"
-                        :padding (u/px 20)}])
-       [:hr]
-       [:pre.value [:code (pr-str @v)]]
-       [form/re-switch-box {:path [:forms :myform :fields :admin] :label "admin?"}]])))
+  (let [form {:path [:forms :myform]
+              :properties {:admin {:type :boolean}}}]
+    (rf/dispatch [:re-form/init form])
+    (let [v (rf/subscribe [:re-form/value [:forms :myform]])]
+      (fn []
+        [:div
+         [:h1 "Select widget"]
+         (style [:pre.value {:background-color "#f1f1f1"
+                             :padding (u/px 20)}])
+         [:hr]
+         [:pre.value [:code (pr-str @v)]]
+         [form/re-switch-box {:form form
+                              :name :admin
+                              :label "admin?"}]]))))
 
 
 
