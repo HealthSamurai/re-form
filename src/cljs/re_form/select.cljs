@@ -27,7 +27,10 @@
     :background-color "white"
     :margin-left "10px"
     :min-width "10em"
-    :padding "5px 10px" 
+    :padding {:left (u/px 10)
+              :right (u/px 40)
+              :top (u/px 5)
+              :bottom (u/px 5)}
     :border "1px solid #ddd"}
    [:.clear {:padding {:left (u/px 10)
                        :right (u/px 10)
@@ -88,7 +91,7 @@
       [:div.re-select {:on-click activate }
        (if-let [v @v]
          [:span.value
-          [:span.value  (label-fn v)]
+          [:span.value  (or (label-fn v) (value-fn v) (str v))]
           [:span.clear {:on-click #(set-value nil)} "x"]]
          [:span.choose-value
           (or (:placeholder opts) "Select...")])
