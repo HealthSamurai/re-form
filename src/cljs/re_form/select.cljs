@@ -26,14 +26,25 @@
     :display "inline-block"
     :background-color "white"
     :margin-left "10px"
+    :min-width "10em"
     :padding "5px 10px" 
     :border "1px solid #ddd"}
-   [:.clear {:padding (u/px 5)
+   [:.clear {:padding {:left (u/px 10)
+                       :right (u/px 10)
+                       :top (u/px 5)
+                       :bottom (u/px 5)}
              :cursor "pointer"
-             :color :red}]
+             :position "absolute"
+             :opactity 0.7
+             :top (u/px 0)
+             :right (u/px 0)
+             :color :red}
+    [:&:hover {:opacity 1 :background-color "#f1f1f1"}]]
    [:div.options
     {:position "absolute"
      :background-color "white"
+     :min-width "10em"
+     :z-index 1000
      :left 0
      :top (u/px 40)
      :width "auto"
@@ -50,7 +61,6 @@
 (rf/reg-event-db
  :re-select/search
  (fn [db [_ manifest txt]]
-   (.log js/console "re-search/search" txt manifest)
    (let [opts (get-in db (:options-path manifest))
          lbl-fn (:label-fn manifest)
          res (->> (or opts [])
@@ -75,16 +85,16 @@
                     (rf/dispatch [:re-form/update opts (value-fn v)])
                     (activate false))]
     (fn [props]
-      [:div.re-select
+      [:div.re-select {:on-click activate }
        (if-let [v @v]
          [:span.value
-          [:span.value {:on-click activate } (label-fn v) ]
+          [:span.value  (label-fn v)]
           [:span.clear {:on-click #(set-value nil)} "x"]]
-         [:span.choose-value {:on-click activate} (or (:placeholder opts) "Select...")])
+         [:span.choose-value
+          (or (:placeholder opts) "Select...")])
        (when (:active @state)
          [:div.options
-          [:input.re-search {:type "text"
-                             :on-change  on-search}]
+          [:input.re-search {:type "text" :on-change  on-search}]
           (for [i @items]
             [:div.option
              {:key (pr-str i)
@@ -95,6 +105,8 @@
   [:div.re-radio-group
    {:display "inline-block"}
    [:div.option {:cursor "pointer"
+                 :opacity 0.7
+                 :border-radius (u/px 15)
                  :padding {:top (u/px 5)
                            :left (u/px 10)
                            :right (u/px 10)
@@ -109,7 +121,7 @@
               :height (u/px 20)}]
     [:&.active {}
      [:.radio {:background-color "#007bff"}]]
-    [:&:hover {}]]])
+    [:&:hover {:opacity 1 :background-color "#f1f1f1"}]]])
 
 (defn re-radio-group [{pth :path options-path :options-path lbl-fn :label-fn :as opts}]
   (let [label-fn (or lbl-fn pr-str)
@@ -137,6 +149,7 @@
    [:div.option {:cursor "pointer"
                  :transition "background-color 200ms, color 100ms" 
                  :background-color "white"
+                 :opacity 0.7
                  :border-right "1px solid #ddd"
                  :padding {:top (u/px 5)
                            :left (u/px 10)
@@ -144,10 +157,15 @@
                            :bottom (u/px 5)}
                  :display "inline-block"}
 
-    [:&:first-child {:border-radius "15px 0px 0px 15px"}]
+    [:&:hover {:background-color "#f1f1f1"
+               :opacity 1}]
+    [:&:first-child {:border-radius "15px 0px 0px 15px"
+                     :padding-left (u/px 15)}]
     [:&:last-child {:border-radius "0px 15px 15px 0px"
+                    :padding-right (u/px 15)
                     :border-right "none"}]
     [:&.active {:background-color "#007bff"
+                :opacity 1
                 :color "white"}]]])
 
 (defn re-radio-buttons [{options-path :options-path

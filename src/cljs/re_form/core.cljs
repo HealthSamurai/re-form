@@ -66,7 +66,7 @@
     (fn [props]
       [:input
        (merge (dissoc opts :form :path)
-              {:type "text" :value @v  :on-change on-change})])))
+              {:type (or (:type opts) "text") :value @v  :on-change on-change})])))
 
 (defn errors [{pth :path f :validator} cmp]
   (let [err (rf/subscribe [:re-form/error pth f])]

@@ -48,18 +48,18 @@
                         {:name "Tim"}
                         {:name "Slava"}]
               :meta {:properties {:owner  {:validators {:not-blank true}}}}
-              :value {:owner "Mike"}}]
+              :value {:owner {:name "Mike"}}}]
     (rf/dispatch [:re-form/init form])
     (fn []
       [:div.row
 
        [:div.col
         [:h1 "Select widget"]
-        (style [:pre.value {:background-color "#f1f1f1"
-                            :padding (u/px 20)}])
+        
         [:label "Owner: "]
         [form/re-select {:form form
                          :options-path (conj form-path :options)
+                         :placeholder "Select user"
                          :name :owner
                          :label-fn :name}]
 
@@ -77,13 +77,8 @@
         [form/re-radio-group {:form form
                               :name :owner
                               :options-path (conj form-path :options)
-                              :label-fn :name}]
-        ]
-       [:div.col
-        [form-data form]
-        ]
-
-       ])))
+                              :label-fn :name}]]
+       [:div.col [form-data form]]])))
 
 (defn switchbox-page []
   (let [form {:path [:forms :myform]
@@ -91,15 +86,12 @@
     (rf/dispatch [:re-form/init form])
     (let [v (rf/subscribe [:re-form/value [:forms :myform]])]
       (fn []
-        [:div
-         [:h1 "Select widget"]
-         (style [:pre.value {:background-color "#f1f1f1"
-                             :padding (u/px 20)}])
-         [:hr]
-         [:pre.value [:code (pr-str @v)]]
-         [form/re-switch-box {:form form
-                              :name :admin
-                              :label "admin?"}]]))))
+        [:div.row
+         [:div.col
+          [:h1 "Switch widget"]
+          [form/re-switch-box {:form form :name :admin :label "admin?"}]]
+         [:div.col
+          [form-data form]]]))))
 
 
 
@@ -119,11 +111,7 @@
     (fn []
       [:div
        [:h1 "Select widget"]
-       [style [:body
-               [:.form-row {:padding "5px 0px"}]
-               [:pre {:background-color "#f1f1f1" :padding "20px" :border "1px solid #ddd"} ]
-               [:label {:width "10em" :display "inline-block" :text-align "right" :padding-right "10px"}]
-               [:.errors {:color "red" :margin-left "10em"}]]]
+       
        [:hr]
        [:div.row
         [:div.col
@@ -138,7 +126,7 @@
           [form/errors-for {:form form :name :email}]]
 
          [:label "Password: "]
-         [form/input {:form form :name :password}]
+         [form/input {:form form :name :password :type "password"}]
 
          [:div.form-row
           [:label "Organization.name: "]
@@ -163,9 +151,6 @@
          ]
         [:div.col
          [form-data form]]]
-       
-
-
        ])))
 
 (defn multiselect-page []
@@ -208,7 +193,6 @@
   (let [current-route (rf/subscribe [:route-map/current-route])]
     (fn []
       (let [{page :match params :params} @current-route]
-        (.log js/console page (:id page))
         (if page
           (if-let [cmp (:cmp (get pages (:id page)))]
             [:div [cmp params]]
@@ -261,7 +245,16 @@
                          :top (u/px 20)
                          :right (u/px 40)}
                 :padding (u/px 40)}]
-       form/form-style]))
+       [:h1 {:margin-bottom (u/px 30)}]
+       form/form-style
+       [:.form-row {:padding "5px 0px"}]
+       [:pre {:background-color "#f1f1f1" :padding "20px" :border "1px solid #ddd"} ]
+       [:label {:width "10em"
+                :vertical-align "top"
+                :color "#888"
+                :display "inline-block" :text-align "right" :padding-right "10px"}]
+       [:.errors {:color "red" :margin-left "10em"}]]))
+
    [:div.topnav [:a.brand "re-form"]]
    [navigation]
    [:div.pane [current-page]]])

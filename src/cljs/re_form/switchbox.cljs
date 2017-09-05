@@ -37,6 +37,5 @@
         :class (when @v "re-checked")
         :on-key-press on-key-press
         :on-click on-change}
-       [:pre (pr-str @v)]
        [:span.re-switch-line [:span.re-box]]
        (when lbl [:span.re-label lbl])])))
