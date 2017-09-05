@@ -23,20 +23,38 @@
       [:pre [:code (with-out-str (cljs.pprint/pprint @data))]])))
 
 
+(defn address-form [{form :form pth :path}]
+
+  )
+
+
 (defn index []
-  (let [v (rf/subscribe [:re-form/value [:forms :user]])]
+  (let [form-path [:forms :myform]
+        form {:path form-path
+              :options  {:gender ["Male" "Female"]}
+              :meta {:properties {:name {:validators {:not-blank true}}
+                                  :gender {}
+                                  :owner  {:validators {:not-blank true}}}}
+              :value {:owner {:name "Mike"}}}]
+    (rf/dispatch [:re-form/init form])
     (fn []
       [:div
        [:h1 "Form builder"]
-       [:hr]
-       [:pre (pr-str @v)]
 
-       [form/re-input {:path [:forms :user :fields :name]}]
-       [form/re-input {:path [:forms :user :fields :email]}]
+       [:label "Name"]
+       [form/input {:form form :name :name}]
+
+
+       [:label "Gender"]
+       [form/re-radio-buttons {:form form :name :gender
+                               :label-fn identity
+                               :options-path [:forms :myform :options :gender]}]
 
        [:h3 "Collection"]
 
-       #_[form/re-collection {:path [:forms :user :fields :roles]} subform]])))
+       #_[form/re-collection
+        {:form form :name :address}
+        address-form]])))
 
 (defn select-page []
   (let [form-path [:forms :myform]
