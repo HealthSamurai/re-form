@@ -4,9 +4,12 @@
             [re-frame.core :as rf]
             [garden.core :as garden]
             [clojure.string :as str]
+            [cljs.pprint]
             [re-form.select :as select]
+            [re-form.list-input :as re-list]
             [re-form.switchbox :as switchbox]
             [re-form.shared :as shared]
+            [re-form.calendar :as calendar]
             [re-form.validators :as validators]))
 
 
@@ -84,10 +87,13 @@
 (def re-radio-group select/re-radio-group)
 (def re-radio-buttons select/re-radio-buttons)
 (def re-switch-box switchbox/switch-box)
+(def re-list re-list/re-list)
+(def re-calendar calendar/re-calendar)
 
 (def form-style
   [:*
    select/re-select-style
    switchbox/re-switch-box-style
    select/re-radio-group-style
-   select/re-radio-buttons-style])
+   select/re-radio-buttons-style
+   calendar/re-calendar-style])

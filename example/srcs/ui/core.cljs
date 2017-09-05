@@ -111,6 +111,44 @@
          [:div.col
           [form-data form]]]))))
 
+(defn list-page []
+  (let [form {:path [:forms :myform]
+              :properties {:roles {:items {:type :string}}}
+              :value {:roles ["a", "b"]}}]
+    (rf/dispatch [:re-form/init form])
+    (let [v (rf/subscribe [:re-form/value [:forms :myform]])]
+      (fn []
+        [:div "list"]
+        [:div.row
+         [:div.col
+          [:h1 "re-list widget"]
+          [:div.form-row
+           [:label "Roles"]
+           [form/re-list {:form form :name :roles}]]
+
+          [:div.form-row
+           [:label "Roles"]
+           [form/re-list {:form form :name :roles}]]]
+
+         [:div.col
+          [form-data form]]]))))
+
+(defn datetime-page []
+  (let [form {:path [:forms :myform]
+              :properties {:birthdate {:type :date}}
+              :value {:birthdate "05-03-1980"}}]
+    (rf/dispatch [:re-form/init form])
+    (let [v (rf/subscribe [:re-form/value [:forms :myform]])]
+      (fn []
+        [:div.row
+         [:div.col
+          [:h1 "Calendar"]
+          [:div.form-row
+           [:label "Birth Date"]
+           [form/re-calendar {:form form :name :birthdate}]]]
+
+         [:div.col
+          [form-data form]]]))))
 
 
 (defn inputs-page []
@@ -178,9 +216,11 @@
   {:index {:title "Form builder"
            :w 1
            :cmp index}
+
    :inputs {:title "Inputs"
             :w 2
             :cmp inputs-page}
+
    :select {:title "Select"
             :w 3
             :cmp select-page}
@@ -190,10 +230,14 @@
                  :cmp multiselect-page}
    :datetime {:title "Date/Time"
               :w 5
-              :cmp multiselect-page}
+              :cmp datetime-page}
    :switchbox {:title "Switch"
                :w 6
                :cmp switchbox-page}
+
+   :list {:title "List"
+          :w 2
+          :cmp list-page}
    :upload {:title "Upload"
             :w 5
             :cmp multiselect-page}})
