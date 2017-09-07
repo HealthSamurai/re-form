@@ -41,7 +41,9 @@
         curr-month (get-days-of-month date true)
 
         first-week (concat prev-month-week (first curr-month))
-        last-week (concat (last curr-month) next-month-week)]
+        last-week (if (< (count (last curr-month)) 7)
+                    (concat (last curr-month) next-month-week)
+                    (last curr-month))]
     (concat [first-week]
             (drop-last (rest curr-month))
             [last-week])))
