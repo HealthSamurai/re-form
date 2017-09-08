@@ -145,6 +145,10 @@
           [:h1 "Calendar"]
           [:div.form-row
            [:label "Birth Date"]
+           [form/re-calendar {:form form :name :birthdate}]]
+
+          [:div.form-row
+           [:label "Birth Date 2"]
            [form/re-calendar {:form form :name :birthdate}]]]
 
          [:div.col
