@@ -257,7 +257,7 @@
 
    :file_upload {:title "File Upload"
                  :w 2
-                 :cmp fup/file-upload-page}})
+                 :cmp fup/file-upload-page}
    :textarea {:title "Text Area"
                :w 7
                :cmp textarea-page}})
