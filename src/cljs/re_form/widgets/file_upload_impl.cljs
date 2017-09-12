@@ -34,10 +34,10 @@
            [:input {:style {:display "none"}
                     :ref #(swap! state assoc :input-ref %)
                     :type "file"
-                    :on-change #(my-onchange % upload-fn on-change) :value nil}]
+                    :on-change #(my-onchange % upload-fn on-change)}]
 
            (if uploading?
-             (str "Uploading " #_(str/join ", " (map #(.-name %) (array-seq files))) "...")
+             (str "Uploading " (str/join ", " (map #(.-name %) (array-seq files))) "...")
              (if value
                [:pre (.stringify js/JSON (clj->js (:value @state)))]
                [:a {:href "javascript:void(0);" :on-click open-file-dialog} "Select file to upload..."]))]))})))
