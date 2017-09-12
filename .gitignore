@@ -7,3 +7,4 @@ figwheel_server.log
 .lein-repl-history
 build/
 .lein-env
+*~

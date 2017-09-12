@@ -214,6 +214,20 @@
 (defn multiselect-page []
   [:h1 "Index"])
 
+(defn textarea-page []
+  (let [form-path [:forms :myform]
+        form {:path form-path
+              :lines-after 2
+              :value {:simpletext "Fill me"}}]
+    (rf/dispatch [:re-form/init form])
+    (fn []
+      [:div [:h1 "Text field widget"]
+       [:div.row
+        [:div.col
+         [form/re-textarea {:form form :name :simpletext}]]
+        [:div.col
+         [form-data form]]]])))
+
 (def pages
   {:index {:title "Form builder"
            :w 1
@@ -244,6 +258,9 @@
    :file_upload {:title "File Upload"
                  :w 2
                  :cmp fup/file-upload-page}})
+   :textarea {:title "Text Area"
+               :w 7
+               :cmp textarea-page}})
 
 (def routes (reduce (fn [acc [k v]] (assoc acc (name k) {:. (assoc (dissoc v :cmp) :id k)})) {:. :index} pages))
 
