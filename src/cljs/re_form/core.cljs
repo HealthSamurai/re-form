@@ -100,7 +100,8 @@
    select/re-radio-group-style
    select/re-radio-buttons-style
    calendar/re-calendar-style
-   select/re-radio-buttons-style])
+   select/re-radio-buttons-style
+   textarea/re-textarea-style])
 
 (defn form-data [form]
   (let [ data (rf/subscribe [:re-form/data (:path form)])]
