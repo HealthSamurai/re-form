@@ -15,8 +15,6 @@
 (defn style [gcss]
   [:style (garden/css gcss)])
 
-
-
 (defn form-data [form]
   (let [ data (rf/subscribe [:re-form/data (:path form)])]
     (fn [props]

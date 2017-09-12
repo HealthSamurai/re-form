@@ -126,8 +126,8 @@
      [:.radio {:background-color "#007bff"}]]
     [:&:hover {:opacity 1 :background-color "#f1f1f1"}]]])
 
-(defn re-radio-group [{pth :path options-path :options-path lbl-fn :label-fn :as opts}]
-  (let [label-fn (or lbl-fn pr-str)
+(defn re-radio-group [{:keys [pth options-path label-fn value-fn] :as opts}]
+  (let [label-fn (or label-fn pr-str)
         v (rf/subscribe [:re-form/value opts])
         items (rf/subscribe [:re-form/data options-path])
         set-value (fn [v] (rf/dispatch [:re-form/update opts v]))]
@@ -137,11 +137,12 @@
         (for [i @items]
           [:div.option
            {:key (pr-str i)
-            :class (when (= i @v) "active")
-            :on-click #(set-value i)}
+            :class (when (= (value-fn i) @v) "active")
+            :on-click #(set-value (value-fn i))}
            [:span.radio]
            [:span.value (label-fn i)]]))
        #_[:div.option.clear {:on-click #(set-value nil)} "Clear x"]])))
+
 
 (def re-radio-buttons-style
   [:div.re-radio-buttons
