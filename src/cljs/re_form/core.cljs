@@ -10,6 +10,7 @@
             [re-form.switchbox :as switchbox]
             [re-form.shared :as shared]
             [re-form.calendar :as calendar]
+            [re-form.textarea :as textarea]
             [re-form.validators :as validators]))
 
 
@@ -90,6 +91,7 @@
 (def re-switch-box switchbox/switch-box)
 (def re-list re-list/re-list)
 (def re-calendar calendar/re-calendar)
+(def re-textarea textarea/re-textarea)
 
 (def form-style
   [:*
