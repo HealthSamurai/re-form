@@ -7,8 +7,7 @@
 (defn file-upload [{:keys [value]}]
   (let [state (r/atom {:value value :uploading? false})
         my-onchange (fn [e upload-fn callback]
-                      (let [files (.-files (.-target e))]
-                        (.log js/console "!!!! uploading files" files)
+                      (let [files (array-seq (.-files (.-target e)))]
                         (swap! state merge {:uploading? true :value nil :files files})
                         (let [result-ch (upload-fn files)]
                           (go (callback (<! result-ch))
@@ -28,16 +27,17 @@
                                 :uploading? false}))))
 
       :reagent-render
-      (fn [{:keys [on-change upload-fn] :as props}]
+      (fn [{:keys [on-change upload-fn multiple] :as props}]
         (let [{:keys [uploading? value files]} @state]
           [:div.file-upload {:class (and uploading? "uploading")}
            [:input {:style {:display "none"}
                     :ref #(swap! state assoc :input-ref %)
                     :type "file"
+                    :multiple multiple
                     :on-change #(my-onchange % upload-fn on-change)}]
 
            (if uploading?
-             (str "Uploading " (str/join ", " (map #(.-name %) (array-seq files))) "...")
+             (str "Uploading " (str/join ", " (map #(.-name %) files)) "...")
              (if value
                [:pre (.stringify js/JSON (clj->js (:value @state)))]
                [:a {:href "javascript:void(0);" :on-click open-file-dialog} "Select file to upload..."]))]))})))
