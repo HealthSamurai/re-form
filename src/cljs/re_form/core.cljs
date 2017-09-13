@@ -7,6 +7,7 @@
             [cljs.pprint]
             [re-form.select :as select]
             [re-form.list-input :as re-list]
+            [re-form.widgets.input :as input-widget]
             [re-form.switchbox :as switchbox]
             [re-form.shared :as shared]
             [re-form.calendar :as calendar]
@@ -64,23 +65,20 @@
      (update-in db spath (fn [o] (merge (or o {}) v))))))
 
 
-(defn input [{{pth :path :as frm} :form  nm :name :as opts}]
-  (let [ip (shared/input-path opts)
-        v (rf/subscribe [:re-form/data ip])
-        on-change (fn [ev] (rf/dispatch [:re-form/update opts (.. ev -target -value)]))]
+(defn input [props]
+  (let [v (rf/subscribe [:re-form/data (shared/input-path props)])
+        on-change #(rf/dispatch [:re-form/update props %])]
     (fn [props]
-      [:input
-       (merge (dissoc opts :form :path)
-              {:type (or (:type opts) "text") :value @v  :on-change on-change})])))
+      [input-widget/input
+       (merge (dissoc props :form :path)
+              {:type (or (:type props) "text") :value @v  :on-change on-change})])))
+
 
 (defn errors [{pth :path f :validator} cmp]
   (let [err (rf/subscribe [:re-form/error pth f])]
     (fn [props cmp]
       [:div {:class (when @err "has-danger")}
        cmp [:br] "Errors:" (pr-str @err)])))
-
-(defn re-input [{pth :path}]
-  [:b "remove me"])
 
 (defn re-collection [{pth :path} input]
   (.log js/console "obsolete"))
