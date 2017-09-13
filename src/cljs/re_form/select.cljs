@@ -8,8 +8,6 @@
    [clojure.string :as str]
    [re-form.shared :as shared]))
 
-
-
 (rf/reg-event-db
  :re-form.select/activate
  (fn [db [_ pth v]]

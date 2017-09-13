@@ -8,7 +8,6 @@
    [garden.units :as u]
    [re-frame.core :as rf]
    [route-map.core :as route-map]
-   [ui.file-upload-page :as fup]
    [ui.routing]
    [re-form.core :as form]
    [clojure.string :as str]
@@ -21,6 +20,7 @@
   (let [ data (rf/subscribe [:re-form/data (:path form)])]
     (fn [props]
       [:pre [:code (with-out-str (cljs.pprint/pprint @data))]])))
+
 
 (defn address-form [{form :form pth :path}]
 
@@ -52,8 +52,8 @@
        [:h3 "Collection"]
 
        #_[form/re-collection
-          {:form form :name :address}
-          address-form]])))
+        {:form form :name :address}
+        address-form]])))
 
 (defn select-page []
   (let [form-path [:forms :myform]
@@ -72,7 +72,7 @@
 
        [:div.col
         [:h1 "Select widget"]
-
+        
         [:label "Owner: "]
         [form/re-select {:form form
                          :options-path (conj form-path :options)
@@ -170,7 +170,7 @@
     (fn []
       [:div
        [:h1 "Select widget"]
-
+       
        [:hr]
        [:div.row
         [:div.col
@@ -260,13 +260,9 @@
    :list {:title "List"
           :w 2
           :cmp list-page}
-
-   :file_upload {:title "File Upload"
-                 :w 2
-                 :cmp fup/file-upload-page}
-   :textarea {:title "Text Area"
-               :w 7
-               :cmp textarea-page}})
+   :upload {:title "Upload"
+            :w 5
+            :cmp multiselect-page}})
 
 (def routes (reduce (fn [acc [k v]] (assoc acc (name k) {:. (assoc (dissoc v :cmp) :id k)})) {:. :index} pages))
 
@@ -355,6 +351,7 @@
 (defn dispatch-routes [_]
   (let [fragment (.. js/window -location -hash)]
     (rf/dispatch [:fragment-changed fragment])))
+
 
 (defn mount-root []
   (reagent/render [root-component] (.getElementById js/document "app")))

@@ -5,9 +5,12 @@
             [garden.core :as garden]
             [clojure.string :as str]
             [cljs.pprint]
+
+            [re-form.widgets.input :as widget-input]
+            [re-form.widgets.radio :as widget-radio]
+
             [re-form.select :as select]
             [re-form.list-input :as re-list]
-            [re-form.widgets.input :as input-widget]
             [re-form.switchbox :as switchbox]
             [re-form.shared :as shared]
             [re-form.calendar :as calendar]
@@ -65,13 +68,35 @@
      (update-in db spath (fn [o] (merge (or o {}) v))))))
 
 
+
+
 (defn input [props]
   (let [v (rf/subscribe [:re-form/data (shared/input-path props)])
         on-change #(rf/dispatch [:re-form/update props %])]
     (fn [props]
-      [input-widget/input
+      [widget-input/input
        (merge (dissoc props :form :path)
               {:type (or (:type props) "text") :value @v  :on-change on-change})])))
+
+(defn radio [{:keys [pth options-path label-fn value-fn] :as props}]
+  (let [label-fn (or label-fn pr-str)
+        value-fn (or value-fn identity)
+        v (rf/subscribe [:re-form/value props])
+        items (rf/subscribe [:re-form/data options-path])
+        set-value (fn [v] (rf/dispatch [:re-form/update props v]))]
+    (fn [props]
+      [widget-radio/radio
+       (merge (dissoc props :form :path)
+              {:items @items :value @v
+               :on-change #(set-value %)})])))
+
+
+
+
+
+
+
+
 
 
 (defn errors [{pth :path f :validator} cmp]
@@ -79,9 +104,6 @@
     (fn [props cmp]
       [:div {:class (when @err "has-danger")}
        cmp [:br] "Errors:" (pr-str @err)])))
-
-(defn re-collection [{pth :path} input]
-  (.log js/console "obsolete"))
 
 (def re-select select/re-select)
 (def re-radio-group select/re-radio-group)
