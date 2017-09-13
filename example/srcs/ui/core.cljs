@@ -11,7 +11,8 @@
    [ui.file-upload-page :as fup]
    [ui.routing]
    [re-form.core :as form]
-   [clojure.string :as str]))
+   [clojure.string :as str]
+   [re-form.widgets :as widgets]))
 
 (defn style [gcss]
   [:style (garden/css gcss)])
@@ -215,16 +216,21 @@
   [:h1 "Index"])
 
 (defn textarea-page []
-  (let [form-path [:forms :myform]
-        form {:path form-path
+  (let [name :simpletext
+        form {:path [:forms :myform]
               :lines-after 2
-              :value {:simpletext "Fill me"}}]
+              :value {name "Fill me"}}
+        opts {:form form :name name}
+        value (rf/subscribe [:re-form/value opts])
+        update-fn #(rf/dispatch [:re-form/update opts (.. % -target -value)])]
     (rf/dispatch [:re-form/init form])
     (fn []
       [:div [:h1 "Text field widget"]
        [:div.row
         [:div.col
-         [form/re-textarea {:form form :name :simpletext}]]
+         [widgets/textarea {:value value
+                            :on-change update-fn
+                            :lines-after (:lines-after form)}]]
         [:div.col
          [form-data form]]]])))
 

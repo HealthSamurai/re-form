@@ -11,8 +11,8 @@
             [re-form.switchbox :as switchbox]
             [re-form.shared :as shared]
             [re-form.calendar :as calendar]
-            [re-form.textarea :as textarea]
-            [re-form.validators :as validators]))
+            [re-form.validators :as validators]
+            [re-form.widgets :as widgets]))
 
 
 (rf/reg-sub-raw
@@ -89,7 +89,6 @@
 (def re-switch-box switchbox/switch-box)
 (def re-list re-list/re-list)
 (def re-calendar calendar/re-calendar)
-(def re-textarea textarea/re-textarea)
 
 (def form-style
   [:*
@@ -99,7 +98,7 @@
    select/re-radio-buttons-style
    calendar/re-calendar-style
    select/re-radio-buttons-style
-   textarea/re-textarea-style])
+   widgets/textarea-style])
 
 (defn form-data [form]
   (let [ data (rf/subscribe [:re-form/data (:path form)])]
