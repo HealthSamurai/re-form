@@ -1,4 +1,4 @@
-(ns re-form.calendar-impl
+(ns re-form.inputs.calendar-impl
   (:require [reagent.core :as reagent]
             [re-frame.core :as rf]))
 
@@ -233,7 +233,5 @@
          [calendar-year state])])))
 
 (defn re-calendar [_]
-  (let [on-change (fn [day] (rf/dispatch [:re-form/update opts day]))
-        v (rf/subscribe [:re-form/value opts])]
-    (fn [{:keys [value on-change]}]
-      [*re-calendar {:value @value :on-change on-change}])))
+  (fn [{:keys [value on-change]}]
+    [*re-calendar {:value @value :on-change on-change}]))

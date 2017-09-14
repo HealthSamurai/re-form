@@ -9,7 +9,6 @@
             [re-form.select :as select]
             [re-form.switchbox :as switchbox]
             [re-form.shared :as shared]
-            [re-form.calendar :as calendar]
             [re-form.validators :as validators]
             [re-form.inputs :as inputs]))
 
@@ -86,7 +85,6 @@
    switchbox/re-switch-box-style
    select/re-radio-group-style
    select/re-radio-buttons-style
-   calendar/re-calendar-style
    select/re-radio-buttons-style
    inputs/radio-input-style])
    inputs/textarea-style
