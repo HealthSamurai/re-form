@@ -1,4 +1,4 @@
-(ns re-form.widgets.csv-input-impl
+(ns re-form.inputs.csv-input-impl
   (:require
    [reagent.core :as reagent]
    [re-frame.core :as rf]

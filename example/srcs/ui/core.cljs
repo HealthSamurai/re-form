@@ -11,7 +11,8 @@
    [ui.routing]
    [re-form.core :as form]
    [clojure.string :as str]
-   [re-form.widgets :as w]))
+   [ui.file-upload-page :as fup]
+   [re-form.inputs :as w]))
 
 (defn style [gcss]
   [:style (garden/css gcss)])
@@ -20,12 +21,6 @@
   (let [ data (rf/subscribe [:re-form/data (:path form)])]
     (fn [props]
       [:pre [:code (with-out-str (cljs.pprint/pprint @data))]])))
-
-
-(defn address-form [{form :form pth :path}]
-
-  )
-
 
 (defn index []
   (let [form {:name :example-form

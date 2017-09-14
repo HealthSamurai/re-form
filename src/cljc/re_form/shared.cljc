@@ -73,7 +73,7 @@
           (conj (or (:path opts) []) (:name opts))
           [:touched]))
 
-(defn validate [manifest]
+(defn validate [manifest v]
   (when-let [vlds (:validators manifest)]
     (reduce-kv
      (fn [acc k opts]
@@ -94,4 +94,4 @@
       (insert-by-path [:re-form form-name :dirty] true)
       (insert-by-path (into [:re-form form-name :state] (conj input-path :dirty)) true)
       (insert-by-path (into [:re-form form-name :state] (conj input-path :errors))
-                      (validate (get-in db [:re-form form-name] {})))))
+                      (validate (get-in db [:re-form form-name] {}) v))))

@@ -1,4 +1,4 @@
-(ns re-form.widgets.file-upload-impl
+(ns re-form.inputs.file-upload-impl
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [reagent.core :as r]
             [clojure.string :as str]

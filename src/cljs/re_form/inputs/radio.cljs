@@ -1,4 +1,4 @@
-(ns re-form.widgets.radio
+(ns re-form.inputs.radio
   (:require [reagent.core :as r]))
 
 (defn radio [{:keys [value] :as props}]
