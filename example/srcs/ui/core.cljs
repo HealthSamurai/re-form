@@ -13,7 +13,8 @@
    [re-form.validators :as valid]
    [clojure.string :as str]
    [ui.file-upload-page :as fup]
-   [re-form.inputs :as w]))
+   [re-form.inputs :as w]
+   [re-form.context :as ctx]))
 
 (defn style [gcss]
   [:style (garden/css gcss)])
@@ -21,9 +22,8 @@
 (defn index []
   (let [form {:name :example-form
               :value {:name "Mike"}}]
-    (form/init form)
     (fn []
-      [:div
+      [form/form form
        [:h1 "Form builder"]
 
        [:label "Name"]
@@ -86,7 +86,7 @@
     (fn []
       [:div.row
        [:div.col
-          [:h1 "Switch widget"]
+        [:h1 "Switch widget"]
         [:label "Is admin?"]
         [form/input {:form :switches-form
                      :path [:admin]
@@ -98,7 +98,7 @@
                      :label "superuser"
                      :input w/switchbox-input}]]
        [:div.col
-          [form/form-data {:form :switches-form}]]])))
+        [form/form-data {:form :switches-form}]]])))
 
 #_(defn list-page []
     (let [form {:path [:forms :myform]
@@ -156,55 +156,52 @@
                       :email "niquola@mail.com"
                       :organization {:name "github" :url "github.com"}
                       :groups [{:name "admin"} {:name "physician"}]}}]
-    (form/init form)
-
     (fn []
-      [:div
-       [:h1 "Select widget"]
+      [form/form form
+       [:div
+        [:h1 "Select widget"]
 
-       [:hr]
-       [:div.row
-        [:div.col
-         [:div.form-row
-          [:label "Name: "]
-          [form/input {:form :inputs-form :path [:name] :input w/text-input}]]
+        [:hr]
+        [:div.row
+         [:div.col
+          [:div.form-row
+           [:label "Name: "]
+           [form/input {:path [:name] :foo 42 :input w/text-input}]]
 
-         [:div.form-row
-          [:label "Email: "]
-          [form/input {:form :inputs-form
-                       :path [:email]
-                       :validators [valid/email]
-                       :input w/text-input}]]
+          [:div.form-row
+           [:label "Email: "]
+           [form/input {:path [:email]
+                        :validators [valid/email]
+                        :input w/text-input}]]
 
-         [:label "Password: "]
-         [form/input {:form :inputs-form
-                      :path [:password]
-                      :validators [valid/not-blank]
-                      :input w/text-input
-                      :type "password"}]
+          [:label "Password: "]
+          [form/input {:path [:password]
+                       :validators [valid/not-blank]
+                       :input w/text-input
+                       :type "password"}]
 
-         [:div.form-row
-          [:label "Organization.name: "]
-          [form/input {:form :inputs-form :path [:organization :name] :input w/text-input}]]
+          [:div.form-row
+           [:label "Organization.name: "]
+           [form/input {:form :inputs-form :path [:organization :name] :input w/text-input}]]
 
-         [:div.form-row
-          [:label "Organization.url: "]
-          [form/input {:form :inputs-form :path [:organization :url] :input w/text-input}]]
+          [:div.form-row
+           [:label "Organization.url: "]
+           [form/input {:form :inputs-form :path [:organization :url] :input w/text-input}]]
 
-         [:div.form-row
-          [:label "group.0.name: "]
-          [form/input {:form :inputs-form
-                       :path [:groups 0 :name]
-                       :input w/text-input}]]
+          [:div.form-row
+           [:label "group.0.name: "]
+           [form/input {:form :inputs-form
+                        :path [:groups 0 :name]
+                        :input w/text-input}]]
 
-         [:div.form-row
-          [:label "group.1.name: "]
-          [form/input {:form :inputs-form
-                       :path [:groups 1 :name]
-                       :input w/text-input}]]]
+          [:div.form-row
+           [:label "group.1.name: "]
+           [form/input {:form :inputs-form
+                        :path [:groups 1 :name]
+                        :input w/text-input}]]]
 
-        [:div.col
-         [form/form-data {:form :inputs-form}]]]])))
+         [:div.col
+          [form/form-data {:form :inputs-form}]]]]])))
 
 (defn multiselect-page []
   [:h1 "Index"])
@@ -216,12 +213,12 @@
     (fn []
       [:div [:h1 "Text field widget"]
        [:div.row
-          [:div.col
-           [form/input {:form :textarea-form
-                        :path [:area-one]
-                        :input w/textarea-input}]]
-          [:div.col
-           [form/form-data {:form :textarea-form}]]]])))
+        [:div.col
+         [form/input {:form :textarea-form
+                      :path [:area-one]
+                      :input w/textarea-input}]]
+        [:div.col
+         [form/form-data {:form :textarea-form}]]]])))
 
 (def pages
   {:index {:title "Form builder"

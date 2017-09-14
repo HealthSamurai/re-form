@@ -30,7 +30,7 @@
                    :old-value n-v
                    :value (str/join ", " n-v)))))
 
-      :display-name  "re-list"
+      :display-name  "csv-input"
 
       :reagent-render
       (fn [props]

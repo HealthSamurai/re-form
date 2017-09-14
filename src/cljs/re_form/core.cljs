@@ -7,7 +7,8 @@
             [cljs.pprint]
             [re-form.shared :as shared]
             [re-form.validators :as validators]
-            [re-form.inputs :as inputs]))
+            [re-form.inputs :as inputs]
+            [re-form.context :as ctx]))
 
 (rf/reg-sub-raw
  :re-form/input-value
@@ -69,12 +70,28 @@
                (fn [_ _ _ v]
                  (rf/dispatch [:re-form/validation-errors name (or (validate-fn v) {})])))))
 
+(defn deinit [form-name]
+  (rf/dispatch [:re-form/deinit form-name]))
+
+(defn form [props & body]
+  (reagent/create-class
+   {:component-will-mount
+    (fn [] (init props))
+    :component-will-unmount
+    (fn [] (deinit props))
+    :display-name (str (:name props))
+    :reagent-render
+    (fn [{:keys [name] :as props}]
+      [ctx/set-context {:form-name name :base-path []}
+       (into [:div.re-form] body)] )}))
+
 (defn binded-input [{form-name :form path :path :as props}]
   (let [value (rf/subscribe [:re-form/input-value form-name path])
-        my-on-change (fn [v on-change]
+        my-on-change (fn binded-input-onchange [v on-change]
                        (rf/dispatch [:re-form/input-changed form-name path v])
                        (and on-change (on-change v)))]
     (fn [{on-change :on-change :as props}]
+      (.log js/console props)
       [(:input props)
        (merge (dissoc props :form :path :input)
               {:value @value :on-change #(my-on-change % on-change)})])))
@@ -90,21 +107,29 @@
                          validators)]
       (rf/dispatch [:re-form/validation-errors form-name {path errors}]))))
 
-(defn input-with-errors [{form-name :form :keys [validators path on-change value] :as props} child-component]
+(defn validated-input [{form-name :form :keys [validators path on-change value] :as props}]
   (let [form-value (rf/subscribe [:re-form/form-value form-name])
-        my-on-change (fn [v on-change]
+        my-on-change (fn validated-input-onchange [v on-change]
                        (validate-and-update-errors form-name path validators v)
                        (and on-change (on-change v)))]
+
     ;; initial validation
     (my-on-change value on-change)
 
     (fn [{:keys [on-change] :as props}]
       [:div.input
-       [child-component (assoc (dissoc props :validators) :on-change #(my-on-change % on-change))]
+       [binded-input (assoc (dissoc props :validators) :on-change #(my-on-change % on-change))]
        [errors-for {:form form-name :path path}]])))
 
+(defn path-from-context [{context :context} child]
+  (let [child-props (nth child 1)]
+    (update-in child [1] merge {:form-name (or (:form-name child-props)
+                                               (:form-name context))
+                                :path (into (or (:base-path context) [])
+                                            (:path child-props))})))
+
 (defn input [props]
-  [input-with-errors props binded-input])
+  [ctx/get-context props validated-input])
 
 (defn form-data [{form-name :form}]
   (let [data (rf/subscribe [:re-form/form-value form-name])]
