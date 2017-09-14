@@ -32,6 +32,10 @@
  (fn [db [_ manifest]]
    (assoc-in db [:re-form (:name manifest)] manifest)))
 
+(rf/reg-event-db
+ :re-form/deinit
+ (fn [db [_ manifest]]
+   (update db :re-form  dissoc (:name manifest))))
 
 (rf/reg-sub-raw
  :re-form/errors-for
