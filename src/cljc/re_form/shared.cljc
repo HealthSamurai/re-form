@@ -73,25 +73,14 @@
           (conj (or (:path opts) []) (:name opts))
           [:touched]))
 
-(defn validate [manifest v]
-  (when-let [vlds (:validators manifest)]
-    (reduce-kv
-     (fn [acc k opts]
-       (if-let [f (get @validators k)]
-         (if-let [err (f opts v nil)]
-           (assoc acc k err)
-           acc)
-         (do (println "Validator " k  " not found") acc)))
-     {}
-     vlds)))
-
 (defn get-errors [db opts]
   (get-in db (errors-path opts)))
+
+(defn put-validation-errors [db form-name errors]
+  (assoc-in db [:re-form form-name :errors] errors))
 
 (defn on-change [db form-name input-path v]
   (-> db
       (insert-by-path (into [:re-form form-name :value] input-path) v)
       (insert-by-path [:re-form form-name :dirty] true)
-      (insert-by-path (into [:re-form form-name :state] (conj input-path :dirty)) true)
-      (insert-by-path (into [:re-form form-name :state] (conj input-path :errors))
-                      (validate (get-in db [:re-form form-name] {}) v))))
+      (insert-by-path (into [:re-form form-name :state] (conj input-path :dirty)) true)))

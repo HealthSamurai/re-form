@@ -10,6 +10,7 @@
    [route-map.core :as route-map]
    [ui.routing]
    [re-form.core :as form]
+   [re-form.validators :as valid]
    [clojure.string :as str]
    [ui.file-upload-page :as fup]
    [re-form.inputs :as w]))
@@ -19,12 +20,8 @@
 
 (defn index []
   (let [form {:name :example-form
-              :options  {:gender ["Male" "Female"]}
-              :meta {:properties {:name {:validators {:not-blank true}}
-                                  :gender {}
-                                  :owner  {:validators {:not-blank true}}}}
               :value {:name "Mike"}}]
-    (rf/dispatch [:re-form/init form])
+    (form/init form)
     (fn []
       [:div
        [:h1 "Form builder"]
@@ -57,7 +54,7 @@
               :meta {:properties {:owner  {:validators {:not-blank true}}}}
               :value {:owner {:name "Mike"}
                       :other-owner {:name "Marat"}}}]
-    (rf/dispatch [:re-form/init form])
+    (form/init form)
 
     (fn []
       [:div.row
@@ -83,8 +80,8 @@
 (defn switchbox-page []
   (let [form {:name :switches-form
               :value {:admin true
-                       :superuser false}}]
-    (rf/dispatch [:re-form/init form])
+                      :superuser false}}]
+    (form/init form)
     (fn []
       [:div.row
        [:div.col
@@ -149,17 +146,16 @@
 
 (defn inputs-page []
   (let [form {:name :inputs-form
-              :meta {:properties {:name  {:validators {:not-blank true}}
-                                  :email {:validators {:email true}}
-                                  :organization {:properties {:name {:validators {:not-blank true}}
-                                                              :url {:validators {:uri true}}}}
-                                  :groups {:items {:properties {:name {:validators {:not-blank true}}}}}}}
+              :validate-fn (fn [v]
+                             (if (not= (:name v) "nicola")
+                               {[:name] ["should be nicola"]}
+                               {}))
+
               :value {:name "nicola"
                       :email "niquola@mail.com"
                       :organization {:name "github" :url "github.com"}
                       :groups [{:name "admin"} {:name "physician"}]}}]
-    (rf/dispatch [:re-form/init form])
-
+    (form/init form)
     (fn []
       [:div
        [:h1 "Select widget"]
@@ -169,37 +165,36 @@
         [:div.col
          [:div.form-row
           [:label "Name: "]
-          [form/input {:form :inputs-form :path [:name] :input w/text-input}]
-          [form/errors-for {:form :inputs-form :path [:name]}]]
+          [form/input {:form :inputs-form :path [:name] :input w/text-input
+                       :validators [valid/not-blank]}]]
 
          [:div.form-row
           [:label "Email: "]
-          [form/input {:form :inputs-form :path [:email] :input w/text-input}]
-          [form/errors-for {:form :inputs-form :path [:email]}]]
+          [form/input {:form :inputs-form :path [:email] :input w/text-input}]]
 
          [:label "Password: "]
          [form/input {:form :inputs-form :path [:password] :input w/text-input :type "password"}]
 
          [:div.form-row
           [:label "Organization.name: "]
-          [form/input {:form :inputs-form :path [:organization :name] :input w/text-input}]
-          [form/errors-for {:form :inputs-form :path [:organization :name]}]]
+          [form/input {:form :inputs-form :path [:organization :name] :input w/text-input}]]
 
          [:div.form-row
           [:label "Organization.url: "]
-          [form/input {:form :inputs-form :path [:organization :url] :input w/text-input}]
-          [form/errors-for {:form :inputs-form :path [:organization :url]}]]
+          [form/input {:form :inputs-form :path [:organization :url] :input w/text-input}]]
 
          [:div.form-row
           [:label "group.0.name: "]
-          [form/input {:form :inputs-form :path [:groups 0 :name] :input w/text-input}]
-          [form/errors-for {:form :inputs-form :path [:groups 0 :name]}]]
+          [form/input {:form :inputs-form
+                       :path [:groups 0 :name]
+                       :input w/text-input}]]
 
          [:div.form-row
           [:label "group.1.name: "]
-          [form/input {:form :inputs-form :path [:groups 1 :name] :input w/text-input}]
-          [form/errors-for {:form :inputs-form :path [:groups 1 :name]}]]
-         ]
+          [form/input {:form :inputs-form
+                       :path [:groups 1 :name]
+                       :input w/text-input}]]]
+
         [:div.col
          [form/form-data {:form :inputs-form}]]]])))
 
