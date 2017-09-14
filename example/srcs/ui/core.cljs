@@ -55,7 +55,8 @@
                {:name "Slava"}]
         form {:name :selects-form
               :meta {:properties {:owner  {:validators {:not-blank true}}}}
-              :value {:owner {:name "Mike"}}}]
+              :value {:owner {:name "Mike"}
+                      :other-owner {:name "Marat"}}}]
     (rf/dispatch [:re-form/init form])
 
     (fn []
@@ -69,7 +70,15 @@
                      :label-fn :name
                      :path [:owner]
                      :input w/radio-input}]
-                [:div.col [form/form-data {:form :selects-form}]]]])))
+        [:br]
+        [:br]
+        [:label "Horizontal owner:"]
+        [form/input {:form :selects-form
+                     :items items
+                     :label-fn :name
+                     :path [:other-owner]
+                     :input w/button-select-input}]
+        [:div.col [form/form-data {:form :selects-form}]]]])))
 
 (defn switchbox-page []
   (let [form {:name :switches-form
