@@ -61,18 +61,13 @@
                (fn [idx e] [:span.error {:key idx} e])
                (or @errors [])))])))
 
-;; what's this?
-;; (rf/reg-event-db
-;;  :re-form/state
-;;  (fn [db [_ opts v]]
-;;    (let [spath (shared/state-path opts)]
-;;      (update-in db spath (fn [o] (merge (or o {}) v))))))\
-
 (defn init [{:keys [name validate-fn] :as form}]
   (rf/dispatch [:re-form/init (dissoc form :validate-fn)])
-  (add-watch (rf/subscribe [:re-form/form-value name]) :re-form-validator
-             (fn [_ _ _ v]
-               (rf/dispatch [:re-form/validation-errors name (or (and validate-fn (validate-fn v)) {})]))))
+
+  (when validate-fn
+    (add-watch (rf/subscribe [:re-form/form-value name]) :re-form-validator
+               (fn [_ _ _ v]
+                 (rf/dispatch [:re-form/validation-errors name (or (validate-fn v) {})])))))
 
 (defn binded-input [{form-name :form path :path :as props}]
   (let [value (rf/subscribe [:re-form/input-value form-name path])
@@ -84,11 +79,28 @@
        (merge (dissoc props :form :path :input)
               {:value @value :on-change #(my-on-change % on-change)})])))
 
-(defn input-with-errors [{form-name :form :keys [validators path] :as props} child-component]
-  (let [form-value (rf/subscribe [:re-form/form-value form-name])]
-    (fn [props]
+(defn- validate-and-update-errors [form-name path validators val]
+  (when-not (empty? validators)
+    (let [errors (reduce (fn [acc validator]
+                           (when-let [res (validator val)]
+                             (if (or (vector? res) (list? res))
+                               (into acc res)
+                               (conj acc res))))
+                         []
+                         validators)]
+      (rf/dispatch [:re-form/validation-errors form-name {path errors}]))))
+
+(defn input-with-errors [{form-name :form :keys [validators path on-change value] :as props} child-component]
+  (let [form-value (rf/subscribe [:re-form/form-value form-name])
+        my-on-change (fn [v on-change]
+                       (validate-and-update-errors form-name path validators v)
+                       (and on-change (on-change v)))]
+    ;; initial validation
+    (my-on-change value on-change)
+
+    (fn [{:keys [on-change] :as props}]
       [:div.input
-       [child-component (dissoc props :validators)]
+       [child-component (assoc (dissoc props :validators) :on-change #(my-on-change % on-change))]
        [errors-for {:form form-name :path path}]])))
 
 (defn input [props]

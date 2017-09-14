@@ -157,6 +157,7 @@
                       :organization {:name "github" :url "github.com"}
                       :groups [{:name "admin"} {:name "physician"}]}}]
     (form/init form)
+
     (fn []
       [:div
        [:h1 "Select widget"]
@@ -166,15 +167,21 @@
         [:div.col
          [:div.form-row
           [:label "Name: "]
-          [form/input {:form :inputs-form :path [:name] :input w/text-input
-                       :validators [valid/not-blank]}]]
+          [form/input {:form :inputs-form :path [:name] :input w/text-input}]]
 
          [:div.form-row
           [:label "Email: "]
-          [form/input {:form :inputs-form :path [:email] :input w/text-input}]]
+          [form/input {:form :inputs-form
+                       :path [:email]
+                       :validators [valid/email]
+                       :input w/text-input}]]
 
          [:label "Password: "]
-         [form/input {:form :inputs-form :path [:password] :input w/text-input :type "password"}]
+         [form/input {:form :inputs-form
+                      :path [:password]
+                      :validators [valid/not-blank]
+                      :input w/text-input
+                      :type "password"}]
 
          [:div.form-row
           [:label "Organization.name: "]

@@ -5,4 +5,4 @@
   (when (str/blank? v) "Should not be blank"))
 
 (defn email [v]
-  (when (not (= "a@b.com" v)) "Should be a@b.com"))
+  (if (not (= "a@b.com" v)) ["Should be a@b.com"]))
