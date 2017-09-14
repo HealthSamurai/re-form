@@ -51,7 +51,8 @@
                {:name "Tim"}
                {:name "Slava"}]
         form {:name :selects-form
-              :meta {:properties {:owner  {:validators {:not-blank true}}}}
+              :meta {:properties {:owner  {:validators {:not-blank true}}
+                                  :other-owner {:validators {:not-blank true}}}}
               :value {:owner {:name "Mike"}
                       :other-owner {:name "Marat"}}}]
     (form/init form)
