@@ -91,7 +91,6 @@
                        (rf/dispatch [:re-form/input-changed form-name path v])
                        (and on-change (on-change v)))]
     (fn [{on-change :on-change :as props}]
-      (.log js/console props)
       [(:input props)
        (merge (dissoc props :form :path :input)
               {:value @value :on-change #(my-on-change % on-change)})])))
@@ -120,13 +119,6 @@
       [:div.input
        [binded-input (assoc (dissoc props :validators) :on-change #(my-on-change % on-change))]
        [errors-for {:form form-name :path path}]])))
-
-(defn path-from-context [{context :context} child]
-  (let [child-props (nth child 1)]
-    (update-in child [1] merge {:form-name (or (:form-name child-props)
-                                               (:form-name context))
-                                :path (into (or (:base-path context) [])
-                                            (:path child-props))})))
 
 (defn input [props]
   [ctx/get-context props validated-input])
