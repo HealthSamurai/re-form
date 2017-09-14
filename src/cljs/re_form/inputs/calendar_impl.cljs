@@ -232,8 +232,8 @@
          (= :year (:mode @state))
          [calendar-year state])])))
 
-(defn re-calendar [opts]
+(defn re-calendar [_]
   (let [on-change (fn [day] (rf/dispatch [:re-form/update opts day]))
         v (rf/subscribe [:re-form/value opts])]
-    (fn [props]
-      [*re-calendar {:value @v :on-change on-change}])))
+    (fn [{:keys [value on-change]}]
+      [*re-calendar {:value @value :on-change on-change}])))
