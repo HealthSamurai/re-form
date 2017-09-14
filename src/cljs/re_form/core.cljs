@@ -11,7 +11,7 @@
             [re-form.shared :as shared]
             [re-form.calendar :as calendar]
             [re-form.validators :as validators]
-            [re-form.inputs :as widgets]))
+            [re-form.inputs :as inputs]))
 
 (rf/reg-sub-raw
  :re-form/input-value
@@ -88,5 +88,6 @@
    select/re-radio-buttons-style
    calendar/re-calendar-style
    select/re-radio-buttons-style
-   widgets/textarea-style
-   widgets/radio-input-style])
+   inputs/radio-input-style])
+   inputs/textarea-style
+   inputs/calendar-style])
