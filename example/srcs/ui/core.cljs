@@ -11,7 +11,7 @@
    [ui.routing]
    [re-form.core :as form]
    [clojure.string :as str]
-   [re-form.widgets :as widgets]))
+   [re-form.widgets :as w]))
 
 (defn style [gcss]
   [:style (garden/css gcss)])
@@ -28,28 +28,29 @@
 
 
 (defn index []
-  (let [form-path [:forms :myform]
-        form {:path form-path
+  (let [form {:name :example-form
               :options  {:gender ["Male" "Female"]}
               :meta {:properties {:name {:validators {:not-blank true}}
                                   :gender {}
                                   :owner  {:validators {:not-blank true}}}}
-              :value {:owner {:name "Mike"}}}]
+              :value {:name "Mike"}}]
     (rf/dispatch [:re-form/init form])
     (fn []
       [:div
        [:h1 "Form builder"]
 
        [:label "Name"]
-       [form/input {:form form :name :name}]
+       [form/input {:form form :path [:name] :input w/text-input}]
+       [form/errors-for {:form form :path [:name]}]
 
 
        [:label "Gender"]
-       [form/re-radio-buttons {:form form :name :gender
+       #_[form/re-radio-buttons {:form form :name :gender
                                :label-fn identity
                                :options-path [:forms :myform :options :gender]}]
+       [form/input {:form form :path [:gender] :input w/text-input}]
 
-       [:h3 "Collection"]
+       #_[:h3 "Collection"]
 
        #_[form/re-collection
         {:form form :name :address}
@@ -70,9 +71,9 @@
     (fn []
       [:div.row
 
-       [:div.col
+       #_[:div.col
         [:h1 "Select widget"]
-        
+
         [:label "Owner: "]
         [form/re-select {:form form
                          :options-path (conj form-path :options)
@@ -104,13 +105,13 @@
     (let [v (rf/subscribe [:re-form/value [:forms :myform]])]
       (fn []
         [:div.row
-         [:div.col
+         #_[:div.col
           [:h1 "Switch widget"]
           [form/re-switch-box {:form form :name :admin :label "admin?"}]]
          [:div.col
           [form-data form]]]))))
 
-(defn list-page []
+#_(defn list-page []
   (let [form {:path [:forms :myform]
               :properties {:roles {:items {:type :string}}}
               :value {:roles ["a", "b"]}}]
@@ -140,7 +141,7 @@
     (let [v (rf/subscribe [:re-form/value [:forms :myform]])]
       (fn []
         [:div.row
-         [:div.col
+         #_[:div.col
           [:h1 "Calendar"]
           [:div.form-row
            [:label "Birth Date"]
@@ -170,7 +171,7 @@
     (fn []
       [:div
        [:h1 "Select widget"]
-       
+
        [:hr]
        [:div.row
         [:div.col
@@ -209,8 +210,7 @@
           [form/errors-for {:form form :path [:groups 1] :name :name}]]
          ]
         [:div.col
-         [form-data form]]]
-       ])))
+         [form-data form]]]])))
 
 (defn multiselect-page []
   [:h1 "Index"])
@@ -226,7 +226,7 @@
     (rf/dispatch [:re-form/init form])
     (fn []
       [:div [:h1 "Text field widget"]
-       [:div.row
+       #_[:div.row
         [:div.col
          [widgets/textarea {:value value
                             :on-change update-fn
@@ -257,12 +257,16 @@
                :w 6
                :cmp switchbox-page}
 
-   :list {:title "List"
-          :w 2
-          :cmp list-page}
-   :upload {:title "Upload"
-            :w 5
-            :cmp multiselect-page}})
+   ;; :list {:title "List"
+   ;;        :w 2
+   ;;        :cmp list-page}
+
+   :file_upload {:title "File Upload"
+                 :w 2
+                 :cmp fup/file-upload-page}
+   :textarea {:title "Text Area"
+               :w 7
+               :cmp textarea-page}})
 
 (def routes (reduce (fn [acc [k v]] (assoc acc (name k) {:. (assoc (dissoc v :cmp) :id k)})) {:. :index} pages))
 

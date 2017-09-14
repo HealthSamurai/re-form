@@ -1,22 +1,18 @@
-(ns re-form.list-input
+(ns re-form.widgets.csv-input-impl
   (:require
    [reagent.core :as reagent]
-   [garden.units :as u]
    [re-frame.core :as rf]
    [clojure.string :as str]))
 
 (def re-list-style
   [:.re-list {}])
 
-(defn parse-value [x]
+(defn- parse-value [x]
   (->> (str/split x #",")
        (mapv str/trim)
        (filterv #(not (str/blank? %)))))
 
-;; (parse-value "a,b")
-
-
-(defn *re-list [{on-change :on-change v :value}]  
+(defn- *re-list [{on-change :on-change v :value}]
   (let [state (reagent/atom {:value nil :old-value nil})
         on-change (fn [ev]
                     (swap! state assoc :value (.. ev -target -value))
@@ -40,10 +36,8 @@
       (fn [props]
         [:input {:type "text" :value (:value @state) :on-change on-change}])})))
 
-(defn re-list [opts]  
-  (let [state (reagent/atom {:value nil})
-        on-change (fn [ev] (rf/dispatch [:re-form/update opts (:value ev)]))
+(defn csv-input [opts]
+  (let [on-change (fn [ev] (rf/dispatch [:re-form/update opts (:value ev)]))
         v (rf/subscribe [:re-form/value opts])]
     (fn [props]
       [*re-list {:value @v :on-change on-change}])))
-

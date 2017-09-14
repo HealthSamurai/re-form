@@ -10,18 +10,16 @@
             [re-form.widgets.radio :as widget-radio]
 
             [re-form.select :as select]
-            [re-form.list-input :as re-list]
             [re-form.switchbox :as switchbox]
             [re-form.shared :as shared]
             [re-form.calendar :as calendar]
             [re-form.validators :as validators]
             [re-form.widgets :as widgets]))
 
-
 (rf/reg-sub-raw
- :re-form/data
- (fn [db [_ path]]
-   (let [cur (reagent/cursor db path)]
+ :re-form/input-value
+ (fn [db [_ form-name path]]
+   (let [cur (reagent/cursor db (into [:re-form form-name :value] path))]
      (reaction @cur))))
 
 (rf/reg-sub-raw
@@ -42,62 +40,40 @@
 (rf/reg-event-db
  :re-form/init
  (fn [db [_ manifest]]
-   (assoc-in db (:path manifest) manifest)))
+   (assoc-in db [:re-form (:name manifest)] manifest)))
 
 
 (rf/reg-sub-raw
  :re-form/errors-for
- (fn [db [_ opts]]
-   (let [cur (reagent/cursor db (shared/errors-path opts))]
+ (fn [db [_ form-name path]]
+   (let [cur (reagent/cursor db (into [:re-form form-name :state] path))]
      (reaction @cur))))
 
-(defn errors-for [opts]
-  (let [errs (rf/subscribe [:re-form/errors-for opts])]
-    (fn [props]
-      (when @errs [:div.errors
-                   (doall (for [[k v] @errs] [:span.error {:key k} v]))]))))
-
 (rf/reg-event-db
- :re-form/update
- (fn [db [_ opts v]] (shared/on-change db opts v)))
-
-(rf/reg-event-db
- :re-form/state
- (fn [db [_ opts v]]
-   (let [spath (shared/state-path opts)]
-     (update-in db spath (fn [o] (merge (or o {}) v))))))
+ :re-form/input-changed
+ (fn [db [_ form-name input-path v]] (shared/on-change db form-name input-path v)))
 
 
-
-
-(defn input [props]
-  (let [v (rf/subscribe [:re-form/data (shared/input-path props)])
-        on-change #(rf/dispatch [:re-form/update props %])]
+(defn errors-for [{{form-name :name} :form path :path :as props}]
+  (let [errors (rf/subscribe [:re-form/errors-for form-name path])]
     (fn [props]
-      [widget-input/input
-       (merge (dissoc props :form :path)
-              {:type (or (:type props) "text") :value @v  :on-change on-change})])))
+      [:div.errors
+       (doall (for [[k v] (or @errors [])] [:span.error {:key k} v]))])))
 
-(defn radio [{:keys [pth options-path label-fn value-fn] :as props}]
-  (let [label-fn (or label-fn pr-str)
-        value-fn (or value-fn identity)
-        v (rf/subscribe [:re-form/value props])
-        items (rf/subscribe [:re-form/data options-path])
-        set-value (fn [v] (rf/dispatch [:re-form/update props v]))]
+;; what's this?
+;; (rf/reg-event-db
+;;  :re-form/state
+;;  (fn [db [_ opts v]]
+;;    (let [spath (shared/state-path opts)]
+;;      (update-in db spath (fn [o] (merge (or o {}) v))))))
+
+(defn input [{{form-name :name :as form} :form path :path :as props}]
+  (let [value (rf/subscribe [:re-form/input-value form-name path])
+        on-change #(rf/dispatch [:re-form/input-changed form-name path %])]
     (fn [props]
-      [widget-radio/radio
-       (merge (dissoc props :form :path)
-              {:items @items :value @v
-               :on-change #(set-value %)})])))
-
-
-
-
-
-
-
-
-
+      [(:input props)
+       (merge (dissoc props :form :path :input)
+              {:value @value :on-change on-change})])))
 
 (defn errors [{pth :path f :validator} cmp]
   (let [err (rf/subscribe [:re-form/error pth f])]
@@ -105,12 +81,10 @@
       [:div {:class (when @err "has-danger")}
        cmp [:br] "Errors:" (pr-str @err)])))
 
-(def re-select select/re-select)
-(def re-radio-group select/re-radio-group)
-(def re-radio-buttons select/re-radio-buttons)
-(def re-switch-box switchbox/switch-box)
-(def re-list re-list/re-list)
-(def re-calendar calendar/re-calendar)
+(defn form-data [form]
+  (let [ data (rf/subscribe [:re-form/data (:path form)])]
+    (fn [props]
+      [:pre [:Code (with-out-str (cljs.pprint/pprint @data))]])))
 
 (def form-style
   [:*
@@ -121,8 +95,3 @@
    calendar/re-calendar-style
    select/re-radio-buttons-style
    widgets/textarea-style])
-
-(defn form-data [form]
-  (let [ data (rf/subscribe [:re-form/data (:path form)])]
-    (fn [props]
-      [:pre [:Code (with-out-str (cljs.pprint/pprint @data))]])))
