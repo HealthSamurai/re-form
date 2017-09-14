@@ -5,7 +5,7 @@
    [re-form.core :as form]
    [cljs-http.client :as http]
    [cljs.core.async :refer [<!]]
-   [re-form.widgets :refer [file-upload]]))
+   [re-form.inputs :refer [file-upload-input]]))
 
 (defn file-upload-page []
   (let [state (reagent/atom {})
@@ -20,10 +20,10 @@
       [:article
        [:h1 "File Upload"]
 
-       [file-upload {:on-change (fn [x] (swap! state assoc :v x))
-                     :upload-fn upload-fn
-                     :multiple (:multiple @state)
-                     :value (:v @state)}]
+       [file-upload-input {:on-change (fn [x] (swap! state assoc :v x))
+                           :upload-fn upload-fn
+                           :multiple (:multiple @state)
+                           :value (:v @state)}]
 
        [:br]
        [:label

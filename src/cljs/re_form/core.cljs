@@ -6,7 +6,7 @@
             [clojure.string :as str]
             [cljs.pprint]
 
-            [re-form.inputs.input :as widget-input]
+            [re-form.inputs.text-input-impl :as widget-input]
             [re-form.inputs.radio :as widget-radio]
 
             [re-form.select :as select]
