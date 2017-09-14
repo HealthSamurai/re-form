@@ -4,12 +4,16 @@
 (def textarea-style
   [:.re-textarea {:resize "none"}])
 
-(defn- local-onchange [visual-state event]
+(defn- style-onchange [visual-state event]
   (let [node (.-target event)
         rows (Math.ceil (/ (do (set! (.-rows node) 1)
                                (.-scrollHeight node))
                            (:base-line-height @visual-state)))]
     (set! (.-rows node) rows)))
+
+(defn- event->value [orig-fn]
+  (fn [event]
+    (orig-fn (.. event -target -value))))
 
 (defn textarea [{:keys [value on-change lines-after]}]
   (let [visual-state (r/atom nil)]
@@ -25,6 +29,7 @@
 
       :reagent-render
       (fn [{:keys [value on-change]}]
-        [:textarea.re-textarea {:value @value
-                                :on-change (juxt on-change (partial local-onchange
-                                                                    visual-state))}])})))
+        [:textarea.re-textarea {:value value
+                                :on-change (juxt (event->value on-change)
+                                                 (partial style-onchange
+                                                          visual-state))}])})))

@@ -203,23 +203,18 @@
   [:h1 "Index"])
 
 (defn textarea-page []
-  (let [name :simpletext
-        form {:path [:forms :myform]
-              :lines-after 2
-              :value {name "Fill me"}}
-        opts {:form form :name name}
-        value (rf/subscribe [:re-form/value opts])
-        update-fn #(rf/dispatch [:re-form/update opts (.. % -target -value)])]
+  (let [form {:name :textarea-form
+              :value {:area-one "Fill me"}}]
     (rf/dispatch [:re-form/init form])
     (fn []
       [:div [:h1 "Text field widget"]
-       #_[:div.row
+       [:div.row
           [:div.col
-           [widgets/textarea {:value value
-                              :on-change update-fn
-                              :lines-after (:lines-after form)}]]
+           [form/input {:form :textarea-form
+                        :path [:area-one]
+                        :input w/textarea-input}]]
           [:div.col
-           [form-data form]]]])))
+           [form/form-data {:form :textarea-form}]]]])))
 
 (def pages
   {:index {:title "Form builder"
