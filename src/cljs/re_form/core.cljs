@@ -6,9 +6,6 @@
             [clojure.string :as str]
             [cljs.pprint]
 
-            [re-form.inputs.text-input-impl :as widget-input]
-            [re-form.inputs.radio :as widget-radio]
-
             [re-form.select :as select]
             [re-form.switchbox :as switchbox]
             [re-form.shared :as shared]
@@ -91,4 +88,5 @@
    select/re-radio-buttons-style
    calendar/re-calendar-style
    select/re-radio-buttons-style
-   widgets/textarea-style])
+   widgets/textarea-style
+   widgets/radio-input-style])

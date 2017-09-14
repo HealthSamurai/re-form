@@ -36,57 +36,54 @@
 
        [:label "Gender"]
        #_[form/re-radio-buttons {:form form :name :gender
-                               :label-fn identity
-                               :options-path [:forms :myform :options :gender]}]
+                                 :label-fn identity
+                                 :options-path [:forms :myform :options :gender]}]
        [form/input {:form :example-form :path [:gender] :input w/text-input}]
 
        #_[:h3 "Collection"]
 
        #_[form/re-collection
-        {:form form :name :address}
-        address-form]])))
+          {:form form :name :address}
+          address-form]])))
 
 (defn select-page []
-  (let [form-path [:forms :myform]
-        form {:path form-path
-              :options [{:name "Nikolai"}
-                        {:name "Mike"}
-                        {:name "Max"}
-                        {:name "Marat"}
-                        {:name "Tim"}
-                        {:name "Slava"}]
+  (let [items [{:name "Nikolai"}
+               {:name "Mike"}
+               {:name "Max"}
+               {:name "Marat"}
+               {:name "Tim"}
+               {:name "Slava"}]
+        form {:name :selects-form
               :meta {:properties {:owner  {:validators {:not-blank true}}}}
               :value {:owner {:name "Mike"}}}]
     (rf/dispatch [:re-form/init form])
+
     (fn []
       [:div.row
-
-       #_[:div.col
+       [:div.col
         [:h1 "Select widget"]
 
         [:label "Owner: "]
-        [form/re-select {:form form
-                         :options-path (conj form-path :options)
-                         :placeholder "Select user"
-                         :name :owner
-                         :label-fn :name}]
+        [form/input {:form :selects-form
+                     :items items
+                     :label-fn :name
+                     :path [:owner]
+                     :input w/radio-input}]
 
-        [:br]
-        [:br]
-        [:label "Owner: "]
-        [form/re-radio-buttons {:form form
-                                :name :owner
-                                :options-path (conj form-path :options)
-                                :label-fn :name}]
+        ;; [:label "Owner: "]
+        ;; [form/re-radio-buttons {:form form
+        ;;                         :name :owner
+        ;;                         :options-path (conj form-path :options)
+        ;;                         :label-fn :name}]
 
-        [:br]
-        [:br]
-        [:label "Owner: "]
-        [form/re-radio-group {:form form
-                              :name :owner
-                              :options-path (conj form-path :options)
-                              :label-fn :name}]]
-       #_[:div.col [form-data form]]])))
+        ;; [:br]
+        ;; [:br]
+        ;; [:label "Owner: "]
+        ;; [form/re-radio-group {:form form
+        ;;                       :name :owner
+        ;;                       :options-path (conj form-path :options)
+        ;;                       :label-fn :name}]]
+        [:div.col [form/form-data {:form :selects-form}]]]])))
 
 (defn switchbox-page []
   (let [form {:path [:forms :myform]
@@ -96,32 +93,32 @@
       (fn []
         [:div.row
          #_[:div.col
-          [:h1 "Switch widget"]
-          [form/re-switch-box {:form form :name :admin :label "admin?"}]]
+            [:h1 "Switch widget"]
+            [form/re-switch-box {:form form :name :admin :label "admin?"}]]
          #_[:div.col
-          [form-data form]]]))))
+            [form-data form]]]))))
 
 #_(defn list-page []
-  (let [form {:path [:forms :myform]
-              :properties {:roles {:items {:type :string}}}
-              :value {:roles ["a", "b"]}}]
-    (rf/dispatch [:re-form/init form])
-    (let [v (rf/subscribe [:re-form/value [:forms :myform]])]
-      (fn []
-        [:div "list"]
-        [:div.row
-         [:div.col
-          [:h1 "re-list widget"]
-          [:div.form-row
-           [:label "Roles"]
-           [form/re-list {:form form :name :roles}]]
+    (let [form {:path [:forms :myform]
+                :properties {:roles {:items {:type :string}}}
+                :value {:roles ["a", "b"]}}]
+      (rf/dispatch [:re-form/init form])
+      (let [v (rf/subscribe [:re-form/value [:forms :myform]])]
+        (fn []
+          [:div "list"]
+          [:div.row
+           [:div.col
+            [:h1 "re-list widget"]
+            [:div.form-row
+             [:label "Roles"]
+             [form/re-list {:form form :name :roles}]]
 
-          [:div.form-row
-           [:label "Roles"]
-           [form/re-list {:form form :name :roles}]]]
+            [:div.form-row
+             [:label "Roles"]
+             [form/re-list {:form form :name :roles}]]]
 
-         [:div.col
-          [form-data form]]]))))
+           [:div.col
+            [form-data form]]]))))
 
 (defn datetime-page []
   (let [form {:path [:forms :myform]
@@ -132,17 +129,17 @@
       (fn []
         [:div.row
          #_[:div.col
-          [:h1 "Calendar"]
-          [:div.form-row
-           [:label "Birth Date"]
-           [form/re-calendar {:form form :name :birthdate}]]
+            [:h1 "Calendar"]
+            [:div.form-row
+             [:label "Birth Date"]
+             [form/re-calendar {:form form :name :birthdate}]]
 
-          [:div.form-row
-           [:label "Birth Date 2"]
-           [form/re-calendar {:form form :name :birthdate}]]]
+            [:div.form-row
+             [:label "Birth Date 2"]
+             [form/re-calendar {:form form :name :birthdate}]]]
 
          #_[:div.col
-          [form-data form]]]))))
+            [form-data form]]]))))
 
 
 (defn inputs-page []
@@ -216,12 +213,12 @@
     (fn []
       [:div [:h1 "Text field widget"]
        #_[:div.row
-        [:div.col
-         [widgets/textarea {:value value
-                            :on-change update-fn
-                            :lines-after (:lines-after form)}]]
-        [:div.col
-         [form-data form]]]])))
+          [:div.col
+           [widgets/textarea {:value value
+                              :on-change update-fn
+                              :lines-after (:lines-after form)}]]
+          [:div.col
+           [form-data form]]]])))
 
 (def pages
   {:index {:title "Form builder"
@@ -254,8 +251,8 @@
                  :w 2
                  :cmp fup/file-upload-page}
    :textarea {:title "Text Area"
-               :w 7
-               :cmp textarea-page}})
+              :w 7
+              :cmp textarea-page}})
 
 (def routes (reduce (fn [acc [k v]] (assoc acc (name k) {:. (assoc (dissoc v :cmp) :id k)})) {:. :index} pages))
 
