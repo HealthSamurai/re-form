@@ -23,11 +23,9 @@
      (reaction @cur))))
 
 (rf/reg-sub-raw
- :re-form/value
- (fn [db [_ opts]]
-   (let [path (shared/input-path opts)
-         cur (reagent/cursor db path)]
-     (reaction @cur))))
+ :re-form/form-value
+ (fn [db [_ form-name]]
+   (reaction @(reagent/cursor db [:re-form form-name :value]))))
 
 (rf/reg-sub-raw
  :re-form/state
@@ -35,7 +33,6 @@
    (let [path (shared/state-path opts)
          cur (reagent/cursor db path)]
      (reaction @cur))))
-
 
 (rf/reg-event-db
  :re-form/init
@@ -81,8 +78,8 @@
       [:div {:class (when @err "has-danger")}
        cmp [:br] "Errors:" (pr-str @err)])))
 
-(defn form-data [form]
-  (let [ data (rf/subscribe [:re-form/data (:path form)])]
+(defn form-data [{form-name :form}]
+  (let [data (rf/subscribe [:re-form/form-value form-name])]
     (fn [props]
       [:pre [:Code (with-out-str (cljs.pprint/pprint @data))]])))
 

@@ -17,11 +17,6 @@
 (defn style [gcss]
   [:style (garden/css gcss)])
 
-(defn form-data [form]
-  (let [ data (rf/subscribe [:re-form/data (:path form)])]
-    (fn [props]
-      [:pre [:code (with-out-str (cljs.pprint/pprint @data))]])))
-
 (defn index []
   (let [form {:name :example-form
               :options  {:gender ["Male" "Female"]}
@@ -91,7 +86,7 @@
                               :name :owner
                               :options-path (conj form-path :options)
                               :label-fn :name}]]
-       [:div.col [form-data form]]])))
+       #_[:div.col [form-data form]]])))
 
 (defn switchbox-page []
   (let [form {:path [:forms :myform]
@@ -103,7 +98,7 @@
          #_[:div.col
           [:h1 "Switch widget"]
           [form/re-switch-box {:form form :name :admin :label "admin?"}]]
-         [:div.col
+         #_[:div.col
           [form-data form]]]))))
 
 #_(defn list-page []
@@ -146,12 +141,12 @@
            [:label "Birth Date 2"]
            [form/re-calendar {:form form :name :birthdate}]]]
 
-         [:div.col
+         #_[:div.col
           [form-data form]]]))))
 
 
 (defn inputs-page []
-  (let [ form {:name :inputs-form
+  (let [form {:name :inputs-form
               :meta {:properties {:name  {:validators {:not-blank true}}
                                   :email {:validators {:email true}}
                                   :organization {:properties {:name {:validators {:not-blank true}}
@@ -172,40 +167,39 @@
         [:div.col
          [:div.form-row
           [:label "Name: "]
-          [form/input {:form form :name :name}]
-          [form/errors-for {:form form :name :name}]]
+          [form/input {:form :inputs-form :path [:name] :input w/text-input}]
+          [form/errors-for {:form :inputs-form :path [:name]}]]
 
          [:div.form-row
           [:label "Email: "]
-          [form/input {:form form :name :email}]
-          [form/errors-for {:form form :name :email}]]
+          [form/input {:form :inputs-form :path [:email] :input w/text-input}]
+          [form/errors-for {:form :inputs-form :path [:email]}]]
 
          [:label "Password: "]
-         [form/input {:form form :name :password :type "password"}]
+         [form/input {:form :inputs-form :path [:password] :input w/text-input :type "password"}]
 
          [:div.form-row
           [:label "Organization.name: "]
-          [form/input {:form form :path [:organization] :name :name}]
-          [form/errors-for {:form form :path [:organization] :name :name}]]
+          [form/input {:form :inputs-form :path [:organization :name] :input w/text-input}]
+          [form/errors-for {:form :inputs-form :path [:organization :name]}]]
 
          [:div.form-row
           [:label "Organization.url: "]
-          [form/input {:form form :path [:organization] :name :url}]
-          [form/errors-for {:form form :path [:organization] :name :url}]]
-
+          [form/input {:form :inputs-form :path [:organization :url] :input w/text-input}]
+          [form/errors-for {:form :inputs-form :path [:organization :url]}]]
 
          [:div.form-row
           [:label "group.0.name: "]
-          [form/input {:form form :path [:groups 0] :name :name}]
-          [form/errors-for {:form form :path [:groups 0] :name :name}]]
+          [form/input {:form :inputs-form :path [:groups 0 :name] :input w/text-input}]
+          [form/errors-for {:form :inputs-form :path [:groups 0 :name]}]]
 
          [:div.form-row
           [:label "group.1.name: "]
-          [form/input {:form form :path [:groups 1] :name :name}]
-          [form/errors-for {:form form :path [:groups 1] :name :name}]]
+          [form/input {:form :inputs-form :path [:groups 1 :name] :input w/text-input}]
+          [form/errors-for {:form :inputs-form :path [:groups 1 :name]}]]
          ]
         [:div.col
-         [form-data form]]]])))
+         [form/form-data {:form :inputs-form}]]]])))
 
 (defn multiselect-page []
   [:h1 "Index"])
