@@ -4,18 +4,18 @@
             [clojure.string :as str]
             [cljs.core.async :refer [<!]]))
 
-(defn file-upload [{:keys [value]}]
+(defn file-upload [{:keys [value value-fn label-fn]}]
   (let [state (r/atom {:value value :uploading? false})
+        label-fn (or label-fn identity)
+        value-fn (or value-fn identity)
         my-onchange (fn [e upload-fn callback]
                       (let [files (array-seq (.-files (.-target e)))]
                         (swap! state merge {:uploading? true :value nil :files files})
                         (let [result-ch (upload-fn files)]
-                          (go (callback (<! result-ch))
+                          (go (callback (value-fn (<! result-ch)))
                               (swap! state merge {:uploading? false :files nil})))))
 
-        open-file-dialog (fn []
-                           (when-let [file-input (:input-ref @state)]
-                             (.click file-input)))]
+        open-file-dialog (fn [input] (.click input))]
 
     (r/create-class
      {:component-will-receive-props
@@ -28,10 +28,11 @@
 
       :reagent-render
       (fn [{:keys [on-change upload-fn multiple] :as props}]
-        (let [{:keys [uploading? value files]} @state]
+        (let [{:keys [uploading? value files]} @state
+              inp (r/atom {})]
           [:div.file-upload {:class (and uploading? "uploading")}
            [:input {:style {:display "none"}
-                    :ref #(swap! state assoc :input-ref %)
+                    :ref #(reset! inp  %) 
                     :type "file"
                     :multiple multiple
                     :on-change #(my-onchange % upload-fn on-change)}]
@@ -39,5 +40,5 @@
            (if uploading?
              (str "Uploading " (str/join ", " (map #(.-name %) files)) "...")
              (if value
-               [:pre (.stringify js/JSON (clj->js (:value @state)))]
-               [:a {:href "javascript:void(0);" :on-click open-file-dialog} "Select file to upload..."]))]))})))
+               [:div (label-fn  (:value @state))]
+               [:a {:href "javascript:void(0);" :on-click #(open-file-dialog @inp)} "Select file to upload..."]))]))})))
