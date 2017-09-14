@@ -69,34 +69,29 @@
                      :label-fn :name
                      :path [:owner]
                      :input w/radio-input}]
-
-        ;; [:label "Owner: "]
-        ;; [form/re-radio-buttons {:form form
-        ;;                         :name :owner
-        ;;                         :options-path (conj form-path :options)
-        ;;                         :label-fn :name}]
-
-        ;; [:br]
-        ;; [:br]
-        ;; [:label "Owner: "]
-        ;; [form/re-radio-group {:form form
-        ;;                       :name :owner
-        ;;                       :options-path (conj form-path :options)
-        ;;                       :label-fn :name}]]
-        [:div.col [form/form-data {:form :selects-form}]]]])))
+                [:div.col [form/form-data {:form :selects-form}]]]])))
 
 (defn switchbox-page []
-  (let [form {:path [:forms :myform]
-              :properties {:admin {:type :boolean}}}]
+  (let [form {:name :switches-form
+              :value {:admin true
+                       :superuser false}}]
     (rf/dispatch [:re-form/init form])
-    (let [v (rf/subscribe [:re-form/value [:forms :myform]])]
-      (fn []
-        [:div.row
-         #_[:div.col
-            [:h1 "Switch widget"]
-            [form/re-switch-box {:form form :name :admin :label "admin?"}]]
-         #_[:div.col
-            [form-data form]]]))))
+    (fn []
+      [:div.row
+       [:div.col
+          [:h1 "Switch widget"]
+        [:label "Is admin?"]
+        [form/input {:form :switches-form
+                     :path [:admin]
+                     :label "admin"
+                     :input w/switchbox-input}]
+        [:label "Is superuser?"]
+        [form/input {:form :switches-form
+                     :path [:superuser]
+                     :label "superuser"
+                     :input w/switchbox-input}]]
+       [:div.col
+          [form/form-data {:form :switches-form}]]])))
 
 #_(defn list-page []
     (let [form {:path [:forms :myform]

@@ -1,4 +1,4 @@
-(ns re-form.switchbox
+(ns re-form.inputs.switchbox-impl
   (:require
    [reagent.core :as reagent]
    [garden.units :as u]
@@ -27,15 +27,13 @@
                :left (u/px -10)}]]
    [:&.re-checked [:.re-box {:left (u/px 10)}]]])
 
-(defn switch-box [{ lbl :label :as opts}]
-  (let [v (rf/subscribe [:re-form/value opts])
-        on-change (fn [ev] (rf/dispatch [:re-form/update opts (not @v)]))
-        on-key-press  (fn [ev] (when (= 32 (.. ev -which)) (on-change ev)))]
-    (fn [props]
+(defn switch-box [_]
+  (fn [{:keys [value on-change label]}]
+    (let [local-onchange (partial on-change (not value))]
       [:a.re-switch
        {:href "javascript:void(0)"
-        :class (when @v "re-checked")
-        :on-key-press on-key-press
-        :on-click on-change}
+        :class (when value "re-checked")
+        :on-key-press (fn [event] (when (= 32 (.-which event)) (local-onchange)))
+        :on-click local-onchange}
        [:span.re-switch-line [:span.re-box]]
-       (when lbl [:span.re-label lbl])])))
+       (when label [:span.re-label label])])))

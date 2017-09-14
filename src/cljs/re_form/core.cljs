@@ -5,9 +5,6 @@
             [garden.core :as garden]
             [clojure.string :as str]
             [cljs.pprint]
-
-            [re-form.select :as select]
-            [re-form.switchbox :as switchbox]
             [re-form.shared :as shared]
             [re-form.validators :as validators]
             [re-form.inputs :as inputs]))
@@ -81,11 +78,7 @@
 
 (def form-style
   [:*
-   select/re-select-style
-   switchbox/re-switch-box-style
-   select/re-radio-group-style
-   select/re-radio-buttons-style
-   select/re-radio-buttons-style
    inputs/radio-input-style
    inputs/textarea-style
-   inputs/calendar-style])
+   inputs/calendar-style
+   inputs/switchbox-style])
