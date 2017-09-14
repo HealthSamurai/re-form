@@ -121,28 +121,26 @@
             [form-data form]]]))))
 
 (defn datetime-page []
-  (let [name :birthdate
-        form {:path [:forms :myform]
-              :properties {:birthdate {:type :date}}
-              :value {name "05-03-1980"}}
-        opts {:form form :name name}
-        value (rf/subscribe [:re-form/value opts])
-        on-change (fn [day] (rf/dispatch [:re-form/update opts day]))]
+  (let [form {:name :calendars-form
+              :value {:birthdate-one {:d 5 :m 3 :y 1980}
+                      :birthdate-two {:d 17 :m 4 :y 1995}}}]
     (rf/dispatch [:re-form/init form])
     (fn []
       [:div.row
-       #_[:div.col
-          [:h1 "Calendar"]
-          [:div.form-row
-           [:label "Birth Date"]
-           [form/re-calendar {:form form :name :birthdate}]]
-
-            [:div.form-row
-             [:label "Birth Date 2"]
-             [form/re-calendar {:form form :name :birthdate}]]]
-
-         #_[:div.col
-          [form-data form]]])))
+       [:div.col
+        [:h1 "Calendar"]
+        [:div.form-row
+         [:label "Birth Date"]
+         [form/input {:form :calendars-form
+                      :path [:birthdate-one]
+                      :input w/calendar-input}]]
+        [:div.form-row
+         [:label "Birth Date 2"]
+         [form/input {:form :calendars-form
+                      :path [:birthdate-two]
+                      :input w/calendar-input}]]]
+       [:div.col
+        [form/form-data {:form :calendars-form}]]])))
 
 
 (defn inputs-page []

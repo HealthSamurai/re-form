@@ -86,6 +86,6 @@
    select/re-radio-group-style
    select/re-radio-buttons-style
    select/re-radio-buttons-style
-   inputs/radio-input-style])
+   inputs/radio-input-style
    inputs/textarea-style
    inputs/calendar-style])

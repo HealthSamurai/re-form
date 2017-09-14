@@ -234,4 +234,4 @@
 
 (defn re-calendar [_]
   (fn [{:keys [value on-change]}]
-    [*re-calendar {:value @value :on-change on-change}]))
+    [*re-calendar {:value value :on-change on-change}]))
