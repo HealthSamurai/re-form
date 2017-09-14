@@ -6,15 +6,15 @@
             [clojure.string :as str]
             [cljs.pprint]
 
-            [re-form.widgets.input :as widget-input]
-            [re-form.widgets.radio :as widget-radio]
+            [re-form.inputs.input :as widget-input]
+            [re-form.inputs.radio :as widget-radio]
 
             [re-form.select :as select]
             [re-form.switchbox :as switchbox]
             [re-form.shared :as shared]
             [re-form.calendar :as calendar]
             [re-form.validators :as validators]
-            [re-form.widgets :as widgets]))
+            [re-form.inputs :as widgets]))
 
 (rf/reg-sub-raw
  :re-form/input-value
@@ -67,7 +67,7 @@
 ;;    (let [spath (shared/state-path opts)]
 ;;      (update-in db spath (fn [o] (merge (or o {}) v))))))
 
-(defn input [{{form-name :name :as form} :form path :path :as props}]
+(defn input [{form-name :form path :path :as props}]
   (let [value (rf/subscribe [:re-form/input-value form-name path])
         on-change #(rf/dispatch [:re-form/input-changed form-name path %])]
     (fn [props]

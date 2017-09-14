@@ -1,4 +1,4 @@
-(ns re-form.widgets.textarea-impl
+(ns re-form.inputs.textarea-impl
   (:require [reagent.core :as r]))
 
 (def textarea-style

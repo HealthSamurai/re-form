@@ -1,4 +1,4 @@
-(ns re-form.widgets.text-input-impl
+(ns re-form.inputs.text-input-impl
   (:require [reagent.core :as r]))
 
 (defn text-input [props]

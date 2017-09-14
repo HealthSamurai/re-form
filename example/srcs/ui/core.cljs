@@ -35,15 +35,15 @@
        [:h1 "Form builder"]
 
        [:label "Name"]
-       [form/input {:form form :path [:name] :input w/text-input}]
-       [form/errors-for {:form form :path [:name]}]
+       [form/input {:form :example-form :path [:name] :input w/text-input}]
+       [form/errors-for {:form :example-form :path [:name]}]
 
 
        [:label "Gender"]
        #_[form/re-radio-buttons {:form form :name :gender
                                :label-fn identity
                                :options-path [:forms :myform :options :gender]}]
-       [form/input {:form form :path [:gender] :input w/text-input}]
+       [form/input {:form :example-form :path [:gender] :input w/text-input}]
 
        #_[:h3 "Collection"]
 
@@ -151,8 +151,7 @@
 
 
 (defn inputs-page []
-  (let [form-path [:forms :myform]
-        form {:path form-path
+  (let [ form {:name :inputs-form
               :meta {:properties {:name  {:validators {:not-blank true}}
                                   :email {:validators {:email true}}
                                   :organization {:properties {:name {:validators {:not-blank true}}
@@ -163,6 +162,7 @@
                       :organization {:name "github" :url "github.com"}
                       :groups [{:name "admin"} {:name "physician"}]}}]
     (rf/dispatch [:re-form/init form])
+
     (fn []
       [:div
        [:h1 "Select widget"]
