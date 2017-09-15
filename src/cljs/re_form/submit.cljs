@@ -9,7 +9,7 @@
     (fn [{submit-fn :submit-fn}]
       (let [disabled? (not (empty? @form-errors))]
         (into [:button.submit {:type "submit"
-                               :on-click (fn [] (and submit-fn (submit-fn)))
+                               :on-click (fn [] (and submit-fn (submit-fn @form-value)))
                                :disabled disabled?}]
               children)))))
 

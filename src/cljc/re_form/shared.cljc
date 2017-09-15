@@ -41,8 +41,9 @@
   (get-in db (errors-path opts)))
 
 (defn put-validation-errors [db form-name errors]
-  (update-in db [:re-form form-name :errors] (fn [errs]
-                                               (filter-vals (complement empty?) (merge errs errors)))))
+  (update-in db [:re-form form-name :errors] (fn [current-errs]
+                                               (filter-vals (complement empty?)
+                                                            (merge current-errs errors)))))
 
 (defn on-change [db form-name input-path v]
   (-> db

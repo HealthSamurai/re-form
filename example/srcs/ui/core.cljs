@@ -217,7 +217,7 @@
            [fc/collection {:path [:cities] :new-item-value ""}
             [form/input {:path [] :input w/text-input}]]]
 
-          [s/submit-button {} "Submit!"]]
+          [s/submit-button {:submit-fn #(js/alert (pr-str %))} "Submit!"]]
 
          [:div.col
           [form/form-data {:form :inputs-form}]]]]])))

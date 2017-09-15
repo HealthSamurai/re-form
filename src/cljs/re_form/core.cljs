@@ -21,11 +21,6 @@
  (fn [db [_ form-name]]
    (reaction @(reagent/cursor db [:re-form form-name :value]))))
 
-(rf/reg-sub :re-form/form-value-2
- (fn [db [_ form-name]]
-   (get-in db [:re-form form-name])))
-
-
 (rf/reg-sub-raw
  :re-form/form-errors
  (fn [db [_ form-name]]
