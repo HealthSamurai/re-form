@@ -6,6 +6,7 @@
             [re-form.inputs.csv-input-impl :as csv-impl]
             [re-form.inputs.calendar-impl :as cal-impl]
             [re-form.inputs.switchbox-impl :as sw-impl]
+            [re-form.inputs.select-input-impl :as se-impl]
             [re-form.inputs.button-select-input-impl :as bs-impl]))
 
 ;; Widgets
@@ -18,6 +19,7 @@
 (def calendar-input cal-impl/re-calendar)
 (def switchbox-input sw-impl/switch-box)
 (def button-select-input bs-impl/button-select-input)
+(def select-input se-impl/select-input)
 
 ;; Styles
 
@@ -26,3 +28,4 @@
 (def calendar-style cal-impl/re-calendar-style)
 (def switchbox-style sw-impl/re-switch-box-style)
 (def button-select-style bs-impl/button-select-style)
+(def select-input-style se-impl/select-input-style)

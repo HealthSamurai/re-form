@@ -134,4 +134,5 @@
    inputs/button-select-style
    inputs/textarea-style
    inputs/calendar-style
-   inputs/switchbox-style])
+   inputs/switchbox-style
+   inputs/select-input-style])

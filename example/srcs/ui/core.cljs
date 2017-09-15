@@ -55,7 +55,8 @@
               :meta {:properties {:owner  {:validators {:not-blank true}}
                                   :other-owner {:validators {:not-blank true}}}}
               :value {:owner {:name "Mike"}
-                      :other-owner {:name "Marat"}}}]
+                      :other-owner {:name "Marat"}
+                      :last-owner {:name "Max"}}}]
     (fn []
       [form/form form
        [:div.row
@@ -74,6 +75,12 @@
                       :label-fn :name
                       :path [:other-owner]
                       :input w/button-select-input}]
+         [:br]
+         [:label "Select"]
+         [form/input {:items items
+                      :label-fn :name
+                      :path [:last-owner]
+                      :input w/select-input}]
          [:div.col [form/form-data {:form :selects-form}]]]]])))
 
 (defn switchbox-page []
