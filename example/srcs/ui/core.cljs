@@ -157,7 +157,8 @@
                       :email "niquola@mail.com"
                       :organization {:name "github" :url "github.com"}
                       :groups [{:name "admin"} {:name "physician"}]
-                      :telecom [{:system "phone" :value "+7 999 666 55 44"}]}}]
+                      :telecom [{:system "phone" :value "+7 999 666 55 44"}
+                                {:system "email" :value "abcab@aaa.com"}]}}]
     (fn []
       [form/form form
        [:div
@@ -201,6 +202,7 @@
                         :input w/text-input}]]
 
           [:div.form-row
+           [:label "Telecom: "]
            [fc/collection {:path [:telecom]}
             [form/input {:path [:value] :input w/text-input}]]]]
 
