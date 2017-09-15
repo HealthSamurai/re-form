@@ -2,8 +2,7 @@
   (:require [reagent.core :as r]))
 
 (def textarea-style
-  []
-  #_[:.re-textarea {:resize ""}])
+  [:.re-textarea {:resize ""}])
 
 (defn- style-onchange [visual-state event]
   (let [node (.-target event)

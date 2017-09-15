@@ -42,14 +42,18 @@
 
 (defn select-input [_]
   (let [state (r/atom {:active false})]
-    (fn [{:keys [value on-change value-fn label-fn items] :as props}]
+    (fn [{:keys [value on-change value-fn label-fn match-fn items] :as props}]
       (let [label-fn (or label-fn pr-str)
-            value-fn (or value-fn identity)]
+            value-fn (or value-fn identity)
+            match-fn (or mathc-fn
+                         (fn [v] (->> items
+                                      (filter #(= (value-fn %) v))
+                                      first label-fn)))]
         [:div.re-select
          {:on-click #(swap! state update :active not)}
          (if value
            [:span.value
-            [:span.value value (or (label-fn value) (value-fn value) (str value))]]
+            [:span.value (match-fn value) #_(or (label-fn value) (value-fn value) (str value))]]
            [:span.choose-value
             (or (:placeholder props) "Select...")])
          (when (:active @state)
