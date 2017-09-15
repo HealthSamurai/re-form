@@ -3,14 +3,26 @@
             [re-frame.core :as rf]
             [re-form.context :as ctx]))
 
-(defn collection* [{:keys [form path] :as props} & body]
-  (let [array (rf/subscribe [:re-form/input-value form path])]
+(defn- drop-idx [v idx]
+  (vec (concat (subvec v 0 idx) (subvec v (inc idx) (count v)))))
+
+(defn- collection* [{:keys [form path new-item-value] :as props} & body]
+  (let [array (rf/subscribe [:re-form/input-value form path])
+        on-new-item (fn [] (rf/dispatch [:re-form/input-changed form path
+                                         (conj @array (or new-item-value {}))]))
+
+        remove-item (fn [idx] (rf/dispatch [:re-form/input-changed form path
+                                            (drop-idx @array idx)]))]
+
     (fn [props & body]
       [:div.collection
+       [:button {:on-click on-new-item} "new item"]
+
        (doall
         (for [[idx item] (map-indexed (fn [idx itm] [idx itm]) @array)]
           [:div.collection-item {:key idx}
-           (into [ctx/set-context {:form-name form :base-path (conj path idx)}] body)]))])))
+           (into [ctx/set-context {:form-name form :base-path (conj path idx)}] body)
+           [:button {:on-click #(remove-item idx)} "x"]]))])))
 
 (defn collection [props & body]
   (into [ctx/get-context props collection*] body))

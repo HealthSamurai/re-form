@@ -158,7 +158,9 @@
                       :organization {:name "github" :url "github.com"}
                       :groups [{:name "admin"} {:name "physician"}]
                       :telecom [{:system "phone" :value "+7 999 666 55 44"}
-                                {:system "email" :value "abcab@aaa.com"}]}}]
+                                {:system "email" :value "abcab@aaa.com"}]
+
+                      :cities ["Omsk" "SPb"]}}]
     (fn []
       [form/form form
        [:div
@@ -203,8 +205,13 @@
 
           [:div.form-row
            [:label "Telecom: "]
-           [fc/collection {:path [:telecom]}
-            [form/input {:path [:value] :input w/text-input}]]]]
+           [fc/collection {:path [:telecom] :new-item-value {:system "phone"}}
+            [form/input {:path [:value] :input w/text-input}]]]
+
+          [:div.form-row
+           [:label "Cities: "]
+           [fc/collection {:path [:cities] :new-item-value ""}
+            [form/input {:path [] :input w/text-input}]]]]
 
          [:div.col
           [form/form-data {:form :inputs-form}]]]]])))
