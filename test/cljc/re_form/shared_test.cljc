@@ -5,7 +5,7 @@
 
 
 (deftest basic-logic
-  (matcho/match
+  #_(matcho/match
    (sut/init {} {:path [:forms :myform]
                  :meta {:properties {:name {:type :string}}}
                  :value {:name "nicola"}})
@@ -29,9 +29,6 @@
                      :dirty true
                      :touched true
                      :state {:email {:touched true :dirty true}}}}})
-
-  (matcho/match
-   (sut/get-manifest db {:form {:path [:forms :myform]} :name :name})) 
   )
 
 
@@ -52,7 +49,7 @@
                             :meta {:properties {:address {:properties {:city {:validators {:not-blank true
                                                                                            :min-length 5}}}}}}}}})
 
-  (matcho/match
+  #_(matcho/match
    (sut/get-manifest db {:form {:path [:forms :myform]} :path [:address] :name :city})
    {:validators {:not-blank true}})
 

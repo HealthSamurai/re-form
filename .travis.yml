@@ -9,7 +9,7 @@ cache:
     - $HOME/.m2
 
 script:
-  - lein test
+  #- lein test
   - cd example
   - mkdir build
   - cp -r resources/public/* build
