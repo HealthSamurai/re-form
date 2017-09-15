@@ -15,22 +15,22 @@
         (aset obj "re-form-context" context-data)
         obj))
 
-    :reagent-render (fn [] child)}))
+    :reagent-render
+    (fn [context-data child] child)}))
 
 (defn get-context [props child & child-body]
   (let [ctx (r/atom nil)]
-    (fn [child]
-      (r/create-class
-       {:context-types context-type
+    (r/create-class
+     {:context-types context-type
 
-        :component-will-mount
-        (fn [this]
-          (reset! ctx (aget (.-context this) "re-form-context")))
+      :component-will-mount
+      (fn [this]
+        (reset! ctx (aget (.-context this) "re-form-context")))
 
-        :reagent-render
-        (fn [props child]
-          (into [child (merge props
-                              {:form (or (:form-name props)
-                                         (keyword (:form-name @ctx)))
-                               :path (into (or (:base-path @ctx) [])
-                                           (:path props))})] child-body))}))))
+      :reagent-render
+      (fn [props child & child-body]
+        (into [child (merge props
+                            {:form (or (:form-name props)
+                                       (keyword (:form-name @ctx)))
+                             :path (into (or (:base-path @ctx) [])
+                                         (or (:path props) []))})] child-body))})))

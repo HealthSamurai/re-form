@@ -1,6 +1,10 @@
 (ns re-form.shared
   (:require [clojure.string :as str]))
 
+(defn filter-vals [pred m]
+  (into {} (filter (fn [[k v]] (pred v))
+                   m)))
+
 (defn insert-by-path [m [k & ks :as path] value]
   (let [v (if ks
             (insert-by-path (get m k) ks value)
@@ -37,7 +41,8 @@
   (get-in db (errors-path opts)))
 
 (defn put-validation-errors [db form-name errors]
-  (update-in db [:re-form form-name :errors] merge errors))
+  (update-in db [:re-form form-name :errors] (fn [errs]
+                                               (filter-vals (complement empty?) (merge errs errors)))))
 
 (defn on-change [db form-name input-path v]
   (-> db

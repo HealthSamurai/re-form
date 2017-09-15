@@ -14,6 +14,7 @@
    [clojure.string :as str]
    [ui.file-upload-page :as fup]
    [re-form.inputs :as w]
+   [re-form.submit :as s]
    [re-form.collection :as fc]
    [re-form.context :as ctx]))
 
@@ -51,6 +52,7 @@
                {:name "Marat"}
                {:name "Tim"}
                {:name "Slava"}]
+
         form {:name :selects-form
               :meta {:properties {:owner  {:validators {:not-blank true}}
                                   :other-owner {:validators {:not-blank true}}}}
@@ -147,7 +149,6 @@
         [:div.col
          [form/form-data {:form :calendars-form}]]]])))
 
-
 (defn inputs-page []
   (let [form {:name :inputs-form
               :validate-fn (fn [v]
@@ -163,6 +164,7 @@
                                 {:system "email" :value "abcab@aaa.com"}]
 
                       :cities ["Omsk" "SPb"]}}]
+
     (fn []
       [form/form form
        [:div
@@ -213,7 +215,9 @@
           [:div.form-row
            [:label "Cities: "]
            [fc/collection {:path [:cities] :new-item-value ""}
-            [form/input {:path [] :input w/text-input}]]]]
+            [form/input {:path [] :input w/text-input}]]]
+
+          [s/submit-button {} "Submit!"]]
 
          [:div.col
           [form/form-data {:form :inputs-form}]]]]])))

@@ -21,6 +21,16 @@
  (fn [db [_ form-name]]
    (reaction @(reagent/cursor db [:re-form form-name :value]))))
 
+(rf/reg-sub :re-form/form-value-2
+ (fn [db [_ form-name]]
+   (get-in db [:re-form form-name])))
+
+
+(rf/reg-sub-raw
+ :re-form/form-errors
+ (fn [db [_ form-name]]
+   (reaction @(reagent/cursor db [:re-form form-name :errors]))))
+
 (rf/reg-sub-raw
  :re-form/state
  (fn [db [_ opts]]
@@ -81,7 +91,7 @@
     (fn [] (deinit props))
     :display-name (str (:name props))
     :reagent-render
-    (fn [{:keys [name] :as props}]
+    (fn [{:keys [name] :as props} & body]
       [ctx/set-context {:form-name name :base-path []}
        (into [:div.re-form] body)] )}))
 
@@ -126,7 +136,7 @@
 (defn form-data [{form-name :form}]
   (let [data (rf/subscribe [:re-form/form-value form-name])]
     (fn [props]
-      [:pre [:Code (with-out-str (cljs.pprint/pprint @data))]])))
+      [:pre (with-out-str (cljs.pprint/pprint @data))])))
 
 (def form-style
   [:*
