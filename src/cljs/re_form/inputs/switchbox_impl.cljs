@@ -25,7 +25,9 @@
                :position "absolute"
                :top (u/px -5)
                :left (u/px -10)}]]
-   [:&.re-checked [:.re-box {:left (u/px 10)}]]])
+   [:&.re-checked
+    [:.re-box {:left (u/px 10)}]
+    [:.re-switch-line {:background-color "#007bff"}]]])
 
 (defn switch-box [_]
   (fn [{:keys [value on-change label]}]

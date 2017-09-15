@@ -8,6 +8,7 @@
    {:display "inline-block"}
    [:.re-checkbox {:cursor "pointer"
                  :opacity 0.7
+                 :border-radius (u/px 15)
                  :padding {:top (u/px 5)
                            :left (u/px 10)
                            :right (u/px 10)
