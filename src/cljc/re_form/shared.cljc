@@ -2,13 +2,12 @@
   (:require [clojure.string :as str]))
 
 (defn insert-by-path [m [k & ks :as path] value]
-  (if ks
+  (let [v (if ks
+            (insert-by-path (get m k) ks value)
+            value)]
     (if (integer? k)
-      (assoc (or m []) k (insert-by-path (get m k) ks value))
-      (assoc (or m {}) k (insert-by-path (get m k) ks value)))
-    (if (integer? k)
-      (assoc (or m []) k value)
-      (assoc (or m {}) k value))))
+      (assoc (or m (vec (replicate k nil))) k v)
+      (assoc (or m {}) k v))))
 
 (defn state-path [{frm :form :as opts}]
   (into []
