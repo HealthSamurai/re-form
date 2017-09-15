@@ -7,7 +7,8 @@
             [re-form.inputs.calendar-impl :as cal-impl]
             [re-form.inputs.switchbox-impl :as sw-impl]
             [re-form.inputs.select-input-impl :as se-impl]
-            [re-form.inputs.button-select-input-impl :as bs-impl]))
+            [re-form.inputs.button-select-input-impl :as bs-impl]
+            [re-form.inputs.checkbox-group-impl :as ch-impl]))
 
 ;; Widgets
 
@@ -20,6 +21,7 @@
 (def switchbox-input sw-impl/switch-box)
 (def button-select-input bs-impl/button-select-input)
 (def select-input se-impl/select-input)
+(def checkbox-group-input ch-impl/checkbox-group-input)
 
 ;; Styles
 
@@ -29,3 +31,4 @@
 (def switchbox-style sw-impl/re-switch-box-style)
 (def button-select-style bs-impl/button-select-style)
 (def select-input-style se-impl/select-input-style)
+(def checkbox-group-style ch-impl/checkbox-group-style)

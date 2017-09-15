@@ -135,4 +135,5 @@
    inputs/textarea-style
    inputs/calendar-style
    inputs/switchbox-style
-   inputs/select-input-style])
+   inputs/select-input-style
+   inputs/checkbox-group-style])

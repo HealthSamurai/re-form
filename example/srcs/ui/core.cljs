@@ -218,8 +218,28 @@
          [:div.col
           [form/form-data {:form :inputs-form}]]]]])))
 
-(defn multiselect-page []
-  [:h1 "Index"])
+(defn checkbox-page []
+  (let [items [{:name "Nikolai"}
+               {:name "Mike"}
+               {:name "Max"}
+               {:name "Marat"}
+               {:name "Tim"}
+               {:name "Slava"}]
+        form {:name :checkbox-form
+              :value {:multies #{{:name "Mike"}
+                                {:name "Marat"}}}}]
+    (fn []
+      [form/form form
+       [:div.row
+        [:div.col
+         [:h1 "Checkbox group"]
+
+         [:label "Select multiple: "]
+         [form/input {:items items
+                      :label-fn :name
+                      :path [:multies]
+                      :input w/checkbox-group-input}]
+         [:div.col [form/form-data {:form :checkbox-form}]]]]])))
 
 (defn textarea-page []
   (let [form {:name :textarea-form
@@ -247,9 +267,9 @@
             :w 3
             :cmp select-page}
 
-   :multiselect {:title "MultiSelect"
+   :checkbox {:title "Checkbox"
                  :w 4
-                 :cmp multiselect-page}
+                 :cmp checkbox-page}
    :datetime {:title "Date/Time"
               :w 5
               :cmp datetime-page}
