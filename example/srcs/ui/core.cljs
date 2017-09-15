@@ -56,50 +56,45 @@
                                   :other-owner {:validators {:not-blank true}}}}
               :value {:owner {:name "Mike"}
                       :other-owner {:name "Marat"}}}]
-    (form/init form)
-
     (fn []
-      [:div.row
-       [:div.col
-        [:h1 "Select widget"]
+      [form/form form
+       [:div.row
+        [:div.col
+         [:h1 "Select widget"]
 
-        [:label "Owner: "]
-        [form/input {:form :selects-form
-                     :items items
-                     :label-fn :name
-                     :path [:owner]
-                     :input w/radio-input}]
-        [:br]
-        [:br]
-        [:label "Horizontal owner:"]
-        [form/input {:form :selects-form
-                     :items items
-                     :label-fn :name
-                     :path [:other-owner]
-                     :input w/button-select-input}]
-        [:div.col [form/form-data {:form :selects-form}]]]])))
+         [:label "Owner: "]
+         [form/input {:items items
+                      :label-fn :name
+                      :path [:owner]
+                      :input w/radio-input}]
+         [:br]
+         [:br]
+         [:label "Horizontal owner:"]
+         [form/input {:items items
+                      :label-fn :name
+                      :path [:other-owner]
+                      :input w/button-select-input}]
+         [:div.col [form/form-data {:form :selects-form}]]]]])))
 
 (defn switchbox-page []
   (let [form {:name :switches-form
               :value {:admin true
                       :superuser false}}]
-    (form/init form)
     (fn []
-      [:div.row
-       [:div.col
-        [:h1 "Switch widget"]
-        [:label "Is admin?"]
-        [form/input {:form :switches-form
-                     :path [:admin]
-                     :label "admin"
-                     :input w/switchbox-input}]
-        [:label "Is superuser?"]
-        [form/input {:form :switches-form
-                     :path [:superuser]
-                     :label "superuser"
-                     :input w/switchbox-input}]]
-       [:div.col
-        [form/form-data {:form :switches-form}]]])))
+      [form/form form
+       [:div.row
+        [:div.col
+         [:h1 "Switch widget"]
+         [:label "Is admin?"]
+         [form/input {:path [:admin]
+                      :label "admin"
+                      :input w/switchbox-input}]
+         [:label "Is superuser?"]
+         [form/input {:path [:superuser]
+                      :label "superuser"
+                      :input w/switchbox-input}]]
+        [:div.col
+         [form/form-data {:form :switches-form}]]]])))
 
 #_(defn list-page []
     (let [form {:path [:forms :myform]
@@ -127,23 +122,23 @@
   (let [form {:name :calendars-form
               :value {:birthdate-one {:d 5 :m 3 :y 1980}
                       :birthdate-two {:d 17 :m 4 :y 1995}}}]
-    (rf/dispatch [:re-form/init form])
     (fn []
-      [:div.row
-       [:div.col
-        [:h1 "Calendar"]
-        [:div.form-row
-         [:label "Birth Date"]
-         [form/input {:form :calendars-form
-                      :path [:birthdate-one]
-                      :input w/calendar-input}]]
-        [:div.form-row
-         [:label "Birth Date 2"]
-         [form/input {:form :calendars-form
-                      :path [:birthdate-two]
-                      :input w/calendar-input}]]]
-       [:div.col
-        [form/form-data {:form :calendars-form}]]])))
+      [form/form form
+       [:div.row
+        [:div.col
+         [:h1 "Calendar"]
+         [:div.form-row
+          [:label "Birth Date"]
+          [form/input {:form :calendars-form
+                       :path [:birthdate-one]
+                       :input w/calendar-input}]]
+         [:div.form-row
+          [:label "Birth Date 2"]
+          [form/input {:form :calendars-form
+                       :path [:birthdate-two]
+                       :input w/calendar-input}]]]
+        [:div.col
+         [form/form-data {:form :calendars-form}]]]])))
 
 
 (defn inputs-page []
@@ -222,16 +217,15 @@
 (defn textarea-page []
   (let [form {:name :textarea-form
               :value {:area-one "Fill me"}}]
-    (rf/dispatch [:re-form/init form])
     (fn []
-      [:div [:h1 "Text field widget"]
-       [:div.row
-        [:div.col
-         [form/input {:form :textarea-form
-                      :path [:area-one]
-                      :input w/textarea-input}]]
-        [:div.col
-         [form/form-data {:form :textarea-form}]]]])))
+      [form/form form
+       [:div [:h1 "Text field widget"]
+        [:div.row
+         [:div.col
+          [form/input {:path [:area-one]
+                       :input w/textarea-input}]]
+         [:div.col
+          [form/form-data {:form :textarea-form}]]]]])))
 
 (def pages
   {:index {:title "Form builder"
