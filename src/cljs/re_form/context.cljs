@@ -1,6 +1,5 @@
 (ns re-form.context
-  (:require [reagent.core :as r]
-            [clojure.walk :as w]))
+  (:require [reagent.core :as r]))
 
 (def context-type (clj->js {"re-form-context" (-> js/React
                                                   (aget "PropTypes")
@@ -12,7 +11,9 @@
 
     :get-child-context
     (fn []
-      (clj->js {"re-form-context" context-data}))
+      (let [obj (js/Object.)]
+        (aset obj "re-form-context" context-data)
+        obj))
 
     :reagent-render (fn [] child)}))
 
@@ -24,7 +25,7 @@
 
         :component-will-mount
         (fn [this]
-          (reset! ctx (w/keywordize-keys (js->clj (aget (.-context this) "re-form-context")))))
+          (reset! ctx (aget (.-context this) "re-form-context")))
 
         :reagent-render
         (fn [props child]
