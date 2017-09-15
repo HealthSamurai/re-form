@@ -16,7 +16,7 @@
 
     :reagent-render (fn [] child)}))
 
-(defn get-context [props child]
+(defn get-context [props child & child-body]
   (let [ctx (r/atom nil)]
     (fn [child]
       (r/create-class
@@ -28,8 +28,8 @@
 
         :reagent-render
         (fn [props child]
-          [child (merge {:form (or (:form-name props)
-                                   (keyword (:form-name @ctx)))
-                         :path (into (or (:base-path @ctx) [])
-                                     (:path props))}
-                        props)])}))))
+          (into [child (merge props
+                              {:form (or (:form-name props)
+                                         (keyword (:form-name @ctx)))
+                               :path (into (or (:base-path @ctx) [])
+                                           (:path props))})] child-body))}))))

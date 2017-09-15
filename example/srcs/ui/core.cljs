@@ -14,6 +14,7 @@
    [clojure.string :as str]
    [ui.file-upload-page :as fup]
    [re-form.inputs :as w]
+   [re-form.collection :as fc]
    [re-form.context :as ctx]))
 
 (defn style [gcss]
@@ -155,7 +156,8 @@
               :value {:name "nicola"
                       :email "niquola@mail.com"
                       :organization {:name "github" :url "github.com"}
-                      :groups [{:name "admin"} {:name "physician"}]}}]
+                      :groups [{:name "admin"} {:name "physician"}]
+                      :telecom [{:system "phone" :value "+7 999 666 55 44"}]}}]
     (fn []
       [form/form form
        [:div
@@ -166,7 +168,7 @@
          [:div.col
           [:div.form-row
            [:label "Name: "]
-           [form/input {:path [:name] :foo 42 :input w/text-input}]]
+           [form/input {:path [:name] :input w/text-input}]]
 
           [:div.form-row
            [:label "Email: "]
@@ -182,23 +184,25 @@
 
           [:div.form-row
            [:label "Organization.name: "]
-           [form/input {:form :inputs-form :path [:organization :name] :input w/text-input}]]
+           [form/input {:path [:organization :name] :input w/text-input}]]
 
           [:div.form-row
            [:label "Organization.url: "]
-           [form/input {:form :inputs-form :path [:organization :url] :input w/text-input}]]
+           [form/input {:path [:organization :url] :input w/text-input}]]
 
           [:div.form-row
            [:label "group.0.name: "]
-           [form/input {:form :inputs-form
-                        :path [:groups 0 :name]
+           [form/input {:path [:groups 0 :name]
                         :input w/text-input}]]
 
           [:div.form-row
            [:label "group.1.name: "]
-           [form/input {:form :inputs-form
-                        :path [:groups 1 :name]
-                        :input w/text-input}]]]
+           [form/input {:path [:groups 1 :name]
+                        :input w/text-input}]]
+
+          [:div.form-row
+           [fc/collection {:path [:telecom]}
+            [form/input {:path [:value] :input w/text-input}]]]]
 
          [:div.col
           [form/form-data {:form :inputs-form}]]]]])))
