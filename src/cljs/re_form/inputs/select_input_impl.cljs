@@ -45,7 +45,7 @@
     (fn [{:keys [value on-change value-fn label-fn match-fn items] :as props}]
       (let [label-fn (or label-fn pr-str)
             value-fn (or value-fn identity)
-            match-fn (or mathc-fn
+            match-fn (or match-fn
                          (fn [v] (->> items
                                       (filter #(= (value-fn %) v))
                                       first label-fn)))]
