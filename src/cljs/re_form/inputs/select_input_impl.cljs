@@ -6,14 +6,10 @@
 (def select-input-style
   [:.re-select
    {:position "relative"
-    :display "inline-block"
     :background-color "white"
-    :margin-left "10px"
+    :margin-left "5px"
     :min-width "10em"
-    :padding {:left (u/px 10)
-              :right (u/px 40)
-              :top (u/px 5)
-              :bottom (u/px 5)}
+    :padding "2px 5px"
     :border "1px solid #ddd"}
    [:.clear {:padding {:left (u/px 10)
                        :right (u/px 10)

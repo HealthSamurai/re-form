@@ -2,7 +2,8 @@
   (:require [reagent.core :as r]))
 
 (def textarea-style
-  [:.re-textarea {:resize "none"}])
+  []
+  #_[:.re-textarea {:resize ""}])
 
 (defn- style-onchange [visual-state event]
   (let [node (.-target event)
