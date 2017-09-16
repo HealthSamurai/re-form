@@ -11,6 +11,8 @@
     :min-width "10em"
     :padding "2px 5px"
     :border "1px solid #ddd"}
+   [:&:hover {:cursor "pointer"
+              :border "1px solid #ccc"}]
    [:.clear {:padding {:left (u/px 10)
                        :right (u/px 10)
                        :top (u/px 5)
@@ -37,7 +39,8 @@
                   :width "90%"
                   :margin "5px"}]
     [:.option {:cursor "pointer"
-                  :padding (u/px 10)}
+               :padding (u/px 10)}
+     [:&.active {:background-color "#f1f1f1"}]
      [:&:hover {:background-color "#f1f1f1"}]]]])
 
 (defn select-input [_]
@@ -60,5 +63,6 @@
            [:div.options
             (for [i items] ^{:key (pr-str i)}
               [:div.option
-               {:on-click (fn [_] (on-change (value-fn i)))}
+               {:on-click (fn [_] (on-change (value-fn i)))
+                :class (when (= value (value-fn i)) "active")}
                (label-fn i)])])]))))

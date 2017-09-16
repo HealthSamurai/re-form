@@ -4,6 +4,10 @@
             [clojure.string :as str]
             [cljs.core.async :refer [<!]]))
 
+
+(def file-upload-style
+  [:.file-upload {:padding "2px 5px"}])
+
 (defn file-upload [{:keys [value value-fn label-fn]}]
   (let [state (r/atom {:value value :uploading? false})
         label-fn (or label-fn identity)
@@ -32,7 +36,7 @@
               inp (r/atom {})]
           [:div.file-upload {:class (and uploading? "uploading")}
            [:input {:style {:display "none"}
-                    :ref #(reset! inp  %) 
+                    :ref #(reset! inp  %)
                     :type "file"
                     :multiple multiple
                     :on-change #(my-onchange % upload-fn on-change)}]
@@ -41,4 +45,5 @@
              (str "Uploading " (str/join ", " (map #(.-name %) files)) "...")
              (if value
                [:div (label-fn  (:value @state))]
-               [:a {:href "javascript:void(0);" :on-click #(open-file-dialog @inp)} "Select file to upload..."]))]))})))
+               [:a {:href "javascript:void(0);" :on-click #(open-file-dialog @inp)}
+                (or (:placeholder props) "Select file to upload...")]))]))})))

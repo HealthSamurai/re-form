@@ -136,6 +136,7 @@
 (def form-style
   [:*
    inputs/radio-input-style
+   inputs/file-upload-style
    inputs/button-select-style
    inputs/textarea-style
    inputs/calendar-style

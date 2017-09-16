@@ -25,6 +25,7 @@
 
 ;; Styles
 
+(def file-upload-style fupl-impl/file-upload-style)
 (def textarea-style ta-impl/textarea-style)
 (def radio-input-style rad-impl/radio-input-styles)
 (def calendar-style cal-impl/re-calendar-style)
