@@ -82,8 +82,8 @@
   (reagent/create-class
    {:component-will-mount
     (fn [] (init props))
-    :component-will-receive-props
-    (fn [this props]
+    ;;:component-will-receive-props
+    #_(fn [this props]
       (let [cur-value (nth (.. this -props -argv ) 1)
             new-value (nth props 1)]
         (when-not (identical? (:value new-value) (:value cur-value))
