@@ -6,7 +6,9 @@
 
 
 (def file-upload-style
-  [:.file-upload {:padding "2px 5px"}])
+  [:.file-upload {:padding "2px 5px"}
+   [:.remove {:font-weight "500" :margin-right "5px"}
+    [:&:hover {:cursor "pointer" :font-weight "600"}]]])
 
 (defn file-upload [{:keys [value value-fn label-fn]}]
   (let [state (r/atom {:value value :uploading? false})
@@ -44,6 +46,9 @@
            (if uploading?
              (str "Uploading " (str/join ", " (map #(.-name %) files)) "...")
              (if value
-               [:div (label-fn  (:value @state))]
+               [:div
+                [:span.remove {:title "Delete" :on-click #(on-change nil)} "X"]
+                [:span.value (label-fn  (:value @state))]
+                ]
                [:a {:href "javascript:void(0);" :on-click #(open-file-dialog @inp)}
                 (or (:placeholder props) "Select file to upload...")]))]))})))
