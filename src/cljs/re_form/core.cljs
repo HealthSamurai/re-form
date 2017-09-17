@@ -84,7 +84,10 @@
     (fn [] (init props))
     :component-will-receive-props
     (fn [this props]
-      (init (nth props 1)))
+      (let [cur-value (nth (.. this -props -argv ) 1)
+            new-value (nth props 1)]
+        (when-not (= new-value cur-value)
+          (init new-value))))
     :component-will-unmount
     (fn [] (deinit props))
     :display-name (str (:name props))
