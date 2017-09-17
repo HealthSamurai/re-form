@@ -45,10 +45,9 @@
 
            (if uploading?
              (str "Uploading " (str/join ", " (map #(.-name %) files)) "...")
-             (if value
+             (if-not (empty? value)
                [:div
-                [:span.remove {:title "Delete" :on-click #(on-change nil)} "X"]
-                [:span.value (label-fn  (:value @state))]
-                ]
+                [:span.remove {:title "Delete" :on-click #(on-change {})} "X"]
+                [:span.value (label-fn  (:value @state))]]
                [:a {:href "javascript:void(0);" :on-click #(open-file-dialog @inp)}
                 (or (:placeholder props) "Select file to upload...")]))]))})))
