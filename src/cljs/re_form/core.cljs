@@ -67,7 +67,7 @@
                (fn [idx e] [:span.error {:key idx} e])
                (or @errors [])))])))
 
-(defn init [{:keys [name validate-fn] :as form}]
+(defn init [{:keys [name validate-fn value] :as form}]
   (rf/dispatch [:re-form/init (dissoc form :validate-fn)])
 
   (when validate-fn
@@ -82,11 +82,14 @@
   (reagent/create-class
    {:component-will-mount
     (fn [] (init props))
+    :component-will-receive-props
+    (fn [this props]
+      (init (nth props 1)))
     :component-will-unmount
     (fn [] (deinit props))
     :display-name (str (:name props))
     :reagent-render
-    (fn [{:keys [name] :as props} & body]
+    (fn [{:keys [name value] :as props} & body]
       [ctx/set-context {:form-name name :base-path []}
        (into [:div.re-form] body)] )}))
 
