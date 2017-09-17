@@ -86,9 +86,7 @@
     (fn [this props]
       (let [cur-value (nth (.. this -props -argv ) 1)
             new-value (nth props 1)]
-        (.log js/console "NEW" new-value)
-        (.log js/console "CUR" new-value)
-        (when-not (= new-value cur-value)
+        (when-not (identical? (:value new-value) (:value cur-value))
           (.log js/console "UPDATE")
           (init new-value))))
     :component-will-unmount
