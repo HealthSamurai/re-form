@@ -124,8 +124,13 @@
        [binded-input (assoc (dissoc props :validators) :on-change #(my-on-change % on-change))]
        [errors-for {:form form-name :path path}]])))
 
-(defn input [props]
+(defn field [props]
   [ctx/get-context props validated-input])
+
+(defn input [& args]
+  (.error js/console "Warning! `re-form.input` is deprecated. Please use `re-form.field` instead. Caused by " (into ["re-form.input"] args))
+  (fn [& args]
+    (into [field] args)))
 
 (defn form-data [{form-name :form}]
   (let [data (rf/subscribe [:re-form/form-value form-name])

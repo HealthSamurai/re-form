@@ -29,7 +29,7 @@
        [:h1 "Form builder"]
 
        [:label "Name"]
-       [form/input {:form :example-form :path [:name] :input w/text-input}]
+       [form/field {:form :example-form :path [:name] :input w/text-input}]
        [form/errors-for {:form :example-form :path [:name]}]
 
 
@@ -37,7 +37,7 @@
        #_[form/re-radio-buttons {:form form :name :gender
                                  :label-fn identity
                                  :options-path [:forms :myform :options :gender]}]
-       [form/input {:form :example-form :path [:gender] :input w/text-input}]
+       [form/field {:form :example-form :path [:gender] :input w/text-input}]
 
        #_[:h3 "Collection"]
 
@@ -64,20 +64,20 @@
          [:h1 "Select widget"]
 
          [:label "Owner: "]
-         [form/input {:items items
+         [form/field {:items items
                       :label-fn :name
                       :path [:owner]
                       :input w/radio-input}]
          [:br]
          [:br]
          [:label "Horizontal owner:"]
-         [form/input {:items items
+         [form/field {:items items
                       :label-fn :name
                       :path [:other-owner]
                       :input w/button-select-input}]
          [:br]
          [:label "Select"]
-         [form/input {:items items
+         [form/field {:items items
                       :label-fn :name
                       :path [:last-owner]
                       :input w/select-input}]
@@ -93,11 +93,11 @@
         [:div.col
          [:h1 "Switch widget"]
          [:label "Is admin?"]
-         [form/input {:path [:admin]
+         [form/field {:path [:admin]
                       :label "admin"
                       :input w/switchbox-input}]
          [:label "Is superuser?"]
-         [form/input {:path [:superuser]
+         [form/field {:path [:superuser]
                       :label "superuser"
                       :input w/switchbox-input}]]
         [:div.col
@@ -136,12 +136,12 @@
          [:h1 "Calendar"]
          [:div.form-row
           [:label "Birth Date"]
-          [form/input {:form :calendars-form
+          [form/field {:form :calendars-form
                        :path [:birthdate-one]
                        :input w/calendar-input}]]
          [:div.form-row
           [:label "Birth Date 2"]
-          [form/input {:form :calendars-form
+          [form/field {:form :calendars-form
                        :path [:birthdate-two]
                        :input w/calendar-input}]]]
         [:div.col
@@ -173,49 +173,49 @@
          [:div.col
           [:div.form-row
            [:label "Name: "]
-           [form/input {:path [:name] :input w/text-input}]]
+           [form/field {:path [:name] :input w/text-input}]]
 
           [:div.form-row
            [:label "Email: "]
-           [form/input {:path [:email]
+           [form/field {:path [:email]
                         :validators [(valid/email :message "email please")]
                         :input w/text-input}]]
 
           [:label "Password: "]
-          [form/input {:path [:password]
+          [form/field {:path [:password]
                        :validators [(valid/min-count 8 count :message "Too short for a password")]
                        :input w/text-input
                        :type "password"}]
 
           [:div.form-row
            [:label "Organization.name: "]
-           [form/input {:path [:organization :name]
+           [form/field {:path [:organization :name]
                         :input w/text-input
                         :validators [(valid/regex #".+ GmbH")]}]]
 
           [:div.form-row
            [:label "Organization.url: "]
-           [form/input {:path [:organization :url] :input w/text-input}]]
+           [form/field {:path [:organization :url] :input w/text-input}]]
 
           [:div.form-row
            [:label "group.0.name: "]
-           [form/input {:path [:groups 0 :name]
+           [form/field {:path [:groups 0 :name]
                         :input w/text-input}]]
 
           [:div.form-row
            [:label "group.1.name: "]
-           [form/input {:path [:groups 1 :name]
+           [form/field {:path [:groups 1 :name]
                         :input w/text-input}]]
 
           [:div.form-row
            [:label "Telecom: "]
            [fc/collection {:path [:telecom] :new-item-value {:system "phone"}}
-            [form/input {:path [:value] :input w/text-input}]]]
+            [form/field {:path [:value] :input w/text-input}]]]
 
           [:div.form-row
            [:label "Cities: "]
            [fc/collection {:path [:cities] :new-item-value ""}
-            [form/input {:path [] :input w/text-input}]]]
+            [form/field {:path [] :input w/text-input}]]]
 
           [s/submit-button {:submit-fn #(js/alert (pr-str %))} "Submit!"]]
 
@@ -239,7 +239,7 @@
          [:h1 "Checkbox group"]
 
          [:label "Select multiple: "]
-         [form/input {:items items
+         [form/field {:items items
                       :label-fn :name
                       :path [:multies]
                       :input w/checkbox-group-input}]
@@ -253,7 +253,7 @@
        [:div [:h1 "Text field widget"]
         [:div.row
          [:div.col
-          [form/input {:path [:area-one]
+          [form/field {:path [:area-one]
                        :input w/textarea-input}]]
          [:div.col
           [form/form-data {:form :textarea-form}]]]]])))
