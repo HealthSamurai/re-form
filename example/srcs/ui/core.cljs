@@ -183,13 +183,15 @@
 
           [:label "Password: "]
           [form/input {:path [:password]
-                       :validators [(valid/not-blank)]
+                       :validators [(valid/min-count 8 count :message "Too short for a password")]
                        :input w/text-input
                        :type "password"}]
 
           [:div.form-row
            [:label "Organization.name: "]
-           [form/input {:path [:organization :name] :input w/text-input}]]
+           [form/input {:path [:organization :name]
+                        :input w/text-input
+                        :validators [(valid/regex #".+ GmbH")]}]]
 
           [:div.form-row
            [:label "Organization.url: "]
