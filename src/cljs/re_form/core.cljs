@@ -26,13 +26,6 @@
  (fn [db [_ form-name]]
    (reaction @(reagent/cursor db [:re-form form-name :errors]))))
 
-(rf/reg-sub-raw
- :re-form/state
- (fn [db [_ opts]]
-   (let [path (shared/state-path opts)
-         cur (reagent/cursor db path)]
-     (reaction @cur))))
-
 (rf/reg-event-db
  :re-form/init
  (fn [db [_ manifest]]
@@ -97,15 +90,15 @@
       [ctx/set-context {:form-name name :base-path []}
        (into [:div.re-form] body)] )}))
 
-(defn binded-input [{form-name :form path :path :as props}]
-  (let [value (rf/subscribe [:re-form/input-value form-name path])
-        my-on-change (fn binded-input-onchange [v on-change]
+(defn binded-input [props]
+  (let [my-on-change (fn binded-input-onchange [form-name path v on-change]
                        (rf/dispatch [:re-form/input-changed form-name path v])
                        (and on-change (on-change v)))]
-    (fn [{on-change :on-change :as props}]
+    (fn [{on-change :on-change form-name :form path :path :as props}]
       [(:input props)
        (merge (dissoc props :form :path :input)
-              {:value @value :on-change #(my-on-change % on-change)})])))
+              {:value @(rf/subscribe [:re-form/input-value form-name path])
+               :on-change #(my-on-change form-name path % on-change)})])))
 
 (defn- validate-and-update-errors [form-name path validators val]
   (when-not (empty? validators)
@@ -119,8 +112,7 @@
       (rf/dispatch [:re-form/validation-errors form-name {path errors}]))))
 
 (defn validated-input [{form-name :form :keys [validators path on-change value] :as props}]
-  (let [form-value (rf/subscribe [:re-form/form-value form-name])
-        my-on-change (fn validated-input-onchange [v on-change]
+  (let [my-on-change (fn validated-input-onchange [v on-change]
                        (validate-and-update-errors form-name path validators v)
                        (and on-change (on-change v)))]
 

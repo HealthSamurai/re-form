@@ -152,7 +152,7 @@
               :validate-fn (fn [v]
                              (if (not= (:name v) "nicola")
                                {[:name] ["should be nicola"]}
-                               {}))
+                               {[:name] nil}))
 
               :value {:name "nicola"
                       :email "niquola@mail.com"
