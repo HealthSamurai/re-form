@@ -136,9 +136,13 @@
   [ctx/get-context props validated-input])
 
 (defn form-data [{form-name :form}]
-  (let [data (rf/subscribe [:re-form/form-value form-name])]
+  (let [data (rf/subscribe [:re-form/form-value form-name])
+        errors (rf/subscribe [:re-form/form-errors form-name])]
     (fn [props]
-      [:pre (with-out-str (cljs.pprint/pprint @data))])))
+      [:div
+       [:pre (with-out-str (cljs.pprint/pprint @data))]
+       (when @errors
+         [:pre (with-out-str (cljs.pprint/pprint @errors))])])))
 
 (def form-style
   [:*
