@@ -54,8 +54,6 @@
                {:name "Slava"}]
 
         form {:name :selects-form
-              :meta {:properties {:owner  {:validators {:not-blank true}}
-                                  :other-owner {:validators {:not-blank true}}}}
               :value {:owner {:name "Mike"}
                       :other-owner {:name "Marat"}
                       :last-owner {:name "Max"}}}]
@@ -180,12 +178,12 @@
           [:div.form-row
            [:label "Email: "]
            [form/input {:path [:email]
-                        :validators [valid/email]
+                        :validators [(valid/email :message "email please")]
                         :input w/text-input}]]
 
           [:label "Password: "]
           [form/input {:path [:password]
-                       :validators [valid/not-blank]
+                       :validators [(valid/not-blank)]
                        :input w/text-input
                        :type "password"}]
 

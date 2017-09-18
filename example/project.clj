@@ -15,7 +15,8 @@
                  [cljs-http "0.1.43"]
                  [hiccup "1.0.5"]
                  [garden "1.3.2"]
-                 [route-map "0.0.4"]]
+                 [route-map "0.0.4"]
+                 [bouncer "1.0.1"]]
 
   :plugins [[lein-environ "1.1.0"]
             [lein-cljsbuild "1.1.6"]

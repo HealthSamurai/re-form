@@ -15,7 +15,8 @@
                  [reagent-utils "0.2.1" :exclusions [cljsjs/react]]
                  [re-frame "0.9.4" :exclusions [cljsjs/react]]
                  [hiccup "1.0.5"]
-                 [garden "1.3.2"]]
+                 [garden "1.3.2"]
+                 [bouncer "1.0.1"]]
 
   :clean-targets ^{:protect false}
   [:target-path
