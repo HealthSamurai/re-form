@@ -164,7 +164,7 @@
 (defn inputs-page []
   (let [form {:name :inputs-form
               :validate-fn (fn [v]
-                             (if (not= (:name v) "nicola")
+                             (if (and (:name v) (not= (:name v) "nicola"))
                                {[:name] ["should be nicola"]}
                                {[:name] nil}))
 
@@ -175,19 +175,34 @@
                       :telecom [{:system "phone" :value "+7 999 666 55 44"}
                                 {:system "email" :value "abcab@aaa.com"}]
 
-                      :cities ["Omsk" "SPb"]}}]
+                      :cities ["Omsk" "SPb"]}}
+        state (reagent/atom {:first-input-mode :first
+                             :password-mounted true})]
 
     (fn []
       [form/form form
        [:div
-        [:h1 "Select widget"]
+        [:h1 "re-form demo page (most complete one)"]
 
         [:hr]
         [:div.row
          [:div.col
           [:div.form-row
-           [:label "Name: "]
-           [form/field {:path [:name] :input w/text-input}]]
+           [:label "Name or Family name: "]
+           [form/field (if (= (:first-input-mode @state) :first)
+                         {:input w/text-input
+                          :path [:name]}
+
+                         {:input w/text-input
+                          :path [:family-name]
+                          :validators [(valid/min-count 5 count :message "Too short for a family name")]})]
+
+           [:button {:on-click (fn []
+                                 (swap! state (fn [s]
+                                                (if (= (:first-input-mode s) :first)
+                                                  (assoc s :first-input-mode :second)
+                                                  (assoc s :first-input-mode :first)))))}
+            "Change path for that input"]]
 
           [:div.form-row
            [:label "Email: "]
@@ -196,10 +211,18 @@
                         :input w/text-input}]]
 
           [:label "Password: "]
-          [form/field {:path [:password]
-                       :validators [(valid/min-count 8 count :message "Too short for a password")]
-                       :input w/text-input
-                       :type "password"}]
+          (when (:password-mounted @state)
+              [form/field {:path [:password]
+                           :validators [(valid/min-count 8 count :message "Too short for a password")]
+                           :input w/text-input
+                           :type "password"}])
+
+          [:button {:on-click (fn []
+                                (swap! state (fn [s]
+                                               (if (:password-mounted s)
+                                                 (assoc s :password-mounted false)
+                                                 (assoc s :password-mounted true)))))}
+           "Remove/add password input"]
 
           [:div.form-row
            [:label "Organization.name: "]
@@ -245,7 +268,7 @@
                {:name "Slava"}]
         form {:name :checkbox-form
               :value {:multies #{{:name "Mike"}
-                                {:name "Marat"}}}}]
+                                 {:name "Marat"}}}}]
     (fn []
       [form/form form
        [:div.row
@@ -286,8 +309,8 @@
             :cmp select-page}
 
    :checkbox {:title "Checkbox"
-                 :w 4
-                 :cmp checkbox-page}
+              :w 4
+              :cmp checkbox-page}
    :datetime {:title "Date/Time"
               :w 5
               :cmp datetime-page}

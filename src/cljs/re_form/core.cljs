@@ -17,6 +17,12 @@
      (reaction @cur))))
 
 (rf/reg-sub-raw
+ :re-form/input-errors
+ (fn [db [_ form-name path]]
+   (let [cur (reagent/cursor db [:re-form form-name :errors path])]
+     (reaction @cur))))
+
+(rf/reg-sub-raw
  :re-form/form-value
  (fn [db [_ form-name]]
    (reaction @(reagent/cursor db [:re-form form-name :value]))))
@@ -36,12 +42,6 @@
  (fn [db [_ manifest]]
    (update db :re-form  dissoc (:name manifest))))
 
-(rf/reg-sub-raw
- :re-form/errors-for
- (fn [db [_ form-name path]]
-   (let [cur (reagent/cursor db [:re-form form-name :errors path])]
-     (reaction @cur))))
-
 (rf/reg-event-db
  :re-form/input-changed
  (fn [db [_ form-name input-path v]] (shared/on-change db form-name input-path v)))
@@ -53,7 +53,7 @@
 
 
 (defn errors-for [{form-name :form path :path :as props}]
-  (let [errors (rf/subscribe [:re-form/errors-for form-name path])]
+  (let [errors (rf/subscribe [:re-form/input-errors form-name path])]
     (fn [props]
       [:div.errors
        (doall (map-indexed
@@ -75,13 +75,6 @@
   (reagent/create-class
    {:component-will-mount
     (fn [] (init props))
-    ;;:component-will-receive-props
-    #_(fn [this props]
-      (let [cur-value (nth (.. this -props -argv ) 1)
-            new-value (nth props 1)]
-        (when-not (identical? (:value new-value) (:value cur-value))
-          (.log js/console "UPDATE")
-          (init new-value))))
     :component-will-unmount
     (fn [] (deinit props))
     :display-name (str (:name props))
@@ -89,16 +82,6 @@
     (fn [{:keys [name value] :as props} & body]
       [ctx/set-context {:form-name name :base-path []}
        (into [:div.re-form] body)] )}))
-
-(defn binded-input [props]
-  (let [my-on-change (fn binded-input-onchange [form-name path v on-change]
-                       (rf/dispatch [:re-form/input-changed form-name path v])
-                       (and on-change (on-change v)))]
-    (fn [{on-change :on-change form-name :form path :path :as props}]
-      [(:input props)
-       (merge (dissoc props :form :path :input)
-              {:value @(rf/subscribe [:re-form/input-value form-name path])
-               :on-change #(my-on-change form-name path % on-change)})])))
 
 (defn- validate-and-update-errors [form-name path validators val]
   (when-not (empty? validators)
@@ -111,6 +94,71 @@
                          validators)]
       (rf/dispatch [:re-form/validation-errors form-name {path errors}]))))
 
+(defn binded-field [props]
+  (let [my-on-change (fn binded-input-onchange [form-name path v on-change]
+                       (rf/dispatch [:re-form/input-changed form-name path v])
+                       (and on-change (on-change v)))
+
+        get-props #(second (.-argv (.-props %)))
+
+        state (reagent/atom {})
+        run-validators
+        (fn []
+          (let [{form-name :form path :path validators :validators value :value} @state]
+            (validate-and-update-errors form-name path validators @value)))
+
+        unbind-input
+        (fn [form-name path]
+          (when (:value @state)
+            (remove-watch (:value @state) :binded-field))
+          (rf/dispatch [:re-form/validation-errors form-name {path []}])
+          (rf/dispatch [:re-form/input-changed form-name path nil]))
+
+        update-binding
+        (fn [{new-form :form new-path :path validators :validators}]
+          (swap! state (fn [{val :value err :errors path :path form :form :as curr-state}]
+                         (if (not (and (= new-path path) (= new-form form)))
+                           (do
+                             (unbind-input form path)
+                             (let [new-val-subscr (rf/subscribe [:re-form/input-value new-form new-path])]
+                               ;; initial validation (do it before we're attaching a watcher)
+                               (validate-and-update-errors new-form new-path validators @new-val-subscr)
+
+                               ;; future validations
+                               (add-watch new-val-subscr :binded-field run-validators)
+
+                               {:form new-form
+                                :path new-path
+                                :value new-val-subscr
+                                :validators validators
+                                :errors (rf/subscribe [:re-form/input-errors new-form new-path])}))
+                           (assoc curr-state :validators validators)))))]
+
+    (reagent/create-class
+     {:display-name :binded-field
+      :component-will-mount
+      (fn [this]
+        (update-binding (get-props this)))
+
+      :component-will-unmount
+      (fn [this]
+        (let [{form-name :form path :path} (get-props this)]
+          (unbind-input form-name path)))
+
+      :component-will-receive-props
+      (fn [this new-props]
+        (update-binding (second new-props)))
+
+      :reagent-render
+      (fn [{on-change :on-change form-name :form path :path :as props}]
+        [:div.re-form-field
+         [(:input props)
+          (merge (dissoc props :form :path :input :validators)
+                 {:value @(:value @state)
+                  :on-change #(my-on-change form-name path % on-change)})]
+
+         [errors-for {:form form-name :path path}]])})))
+
 (defn validated-input [{form-name :form :keys [validators path on-change value] :as props}]
   (let [my-on-change (fn validated-input-onchange [v on-change]
                        (validate-and-update-errors form-name path validators v)
@@ -120,12 +168,12 @@
     (my-on-change value on-change)
 
     (fn [{:keys [on-change] :as props}]
-      [:div.input
-       [binded-input (assoc (dissoc props :validators) :on-change #(my-on-change % on-change))]
+      [:div.re-form-field
+       [binded-field (assoc (dissoc props :validators) :on-change #(my-on-change % on-change))]
        [errors-for {:form form-name :path path}]])))
 
 (defn field [props]
-  [ctx/get-context props validated-input])
+  [ctx/get-context props binded-field])
 
 (defn input [& args]
   (.error js/console "Warning! `re-form.input` is deprecated. Please use `re-form.field` instead. Caused by " (into ["re-form.input"] args))
