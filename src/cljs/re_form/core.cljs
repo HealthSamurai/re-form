@@ -150,4 +150,5 @@
    inputs/calendar-style
    inputs/switchbox-style
    inputs/select-input-style
-   inputs/checkbox-group-style])
+   inputs/checkbox-group-style
+   inputs/select-xhr-style])

@@ -1,7 +1,12 @@
 (ns ui.core
-  (:require-macros [reagent.ratom :refer [reaction]])
+  (:require-macros [reagent.ratom :refer [reaction]]
+                   [cljs.core.async.macros :refer [go]])
   (:require
    [cljsjs.react]
+   [goog.string :as gstring]
+   [goog.string.format]
+   [cljs-http.client :as http]
+   [cljs.core.async :refer [<!]]
    [reagent.core :as reagent]
    [garden.core :as garden]
    [garden.color :as c]
@@ -62,6 +67,15 @@
        [:div.row
         [:div.col
          [:h1 "Select widget"]
+
+         [:label "XHR select:"]
+         [form/field {:value-fn #(get-in % [:resource :code])
+                      :label-fn #(get-in % [:resource :display])
+                      :suggest-fn
+                      (fn [value] (go (:entry (:body (<! (http/get (gstring/format "https://ml.aidbox.io/$terminology/CodeSystem/$lookup?display=%s&system=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Ficd-10" value)))))))
+                      :path [:xhr]
+                      :input w/select-xhr-input}]
+
 
          [:label "Owner: "]
          [form/field {:items items
