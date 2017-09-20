@@ -27,22 +27,22 @@
   [:style (garden/css gcss)])
 
 (defn index []
-  (let [form {:name :example-form
+  (let [form {:form-name :example-form
               :value {:name "Mike"}}]
     (fn []
       [form/form form
        [:h1 "Form builder"]
 
        [:label "Name"]
-       [form/field {:form :example-form :path [:name] :input w/text-input}]
-       [form/errors-for {:form :example-form :path [:name]}]
+       [form/field {:form-name :example-form :path [:name] :input w/text-input}]
+       [form/errors-for {:form-name :example-form :path [:name]}]
 
 
        [:label "Gender"]
        #_[form/re-radio-buttons {:form form :name :gender
                                  :label-fn identity
                                  :options-path [:forms :myform :options :gender]}]
-       [form/field {:form :example-form :path [:gender] :input w/text-input}]
+       [form/field {:form-name :example-form :path [:gender] :input w/text-input}]
 
        #_[:h3 "Collection"]
 
@@ -58,7 +58,7 @@
                {:name "Tim"}
                {:name "Slava"}]
 
-        form {:name :selects-form
+        form {:form-name :selects-form
               :value {:owner {:name "Mike"}
                       :other-owner {:name "Marat"}
                       :last-owner {:name "Max"}}}]
@@ -95,10 +95,10 @@
                       :label-fn :name
                       :path [:last-owner]
                       :input w/select-input}]
-         [:div.col [form/form-data {:form :selects-form}]]]]])))
+         [:div.col [form/form-data {:form-name :selects-form}]]]]])))
 
 (defn switchbox-page []
-  (let [form {:name :switches-form
+  (let [form {:form-name :switches-form
               :value {:admin true
                       :superuser false}}]
     (fn []
@@ -115,7 +115,7 @@
                       :label "superuser"
                       :input w/switchbox-input}]]
         [:div.col
-         [form/form-data {:form :switches-form}]]]])))
+         [form/form-data {:form-name :switches-form}]]]])))
 
 #_(defn list-page []
     (let [form {:path [:forms :myform]
@@ -140,7 +140,7 @@
             [form-data form]]]))))
 
 (defn datetime-page []
-  (let [form {:name :calendars-form
+  (let [form {:form-name :calendars-form
               :value {:birthdate-one {:d 5 :m 3 :y 1980}
                       :birthdate-two {:d 17 :m 4 :y 1995}}}]
     (fn []
@@ -150,19 +150,19 @@
          [:h1 "Calendar"]
          [:div.form-row
           [:label "Birth Date"]
-          [form/field {:form :calendars-form
+          [form/field {:form-name :calendars-form
                        :path [:birthdate-one]
                        :input w/calendar-input}]]
          [:div.form-row
           [:label "Birth Date 2"]
-          [form/field {:form :calendars-form
+          [form/field {:form-name :calendars-form
                        :path [:birthdate-two]
                        :input w/calendar-input}]]]
         [:div.col
-         [form/form-data {:form :calendars-form}]]]])))
+         [form/form-data {:form-name :calendars-form}]]]])))
 
 (defn inputs-page []
-  (let [form {:name :inputs-form
+  (let [form {:form-name :inputs-form
               :validate-fn (fn [v]
                              (if (and (:name v) (not= (:name v) "nicola"))
                                {[:name] ["should be nicola"]}
@@ -212,10 +212,10 @@
 
           [:label "Password: "]
           (when (:password-mounted @state)
-              [form/field {:path [:password]
-                           :validators [(valid/min-count 8 count :message "Too short for a password")]
-                           :input w/text-input
-                           :type "password"}])
+            [form/field {:path [:password]
+                         :validators [(valid/min-count 8 count :message "Too short for a password")]
+                         :input w/text-input
+                         :type "password"}])
 
           [:button {:on-click (fn []
                                 (swap! state (fn [s]
@@ -257,7 +257,7 @@
           [s/submit-button {:submit-fn #(js/alert (pr-str %))} "Submit!"]]
 
          [:div.col
-          [form/form-data {:form :inputs-form}]]]]])))
+          [form/form-data {:form-name :inputs-form}]]]]])))
 
 (defn checkbox-page []
   (let [items [{:name "Nikolai"}
@@ -266,7 +266,7 @@
                {:name "Marat"}
                {:name "Tim"}
                {:name "Slava"}]
-        form {:name :checkbox-form
+        form {:form-name :checkbox-form
               :value {:multies #{{:name "Mike"}
                                  {:name "Marat"}}}}]
     (fn []
@@ -280,10 +280,10 @@
                       :label-fn :name
                       :path [:multies]
                       :input w/checkbox-group-input}]
-         [:div.col [form/form-data {:form :checkbox-form}]]]]])))
+         [:div.col [form/form-data {:form-name :checkbox-form}]]]]])))
 
 (defn textarea-page []
-  (let [form {:name :textarea-form
+  (let [form {:form-name :textarea-form
               :value {:area-one "Fill me"}}]
     (fn []
       [form/form form
@@ -293,7 +293,7 @@
           [form/field {:path [:area-one]
                        :input w/textarea-input}]]
          [:div.col
-          [form/form-data {:form :textarea-form}]]]]])))
+          [form/form-data {:form-name :textarea-form}]]]]])))
 
 (def pages
   {:index {:title "Form builder"

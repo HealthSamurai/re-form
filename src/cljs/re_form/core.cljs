@@ -35,12 +35,12 @@
 (rf/reg-event-db
  :re-form/init
  (fn [db [_ manifest]]
-   (assoc-in db [:re-form (:name manifest)] manifest)))
+   (assoc-in db [:re-form (:form-name manifest)] manifest)))
 
 (rf/reg-event-db
  :re-form/deinit
- (fn [db [_ manifest]]
-   (update db :re-form  dissoc (:name manifest))))
+ (fn [db [_ form-name]]
+   (update db :re-form  dissoc form-name)))
 
 (rf/reg-event-db
  :re-form/input-changed
@@ -52,7 +52,7 @@
    (shared/put-validation-errors db form-name errors)))
 
 
-(defn errors-for [{form-name :form path :path :as props}]
+(defn errors-for [{form-name :form-name path :path :as props}]
   (let [errors (rf/subscribe [:re-form/input-errors form-name path])]
     (fn [props]
       [:div.errors
@@ -60,7 +60,10 @@
                (fn [idx e] [:span.error {:key idx} e])
                (or @errors [])))])))
 
-(defn init [{:keys [name validate-fn value] :as form}]
+(defn init [{:keys [form-name validate-fn value] :as form}]
+  (when-not form-name
+    (throw (js/Error. (str "No form name is provided for `re-form.form` component, props are: " (pr-str form)))))
+
   (rf/dispatch [:re-form/init (dissoc form :validate-fn)])
 
   (when validate-fn
@@ -76,11 +79,11 @@
    {:component-will-mount
     (fn [] (init props))
     :component-will-unmount
-    (fn [] (deinit props))
-    :display-name (str (:name props))
+    (fn [] (deinit (:form-name props)))
+    :display-name (str (:form-name props))
     :reagent-render
-    (fn [{:keys [name value] :as props} & body]
-      [ctx/set-context {:form-name name :base-path []}
+    (fn [{:keys [form-name value] :as props} & body]
+      [ctx/set-context {:form-name form-name :base-path []}
        (into [:div.re-form] body)] )}))
 
 (defn- validate-and-update-errors [form-name path validators val]
@@ -95,16 +98,17 @@
       (rf/dispatch [:re-form/validation-errors form-name {path errors}]))))
 
 (defn binded-field [props]
-  (let [my-on-change (fn binded-input-onchange [form-name path v on-change]
-                       (rf/dispatch [:re-form/input-changed form-name path v])
-                       (and on-change (on-change v)))
+  (let [my-on-change
+        (fn binded-input-onchange [form-name path v on-change]
+          (rf/dispatch [:re-form/input-changed form-name path v])
+          (and on-change (on-change v)))
 
         get-props #(second (.-argv (.-props %)))
 
         state (reagent/atom {})
         run-validators
         (fn []
-          (let [{form-name :form path :path validators :validators value :value} @state]
+          (let [{form-name :form-name path :path validators :validators value :value} @state]
             (validate-and-update-errors form-name path validators @value)))
 
         unbind-input
@@ -115,8 +119,8 @@
           (rf/dispatch [:re-form/input-changed form-name path nil]))
 
         update-binding
-        (fn [{new-form :form new-path :path validators :validators}]
-          (swap! state (fn [{val :value err :errors path :path form :form :as curr-state}]
+        (fn [{new-form :form-name new-path :path validators :validators}]
+          (swap! state (fn [{val :value err :errors path :path form :form-name :as curr-state}]
                          (if (not (and (= new-path path) (= new-form form)))
                            (do
                              (unbind-input form path)
@@ -127,7 +131,7 @@
                                ;; future validations
                                (add-watch new-val-subscr :binded-field run-validators)
 
-                               {:form new-form
+                               {:form-name new-form
                                 :path new-path
                                 :value new-val-subscr
                                 :validators validators
@@ -142,7 +146,7 @@
 
       :component-will-unmount
       (fn [this]
-        (let [{form-name :form path :path} (get-props this)]
+        (let [{form-name :form-name path :path} (get-props this)]
           (unbind-input form-name path)))
 
       :component-will-receive-props
@@ -150,27 +154,14 @@
         (update-binding (second new-props)))
 
       :reagent-render
-      (fn [{on-change :on-change form-name :form path :path :as props}]
+      (fn [{on-change :on-change form-name :form-name path :path :as props}]
         [:div.re-form-field
          [(:input props)
-          (merge (dissoc props :form :path :input :validators)
+          (merge (dissoc props :form-name :path :input :validators)
                  {:value @(:value @state)
                   :on-change #(my-on-change form-name path % on-change)})]
 
-         [errors-for {:form form-name :path path}]])})))
-
-(defn validated-input [{form-name :form :keys [validators path on-change value] :as props}]
-  (let [my-on-change (fn validated-input-onchange [v on-change]
-                       (validate-and-update-errors form-name path validators v)
-                       (and on-change (on-change v)))]
-
-    ;; initial validation
-    (my-on-change value on-change)
-
-    (fn [{:keys [on-change] :as props}]
-      [:div.re-form-field
-       [binded-field (assoc (dissoc props :validators) :on-change #(my-on-change % on-change))]
-       [errors-for {:form form-name :path path}]])))
+         [errors-for {:form-name form-name :path path}]])})))
 
 (defn field [props]
   [ctx/get-context props binded-field])
@@ -180,7 +171,7 @@
   (fn [& args]
     (into [field] args)))
 
-(defn form-data [{form-name :form}]
+(defn form-data [{form-name :form-name}]
   (let [data (rf/subscribe [:re-form/form-value form-name])
         errors (rf/subscribe [:re-form/form-errors form-name])]
     (fn [props]

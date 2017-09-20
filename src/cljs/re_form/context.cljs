@@ -30,7 +30,7 @@
       :reagent-render
       (fn [props child & child-body]
         (into [child (merge props
-                            {:form (or (:form-name props)
-                                       (keyword (:form-name @ctx)))
+                            {:form-name (or (:form-name props)
+                                            (keyword (:form-name @ctx)))
                              :path (into (or (:base-path @ctx) [])
                                          (or (:path props) []))})] child-body))})))
