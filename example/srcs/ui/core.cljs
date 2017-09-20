@@ -252,7 +252,7 @@
           [:div.form-row
            [:label "Cities: "]
            [fc/collection {:path [:cities] :new-item-value ""}
-            [form/field {:path [] :input w/text-input}]]]
+            [form/field {:path [] :input w/text-input :validators [(valid/not-blank :message "Me not to be so blank!")]}]]]
 
           [s/submit-button {:submit-fn #(js/alert (pr-str %))} "Submit!"]]
 

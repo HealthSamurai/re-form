@@ -44,7 +44,11 @@
 
 (rf/reg-event-db
  :re-form/input-changed
- (fn [db [_ form-name input-path v]] (shared/on-change db form-name input-path v)))
+ (fn [db [_ form-name input-path v]] (shared/on-input-changed db form-name input-path v)))
+
+(rf/reg-event-db
+ :re-form/input-removed
+ (fn [db [_ form-name input-path v]] (shared/on-input-removed db form-name input-path)))
 
 (rf/reg-event-db
  :re-form/validation-errors
@@ -115,8 +119,7 @@
         (fn [form-name path]
           (when (:value @state)
             (remove-watch (:value @state) :binded-field))
-          (rf/dispatch [:re-form/validation-errors form-name {path []}])
-          (rf/dispatch [:re-form/input-changed form-name path nil]))
+          (rf/dispatch [:re-form/input-removed form-name path]))
 
         update-binding
         (fn [{new-form :form-name new-path :path validators :validators}]

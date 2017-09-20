@@ -1,25 +1,41 @@
 (ns re-form.shared
   (:require [clojure.string :as str]))
 
-(defn filter-vals [pred m]
+(defn- filter-vals [pred m]
   (into {} (filter (fn [[k v]] (pred v))
                    m)))
 
-(defn insert-by-path [m [k & ks :as path] value]
+(defn- dissoc-index [v idx]
+  (if (> (count v) idx)
+    (vec (concat (subvec v 0 idx) (subvec v (inc idx) (count v))))
+    v))
+
+(defn- assoc-by-path [m [k & ks :as path] value]
   (let [v (if ks
-            (insert-by-path (get m k) ks value)
+            (assoc-by-path (get m k) ks value)
             value)]
     (if (integer? k)
       (assoc (or m (vec (replicate k nil))) k v)
       (assoc (or m {}) k v))))
+
+(defn- dissoc-by-path [m path]
+  (let [path-butlast (butlast path)
+        path-last (last path)]
+    (if (integer? path-last)
+      (update-in m path-butlast dissoc-index path-last)
+      (update-in m path-butlast dissoc path-last))))
 
 (defn put-validation-errors [db form-name errors]
   (update-in db [:re-form form-name :errors] (fn [current-errs]
                                                (filter-vals (complement empty?)
                                                             (merge current-errs errors)))))
 
-(defn on-change [db form-name input-path v]
+(defn on-input-changed [db form-name input-path v]
   (-> db
-      (insert-by-path (into [:re-form form-name :value] input-path) v)
-      (insert-by-path [:re-form form-name :dirty] true)
-      (insert-by-path (into [:re-form form-name :state] (conj input-path :dirty)) true)))
+      (assoc-by-path (into [:re-form form-name :value] input-path) v)
+      (assoc-by-path [:re-form form-name :dirty] true)
+      (assoc-by-path (into [:re-form form-name :state] (conj input-path :dirty)) true)))
+
+(defn on-input-removed [db form-name input-path]
+  (-> (put-validation-errors db form-name {input-path []})
+      (dissoc-by-path (into [:re-form form-name :value] input-path))))

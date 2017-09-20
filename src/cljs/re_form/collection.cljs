@@ -8,11 +8,10 @@
 
 (defn- collection* [{:keys [form-name path new-item-value] :as props} & body]
   (let [array (rf/subscribe [:re-form/input-value form-name path])
-        on-new-item (fn [] (rf/dispatch [:re-form/input-changed form-name path
-                                         (conj @array (or new-item-value {}))]))
+        on-new-item (fn [] (rf/dispatch [:re-form/input-changed form-name (conj path (count @array))
+                                         (or new-item-value {})]))
 
-        remove-item (fn [idx] (rf/dispatch [:re-form/input-changed form-name path
-                                            (drop-idx @array idx)]))]
+        remove-item (fn [idx] (rf/dispatch [:re-form/input-removed form-name (conj path idx)]))]
 
     (fn [props & body]
       [:div.collection
