@@ -48,12 +48,13 @@
   (println suggs)
   (swap! state assoc :suggestions suggs))
 
-(defn- on-change-update [state suggest-fn]
-  (swap! state update :active not)
-  (go (suggest-set-callback state (<! (suggest-fn "head")))))
+(defn- on-change-update [state suggest-fn query]
+  (go (suggest-set-callback state (<! (suggest-fn query)))))
 
 ;; TODO:
 ;; text input to query
+;; on component-did-mount do r/dom-node and .addEventListener 'input' to track
+;; contenteditable changes
 ;; debounce
 (defn select-xhr-input [_]
   (let [state (r/atom {:active false :suggestions []})]
@@ -65,12 +66,13 @@
                                       (filter #(= (value-fn %) v))
                                       first label-fn)))]
         [:div.re-select-xhr
-         {:on-click #(on-change-update state suggest-fn)}
+         {:on-click #(swap! state update :active not)}
          (if value
            [:span.value
             [:span.value (match-fn value) ]]
            [:span.choose-value
-            (or placeholder "Select...")])
+            {:contentEditable true
+             :on-input #(on-change-update state suggest-fn (.. % -target -value))}])
          (when (:active @state)
            [:div.options
             (for [i (:suggestions @state)] ^{:key (label-fn i)}
