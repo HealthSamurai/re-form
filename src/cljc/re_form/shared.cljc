@@ -30,6 +30,13 @@
                                                (filter-vals (complement empty?)
                                                             (merge current-errs errors)))))
 
+(defn add-validation-errors [db form-name path errors]
+  (update-in db [:re-form form-name :errors]
+             (fn [errs]
+               (assoc errs path (if (get errs path)
+                                  (into (get errs path) errors)
+                                  errors)))))
+
 (defn on-input-changed [db form-name input-path v]
   (-> db
       (assoc-by-path (into [:re-form form-name :value] input-path) v)

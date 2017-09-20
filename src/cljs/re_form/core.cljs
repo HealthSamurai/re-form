@@ -1,9 +1,12 @@
 (ns re-form.core
-  (:require-macros [reagent.ratom :refer [reaction]])
+  (:require-macros [reagent.ratom :refer [reaction]]
+                   [cljs.core.async.macros :refer [go]])
   (:require [reagent.core :as reagent]
             [re-frame.core :as rf]
             [garden.core :as garden]
             [clojure.string :as str]
+            [cljs.core.async.impl.channels :as channels-impl]
+            [cljs.core.async :refer [<! close!]]
             [cljs.pprint]
             [re-form.shared :as shared]
             [re-form.validators :as validators]
@@ -55,13 +58,17 @@
  (fn [db [_ form-name errors]]
    (shared/put-validation-errors db form-name errors)))
 
+(rf/reg-event-db
+ :re-form/add-validation-errors
+ (fn [db [_ form-name path errors]]
+   (shared/add-validation-errors db form-name path errors)))
 
 (defn errors-for [{form-name :form-name path :path :as props}]
   (let [errors (rf/subscribe [:re-form/input-errors form-name path])]
     (fn [props]
       [:div.errors
        (doall (map-indexed
-               (fn [idx e] [:span.error {:key idx} e])
+               (fn [idx e] [:div.error {:key idx} e])
                (or @errors [])))])))
 
 (defn init [{:keys [form-name validate-fn value] :as form}]
@@ -92,13 +99,23 @@
 
 (defn- validate-and-update-errors [form-name path validators val]
   (when-not (empty? validators)
-    (let [errors (reduce (fn [acc validator]
-                           (when-let [res (validator val)]
-                             (if (or (vector? res) (list? res))
-                               (into acc res)
-                               (conj acc res))))
-                         []
-                         validators)]
+    (let [errors
+          (reduce (fn [acc validator]
+                    (when-let [res (validator val)]
+                      (if (or (vector? res) (list? res))
+                        (into acc res)
+
+                        (if (= (type res) channels-impl/ManyToManyChannel)
+                          (do (go
+                                (let [e (<! res)]
+                                  (.log js/console "got error" e)
+                                  (rf/dispatch [:re-form/add-validation-errors form-name path e])
+                                  (close! res)))
+                              acc)
+
+                          (conj acc res)))))
+                  []
+                  validators)]
       (rf/dispatch [:re-form/validation-errors form-name {path errors}]))))
 
 (defn binded-field [props]
