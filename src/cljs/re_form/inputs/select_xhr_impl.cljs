@@ -90,7 +90,8 @@
                         (set! (.-textContent (:node @state)) "")
                         (when (:active @state) (.focus (:node @state))))}
            [:span.value {:style {:display (if (:active @state) "none" "inline")}} (match-fn value)]
-           [:span.choose-value {:contentEditable true}]
+           [:span.choose-value {:contentEditable true
+                                :style {:display "inline-block"}}]
            (when (:active @state)
              [:div.options
               (for [i (:suggestions @state)] ^{:key (label-fn i)}
