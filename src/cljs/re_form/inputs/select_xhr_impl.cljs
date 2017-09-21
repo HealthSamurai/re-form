@@ -35,6 +35,8 @@
      :width "auto"
      :display "inline-block"
      :box-shadow "1px 1px 2px #ccc"
+     :max-height (u/px 500)
+     :overflow-y "auto"
      :border "1px solid #ddd"}
     [:.re-search {:display "inline-block"
                   :width "90%"
