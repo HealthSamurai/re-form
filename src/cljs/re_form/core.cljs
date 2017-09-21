@@ -129,7 +129,7 @@
         run-validators
         (fn []
           (let [{form-name :form-name path :path validators :validators value :value} @state]
-            (validate-and-update-errors form-name path validators value)))
+            (validate-and-update-errors form-name path validators @value)))
 
         unbind-input
         (fn [form-name path]
@@ -161,6 +161,7 @@
      {:display-name :binded-field
       :component-will-mount
       (fn [this]
+        (.log js/console (clj->js (get-props this)))
         (update-binding (get-props this)))
 
       :component-will-unmount
