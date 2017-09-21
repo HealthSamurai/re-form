@@ -1,12 +1,12 @@
 (ns ui.core
   (:require-macros [reagent.ratom :refer [reaction]]
-                   [cljs.core.async.macros :refer [go-loop go]])
+                   [cljs.core.async.macros :refer [go]])
   (:require
    [cljsjs.react]
    [goog.string :as gstring]
    [goog.string.format]
    [cljs-http.client :as http]
-   [cljs.core.async :refer [<! >! chan alts! timeout]]
+   [cljs.core.async :refer [<! >! timeout]]
    [reagent.core :as reagent]
    [garden.core :as garden]
    [garden.color :as c]
@@ -161,30 +161,13 @@
         [:div.col
          [form/form-data {:form-name :calendars-form}]]]])))
 
-(defn debounce [in ms]
-  (.log js/console "creating new debounce process!")
-  (let [out (chan)]
-    (go-loop [last-val nil]
-      (.log js/console "!!!! loop iteration")
-      (let [val (if (nil? last-val) (<! in) last-val)
-            timer (timeout ms)
-            [new-val ch] (alts! [in timer])]
-        (condp = ch
-          timer (do (>! out val) (recur nil))
-          in (if new-val (recur new-val) (.log js/console "!!!!! loop finished")))))
-    out))
-
-(defn example-async-input-validator []
-  (let [in (chan)
-        ch (debounce in 500)]
-
-    (fn [v]
-      (let [errors-ch (chan)]
-        (go (when v (>! in v))
-            (let [val (<! ch)
-                  _ (<! (timeout 700))]
-              (>! errors-ch [(str "Password " val " is too weak for our secure system!")])))
-        errors-ch))))
+(def example-async-validator
+  (valid/debounced-async-validator
+   500
+   (fn [val path]
+     (go
+       (let [_ (<! (timeout 1000))]
+         [[(str "Async validation result: " val)] path])))))
 
 (defn inputs-page []
   (let [form {:form-name :inputs-form
@@ -239,7 +222,7 @@
           (when (:password-mounted @state)
             [form/field {:path [:password]
                          :validators [(valid/min-count 8 count :message "Too short for a password")
-                                      (example-async-input-validator)]
+                                      example-async-validator]
                          :input w/text-input
                          :type "password"}])
 
@@ -273,7 +256,7 @@
           [:div.form-row
            [:label "Telecom: "]
            [fc/collection {:path [:telecom] :new-item-value {:system "phone"}}
-            [form/field {:path [:value] :input w/text-input}]]]
+            [form/field {:path [:value] :input w/text-input :validators [example-async-validator]}]]]
 
           [:div.form-row
            [:label "Cities: "]

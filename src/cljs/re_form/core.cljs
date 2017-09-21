@@ -101,17 +101,16 @@
   (when-not (empty? validators)
     (let [errors
           (reduce (fn [acc validator]
-                    (when-let [res (validator val)]
+                    (when-let [res (validator val path)]
                       (if (or (vector? res) (list? res))
                         (into acc res)
 
                         (if (= (type res) channels-impl/ManyToManyChannel)
-                          (do (go
-                                (let [e (<! res)]
-                                  (.log js/console "got error" e)
-                                  (rf/dispatch [:re-form/add-validation-errors form-name path e])
-                                  (close! res)))
-                              acc)
+                          (do
+                            (go
+                              (let [[e e-path] (<! res)]
+                                (rf/dispatch [:re-form/add-validation-errors form-name e-path e])))
+                            acc)
 
                           (conj acc res)))))
                   []
