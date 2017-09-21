@@ -35,7 +35,6 @@
 
        [:label "Name"]
        [form/field {:form-name :example-form :path [:name] :input w/text-input}]
-       [form/errors-for {:form-name :example-form :path [:name]}]
 
 
        [:label "Gender"]

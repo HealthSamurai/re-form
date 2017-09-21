@@ -63,7 +63,7 @@
  (fn [db [_ form-name path errors]]
    (shared/add-validation-errors db form-name path errors)))
 
-(defn errors-for [{form-name :form-name path :path :as props}]
+#_(defn errors-for [{form-name :form-name path :path :as props}]
   (let [errors (rf/subscribe [:re-form/input-errors form-name path])]
     (fn [props]
       [:div.errors
@@ -178,9 +178,8 @@
          [(:input props)
           (merge (dissoc props :form-name :path :input :validators)
                  {:value @(:value @state)
-                  :on-change #(my-on-change form-name path % on-change)})]
-
-         [errors-for {:form-name form-name :path path}]])})))
+                  :on-change #(my-on-change form-name path % on-change)
+                  :errors @(rf/subscribe [:re-form/input-errors form-name path])})]])})))
 
 (defn field [props]
   [ctx/get-context props binded-field])
