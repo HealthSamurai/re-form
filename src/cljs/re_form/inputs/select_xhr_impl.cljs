@@ -1,7 +1,7 @@
 (ns re-form.inputs.select-xhr-impl
-  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [reagent.core :as r]
-            [cljs.core.async :refer [<!]]
+            [cljs.core.async :refer [<! chan timeout]]
             [garden.units :as u]))
 
 (def select-xhr-style
@@ -47,15 +47,25 @@
 (defn- suggest-set-callback [state suggs]
   (swap! state assoc :suggestions suggs))
 
-(defn- on-change-update [state suggest-fn node]
+(defn debounced-callback [state suggest-fn in ms]
+  (go-loop [last-val nil]
+    (let [val (if (nil? last-val) (<! in) last-val)
+          timer (timeout ms)
+          [new-val ch] (alts! [in timer])]
+      (condp = ch
+        timer (do (swap! state assoc :suggestions (<! (suggest-fn val)))
+                  (recur nil))
+        in (when new-val (recur new-val))))))
+
+(defn- on-change-update [ch node]
   (let [query (.-textContent node)]
     (when-not (empty? query)
-      (go (suggest-set-callback state (<! (suggest-fn query)))))))
+      (go (>! ch query)))))
 
-;; TODO:
-;; debounce
 (defn select-xhr-input [{:keys [suggest-fn]}]
-  (let [state (r/atom {:active false :suggestions []})]
+  (let [state (r/atom {:active false :suggestions []})
+        on-change-ch (chan)]
+    (debounced-callback state suggest-fn on-change-ch 100)
     (r/create-class
      {
       :component-did-mount
@@ -65,7 +75,7 @@
                        array-seq
                        first)]
           (swap! state assoc :node node)
-          (.addEventListener node "input" #(on-change-update state suggest-fn node))))
+          (.addEventListener node "input" #(on-change-update on-change-ch node))))
 
       :reagent-render
       (fn [{:keys [value on-change value-fn label-fn match-fn suggest-fn placeholder]}]
