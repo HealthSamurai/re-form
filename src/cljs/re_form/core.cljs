@@ -129,7 +129,7 @@
         run-validators
         (fn []
           (let [{form-name :form-name path :path validators :validators value :value} @state]
-            (validate-and-update-errors form-name path validators @value)))
+            (validate-and-update-errors form-name path validators value)))
 
         unbind-input
         (fn [form-name path]
