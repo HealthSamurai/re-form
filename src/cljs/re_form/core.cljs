@@ -123,7 +123,7 @@
           (rf/dispatch [:re-form/input-changed form-name path v])
           (and on-change (on-change v)))
 
-        get-props #(second (.-argv (.-props %)))
+        get-props #(second (aget (aget % "props") "argv") )
 
         state (reagent/atom {})
         run-validators
@@ -161,7 +161,8 @@
      {:display-name :binded-field
       :component-will-mount
       (fn [this]
-        (.log js/console (clj->js (get-props this)))
+        (.log js/console "This" this)
+        (.log js/console "Props" (clj->js (get-props this)))
         (update-binding (get-props this)))
 
       :component-will-unmount
