@@ -161,8 +161,6 @@
      {:display-name :binded-field
       :component-will-mount
       (fn [this]
-        (.log js/console "This" this)
-        (.log js/console "Props" (clj->js (get-props this)))
         (update-binding (get-props this)))
 
       :component-will-unmount
