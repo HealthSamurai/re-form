@@ -53,17 +53,18 @@
       (go (suggest-set-callback state (<! (suggest-fn query)))))))
 
 ;; TODO:
-;; text input to query
-;; on component-did-mount do r/dom-node and .addEventListener 'input' to track
-;; contenteditable changes
 ;; debounce
 (defn select-xhr-input [{:keys [suggest-fn]}]
   (let [state (r/atom {:active false :suggestions []})]
     (r/create-class
-     {:component-did-mount
+     {
+      :component-did-mount
       (fn [this]
-        (let [root-node (r/dom-node this)
-              node (first (array-seq (.getElementsByClassName root-node "choose-value")))]
+        (let [node (-> (r/dom-node this)
+                       (.getElementsByClassName "choose-value")
+                       array-seq
+                       first)]
+          (swap! state assoc :node node)
           (.addEventListener node "input" #(on-change-update state suggest-fn node))))
 
       :reagent-render
@@ -75,17 +76,15 @@
                                         (filter #(= (value-fn %) v))
                                         first label-fn)))]
           [:div.re-select-xhr
-           {:on-click #(swap! state update :active not)}
-           (if value
-             [:span.value
-              [:span.value (match-fn value) ]]
-             [:span.choose-value
-              {:contentEditable true}])
+           {:on-click (fn [_] (swap! state update :active not)
+                        (set! (.-textContent (:node @state)) "")
+                        (when (:active @state) (.focus (:node @state))))}
+           [:span.value {:style {:display (if (:active @state) "none" "inline")}} (match-fn value)]
+           [:span.choose-value {:contentEditable true}]
            (when (:active @state)
              [:div.options
               (for [i (:suggestions @state)] ^{:key (label-fn i)}
                 [:div.option
                  {:on-click (fn [_] (on-change (value-fn i)))
                   :class (when (= value (value-fn i)) "active")}
-                 (label-fn i)])])]))}))
-  )
+                 (label-fn i)])])]))})))
