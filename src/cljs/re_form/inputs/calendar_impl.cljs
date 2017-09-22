@@ -55,8 +55,8 @@
                     {:m month
                      :y year
                      :d d
-                     :today (and (= d today) (= year today-year) (= month today-month))
-                     :current true})))))))
+                     #_(:today (and (= d today) (= year today-year) (= month today-month))
+                                :current true)})))))))
 
 (defn- get-days-of-month
   ([date]
@@ -163,19 +163,17 @@
     [:table
      [*calendar-header state]
      [:tbody
-      (doall (for [week data]
-               [:tr {:key (let [f (first week)] (str (:m f) "-" (:d f)))}
-                (doall (for [day week]
-                         [:td {:key (str (:m day) (:d day))
-                               :on-click #(on-change day)
-                               :class (str
-                                       (when (= day v)
-                                         "active")
-                                       " "
-                                       (when (:current day) "current")
-                                       " "
-                                       (when (:today day) "today"))}
-                          (pr-str (:d day))]))]))]]))
+      (for [week data]
+        [:tr {:key (let [f (first week)] (str (:m f) "-" (:d f)))}
+         (for [day week]
+           [:td {:key (str (:m day) (:d day))
+                 :on-click #(on-change day)
+                 :class (str
+                         (when (= day v)
+                           "active")
+                         " "
+                         (when (:today day) "today"))}
+            (pr-str (:d day))])])]]))
 
 (defn calendar-month [state]
   (let [switch-mode (fn [m] (swap! state assoc :mode :year))
