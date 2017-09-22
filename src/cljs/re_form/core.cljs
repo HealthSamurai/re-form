@@ -20,6 +20,12 @@
      (reaction @cur))))
 
 (rf/reg-sub-raw
+ :re-form/input-flags
+ (fn [db [_ form-name path]]
+   (let [cur (reagent/cursor db [:re-form form-name :flags path])]
+     (reaction @cur))))
+
+(rf/reg-sub-raw
  :re-form/input-errors
  (fn [db [_ form-name path]]
    (let [cur (reagent/cursor db [:re-form form-name :errors path])]
@@ -29,6 +35,11 @@
  :re-form/form-value
  (fn [db [_ form-name]]
    (reaction @(reagent/cursor db [:re-form form-name :value]))))
+
+(rf/reg-sub-raw
+ :re-form/is-form-submitting
+ (fn [db [_ form-name]]
+   (reaction @(reagent/cursor db [:re-form form-name :submitting]))))
 
 (rf/reg-sub-raw
  :re-form/form-errors
@@ -47,11 +58,18 @@
 
 (rf/reg-event-db
  :re-form/input-changed
- (fn [db [_ form-name input-path v]] (shared/on-input-changed db form-name input-path v)))
+ (fn [db [_ form-name input-path v]]
+   (shared/on-input-changed db form-name input-path v)))
+
+(rf/reg-event-db
+ :re-form/set-input-flags
+ (fn [db [_ form-name input-path flags]]
+   (update-in db [:re-form form-name :flags input-path] merge flags)))
 
 (rf/reg-event-db
  :re-form/input-removed
- (fn [db [_ form-name input-path v]] (shared/on-input-removed db form-name input-path)))
+ (fn [db [_ form-name input-path v]]
+   (shared/on-input-removed db form-name input-path)))
 
 (rf/reg-event-db
  :re-form/validation-errors
@@ -63,13 +81,10 @@
  (fn [db [_ form-name path errors]]
    (shared/add-validation-errors db form-name path errors)))
 
-#_(defn errors-for [{form-name :form-name path :path :as props}]
-  (let [errors (rf/subscribe [:re-form/input-errors form-name path])]
-    (fn [props]
-      [:div.errors
-       (doall (map-indexed
-               (fn [idx e] [:div.error {:key idx} e])
-               (or @errors [])))])))
+(rf/reg-event-db
+ :re-form/start-submitting
+ (fn [db [_ form-name]]
+   (assoc-in db [:re-form form-name :submitting] true)))
 
 (defn init [{:keys [form-name validate-fn value] :as form}]
   (when-not form-name
@@ -78,9 +93,9 @@
   (rf/dispatch [:re-form/init (dissoc form :validate-fn)])
 
   (when validate-fn
-    (add-watch (rf/subscribe [:re-form/form-value name]) :re-form-validator
+    (add-watch (rf/subscribe [:re-form/form-value form-name]) :re-form-validator
                (fn [_ _ _ v]
-                 (rf/dispatch [:re-form/validation-errors name (or (validate-fn v) {})])))))
+                 (rf/dispatch [:re-form/validation-errors form-name (or (validate-fn v) {})])))))
 
 (defn deinit [form-name]
   (rf/dispatch [:re-form/deinit form-name]))
@@ -123,6 +138,11 @@
           (rf/dispatch [:re-form/input-changed form-name path v])
           (and on-change (on-change v)))
 
+        my-on-blur
+        (fn binded-input-onblur [form-name path on-blur]
+          (rf/dispatch [:re-form/set-input-flags form-name path {:touched true}])
+          (and on-blur (on-blur)))
+
         get-props #(second (aget (aget % "props") "argv") )
 
         state (reagent/atom {})
@@ -153,8 +173,7 @@
                                {:form-name new-form
                                 :path new-path
                                 :value new-val-subscr
-                                :validators validators
-                                :errors (rf/subscribe [:re-form/input-errors new-form new-path])}))
+                                :validators validators}))
                            (assoc curr-state :validators validators)))))]
 
     (reagent/create-class
@@ -173,13 +192,21 @@
         (update-binding (second new-props)))
 
       :reagent-render
-      (fn [{on-change :on-change form-name :form-name path :path :as props}]
-        [:div.re-form-field
-         [(:input props)
-          (merge (dissoc props :form-name :path :input :validators)
-                 {:value @(:value @state)
-                  :on-change #(my-on-change form-name path % on-change)
-                  :errors @(rf/subscribe [:re-form/input-errors form-name path])})]])})))
+      (fn [{:keys [on-change form-name path on-blur] :as props}]
+        (let [flags @(rf/subscribe [:re-form/input-flags new-form new-path])
+              is-form-submitting @(rf/subscribe [:re-form/is-form-submitting form-name])
+              errors @(rf/subscribe [:re-form/input-errors form-name path])]
+          [:div.re-form-field {:class (->> flags
+                                           (filter second)
+                                           (map #(name (first %)))
+                                           (str/join " "))}
+           [(:input props)
+            (merge (dissoc props :form-name :path :input :validators)
+                   {:value @(:value @state)
+                    :on-change #(my-on-change form-name path % on-change)
+                    :on-blur #(my-on-blur form-name path on-blur)
+                    :errors (if (or (:touched flags) is-form-submitting)
+                              errors [])})]]))})))
 
 (defn field [props]
   [ctx/get-context props binded-field])

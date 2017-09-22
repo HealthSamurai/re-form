@@ -40,8 +40,7 @@
 (defn on-input-changed [db form-name input-path v]
   (-> db
       (assoc-by-path (into [:re-form form-name :value] input-path) v)
-      (assoc-by-path [:re-form form-name :dirty] true)
-      (assoc-by-path (into [:re-form form-name :state] (conj input-path :dirty)) true)))
+      (assoc-by-path [:re-form form-name :flags input-path :dirty] true)))
 
 (defn on-input-removed [db form-name input-path]
   (-> (put-validation-errors db form-name {input-path []})

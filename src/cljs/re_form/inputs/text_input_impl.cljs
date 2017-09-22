@@ -6,7 +6,8 @@
   (let [my-onchange (fn [event on-change] (on-change (.. event -target -value)))]
     (fn [{:keys [value on-change errors] :as props}]
       [:div
-       [:input  {:type "text"
-                 :on-change #(my-onchange % on-change)
-                 :value value}]
+       [:input (merge (dissoc props :errors)
+                      {:type "text"
+                       :on-change #(my-onchange % on-change)
+                       :value value})]
        [errors-div errors]])))
