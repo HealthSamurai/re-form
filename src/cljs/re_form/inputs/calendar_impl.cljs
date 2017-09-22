@@ -1,6 +1,5 @@
 (ns re-form.inputs.calendar-impl
-  (:require [reagent.core :as reagent]
-            [re-frame.core :as rf]))
+  (:require [reagent.core :as r]))
 
 (def months
   {0  {:name "January" :days 31}
@@ -159,7 +158,6 @@
         [:th "Sa"]]])))
 
 (defn calendar-days [state on-change v]
-  (println "v" v)
   (let [cal (:cal @state)
         data (get-month (:y cal) (:m cal))]
     [:table
@@ -217,21 +215,17 @@
                         [:td {:key x :on-click #(choose-year x)}
                          x]))]))]]))))
 
-(defn *re-calendar [{on-change :on-change}]
-  (let [state (reagent/atom {:cal {:y 2017 :m 8}
-                             :mode :days})]
-    (fn [props]
+(defn re-calendar [{:keys [value on-change errors]}]
+  (let [state (r/atom {:mode :days})]
+    (fn [{:keys [value on-change errors]}]
+      (swap! state assoc :cal value)
       [:div.re-calendar
-       (cond
-         (= :days (:mode @state))
-         [calendar-days state on-change (:value props)]
+       (case (:mode @state)
+         :days
+         [calendar-days state on-change value]
 
-         (= :month (:mode @state))
+         :month
          [calendar-month state]
 
-         (= :year (:mode @state))
+         :year
          [calendar-year state])])))
-
-(defn re-calendar [_]
-  (fn [{:keys [value on-change]}]
-    [*re-calendar {:value value :on-change on-change}]))
