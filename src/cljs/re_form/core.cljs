@@ -193,7 +193,7 @@
 
       :reagent-render
       (fn [{:keys [on-change form-name path on-blur] :as props}]
-        (let [flags @(rf/subscribe [:re-form/input-flags new-form new-path])
+        (let [flags @(rf/subscribe [:re-form/input-flags form-name path])
               is-form-submitting @(rf/subscribe [:re-form/is-form-submitting form-name])
               errors @(rf/subscribe [:re-form/input-errors form-name path])]
           [:div.re-form-field {:class (->> flags
