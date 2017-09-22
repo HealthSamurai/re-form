@@ -184,7 +184,8 @@
                        (swap! state (fn [s]
                                       (-> s 
                                           (assoc-in [:cal :m] m)
-                                          (assoc :mode :days)))))]
+                                          (assoc :mode :days)
+                                          (assoc :detached true)))))]
     (fn []
       [:table
        [:thead
@@ -204,7 +205,8 @@
                        (swap! state (fn [x]
                                       (-> x 
                                           (assoc-in [:cal :y] y)
-                                          (assoc :mode :days)))))]
+                                          (assoc :mode :days)
+                                          (assoc :detached true)))))]
     (fn []
       (let [y (get-in @state [:cal :y])]
         [:table
