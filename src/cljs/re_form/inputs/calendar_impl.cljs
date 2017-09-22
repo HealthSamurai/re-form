@@ -129,13 +129,15 @@
   (let [prev-month (fn [_]
                      (let [cal (:cal @state)
                            p (js/Date. (:y cal) (dec (:m cal)) 1)]
-                       (swap! state assoc :cal {:y (.getFullYear p)
-                                                :m (.getMonth p)})))
+                       (swap! state #(-> % (assoc :cal {:y (.getFullYear p)
+                                                        :m (.getMonth p)})
+                                         (assoc :detached true)))))
         next-month (fn [_]
                      (let [cal (:cal @state)
                            p (js/Date. (:y cal) (inc (:m cal)) 1)]
-                       (swap! state assoc :cal {:y (.getFullYear p)
-                                                :m (.getMonth p)})))
+                       (swap! state #(-> % (assoc :cal {:y (.getFullYear p)
+                                                        :m (.getMonth p)})
+                                         (assoc :detached true)))))
         switch-mode (fn [m] (fn [_] (swap! state assoc :mode m)))]
     (fn []
       [:thead
@@ -167,7 +169,8 @@
         [:tr {:key (let [f (first week)] (str (:m f) "-" (:d f)))}
          (for [day week]
            [:td {:key (str (:m day) (:d day))
-                 :on-click #(on-change day)
+                 :on-click (fn [_] (swap! state assoc :detached false)
+                             (on-change day))
                  :class (str
                          (when (= day v)
                            "active")
@@ -216,7 +219,8 @@
 (defn re-calendar [{:keys [value on-change errors]}]
   (let [state (r/atom {:mode :days})]
     (fn [{:keys [value on-change errors]}]
-      (swap! state assoc :cal value)
+      (when-not (:detached @state)
+        (swap! state assoc :cal value))
       [:div.re-calendar
        (case (:mode @state)
          :days
