@@ -9,7 +9,8 @@
             [re-form.inputs.select-input-impl :as se-impl]
             [re-form.inputs.button-select-input-impl :as bs-impl]
             [re-form.inputs.checkbox-group-impl :as ch-impl]
-            [re-form.inputs.select-xhr-impl :as xh-impl]))
+            [re-form.inputs.select-xhr-impl :as xh-impl]
+            [re-form.inputs.codemirror-impl :as cm-impl]))
 
 ;; Widgets
 
@@ -24,6 +25,7 @@
 (def select-input se-impl/select-input)
 (def checkbox-group-input ch-impl/checkbox-group-input)
 (def select-xhr-input xh-impl/select-xhr-input)
+(def codemirror-input cm-impl/codemirror-input)
 
 ;; Styles
 
@@ -36,3 +38,4 @@
 (def select-input-style se-impl/select-input-style)
 (def checkbox-group-style ch-impl/checkbox-group-style)
 (def select-xhr-style xh-impl/select-xhr-style)
+(def codemirror-style cm-impl/codemirror-style)

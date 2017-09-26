@@ -19,6 +19,7 @@
    [clojure.string :as str]
    [ui.file-upload-page :as fup]
    [re-form.inputs :as w]
+   [re-form.inputs.completions :as completions]
    [re-form.submit :as s]
    [re-form.collection :as fc]
    [re-form.context :as ctx]))
@@ -292,14 +293,20 @@
 
 (defn textarea-page []
   (let [form {:form-name :textarea-form
-              :value {:area-one "Fill me"}}]
+              :value {:area-one "Fill me"
+                      :area-two "Superior codemirror! Type #comp to get completions!\n"}}]
     (fn []
       [form/form form
        [:div [:h1 "Text field widget"]
         [:div.row
          [:div.col
           [form/field {:path [:area-one]
-                       :input w/textarea-input}]]
+                       :input w/textarea-input}]
+          [form/field {:path [:area-two]
+                       :complete-fn (partial completions/complete-startswith
+                                             #"#"
+                                             {"comp" ["complement" "complete" "computer"]})
+                       :input w/codemirror-input}]]
          [:div.col
           [form/form-data {:form-name :textarea-form}]]]]])))
 

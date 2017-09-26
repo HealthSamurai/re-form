@@ -235,4 +235,5 @@
    inputs/switchbox-style
    inputs/select-input-style
    inputs/checkbox-group-style
-   inputs/select-xhr-style])
+   inputs/select-xhr-style
+   inputs/codemirror-style])
