@@ -7,7 +7,7 @@
     (fn [{:keys [value on-change errors] :as props}]
       [:div
        [:input (merge (dissoc props :errors)
-                      {:type "text"
+                      {:type (or (:type props) "text")
                        :on-change #(my-onchange % on-change)
                        :value value})]
        [errors-div errors]])))

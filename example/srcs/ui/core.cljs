@@ -142,7 +142,7 @@
 (defn datetime-page []
   (let [form {:form-name :calendars-form
               :value {:birthdate-one {:d 5 :m 3 :y 1980}
-                      :birthdate-two {:d 17 :m 4 :y 1995}}}]
+                      :birthdate-two "1995-04-17"}}]
     (fn []
       [form/form form
        [:div.row
@@ -157,7 +157,8 @@
           [:label "Birth Date 2"]
           [form/field {:form-name :calendars-form
                        :path [:birthdate-two]
-                       :input w/calendar-input}]]]
+                       :type "date"
+                       :input w/text-input}]]]
         [:div.col
          [form/form-data {:form-name :calendars-form}]]]])))
 
