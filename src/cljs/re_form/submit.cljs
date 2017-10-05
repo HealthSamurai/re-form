@@ -1,7 +1,13 @@
 (ns re-form.submit
   (:require [re-frame.core :as rf]
             [re-form.core :as fc]
-            [re-form.context :as ctx]))
+            [re-form.context :as ctx]
+            [clojure.string :as str]))
+
+(defn- process-class [class]
+  (if (keyword? class)
+    (str/join " " (str/split (name class) \.))
+    class))
 
 (defn- submit-button* [{:keys [form-name] :as props} & children]
   (let [form-errors (rf/subscribe [:re-form/form-errors form-name])
@@ -11,10 +17,10 @@
                   (when (empty? @form-errors)
                     (and submit-fn (submit-fn @form-value))))]
 
-    (fn [{submit-fn :submit-fn}]
+    (fn [{:keys [submit-fn class]}]
       (into [:button.submit {:type "submit"
-                             :on-click #(onclick submit-fn)
-                             :disabled disabled?}]
+                             :class (process-class class)
+                             :on-click #(onclick submit-fn)}]
             children))))
 
 (defn submit-button [props & children]
