@@ -162,7 +162,8 @@
           (swap! state (fn [{val :value err :errors path :path form :form-name :as curr-state}]
                          (if (not (and (= new-path path) (= new-form form)))
                            (do
-                             (unbind-input form path)
+                             (when (and form path)
+                               (unbind-input form path))
                              (let [new-val-subscr (rf/subscribe [:re-form/input-value new-form new-path])]
                                ;; initial validation (do it before we're attaching a watcher)
                                (validate-and-update-errors new-form new-path validators @new-val-subscr)
