@@ -27,9 +27,10 @@
 
 (rf/reg-sub-raw
  :re-form/input-errors
- (fn [db [_ form-name path]]
-   (let [cur (reagent/cursor db [:re-form form-name :errors path])]
-     (reaction @cur))))
+ (fn [db [_ form-name paths]]
+   (let [cur (reagent/cursor db [:re-form form-name :errors])
+         path-set (set paths)]
+     (reaction (vec (mapcat second (filterv (fn [[k _]] (path-set k)) @cur)))))))
 
 (rf/reg-sub-raw
  :re-form/form-value
@@ -116,7 +117,7 @@
   (when-not (empty? validators)
     (let [errors
           (reduce (fn [acc validator]
-                    (when-let [res (validator val path)]
+                    (if-let [res (validator val path)]
                       (if (or (vector? res) (list? res))
                         (into acc res)
 
@@ -127,7 +128,8 @@
                                 (rf/dispatch [:re-form/add-validation-errors form-name e-path e])))
                             acc)
 
-                          (conj acc res)))))
+                          (conj acc res)))
+                      acc))
                   []
                   validators)]
       (rf/dispatch [:re-form/validation-errors form-name {path errors}]))))
@@ -193,10 +195,10 @@
         (update-binding (second new-props)))
 
       :reagent-render
-      (fn [{:keys [on-change form-name path on-blur] :as props}]
+      (fn [{:keys [on-change form-name path on-blur error-paths] :as props}]
         (let [flags @(rf/subscribe [:re-form/input-flags form-name path])
               is-form-submitting @(rf/subscribe [:re-form/is-form-submitting form-name])
-              errors @(rf/subscribe [:re-form/input-errors form-name path])]
+              errors @(rf/subscribe [:re-form/input-errors form-name (into [path] error-paths)])]
           [:div.re-form-field {:class (->> flags
                                            (filter second)
                                            (map #(name (first %)))
