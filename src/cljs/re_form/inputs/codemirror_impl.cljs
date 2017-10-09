@@ -21,19 +21,22 @@
     (r/create-class
      {:component-did-mount
       (fn [this]
-        (let [editor
+        (let [editor-opts
+              (cond-> {:viewportMargin (.-Infinity js/window)
+                       :lineWrapping true}
+                (some? complete-fn) (assoc :hintOptions {:hint complete-fn}))
+              editor
               (.fromTextArea
                js/CodeMirror (-> (r/dom-node this)
                                  (.getElementsByClassName "cm-textarea")
                                  array-seq first)
-               (clj->js {:viewportMargin (.-Infinity js/window)
-                         :lineWrapping true
-                         :hintOptions {:hint complete-fn}}))]
+               (clj->js editor-opts))]
           (.on editor "change" (fn [cm _] (on-change (.getValue cm))))
-          (.on editor "keyup"
-               (fn [cm _] (when-not (.. cm -state -completionActive)
-                            (.. js/CodeMirror -commands
-                                (autocomplete cm nil (clj->js {:completeSingle false}))))))
+          (when (some? complete-fn)
+            (.on editor "keyup"
+                 (fn [cm _] (when-not (.. cm -state -completionActive)
+                              (.. js/CodeMirror -commands
+                                  (autocomplete cm nil (clj->js {:completeSingle false})))))))
           (reset! cm-atom editor)))
 
       :component-will-receive-props
