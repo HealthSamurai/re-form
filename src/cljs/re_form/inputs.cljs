@@ -10,12 +10,14 @@
             [re-form.inputs.button-select-input-impl :as bs-impl]
             [re-form.inputs.checkbox-group-impl :as ch-impl]
             [re-form.inputs.select-xhr-impl :as xh-impl]
-            [re-form.inputs.codemirror-impl :as cm-impl]))
+            [re-form.inputs.codemirror-impl :as cm-impl]
+            [re-form.inputs.date-input-impl :as date-impl]))
 
 ;; Widgets
 
 (def file-upload-input fupl-impl/file-upload)
 (def textarea-input ta-impl/textarea)
+(def date-input date-impl/date-input)
 (def csv-input csv-impl/csv-input)
 (def text-input tei-impl/text-input)
 (def radio-input rad-impl/radio-input)
