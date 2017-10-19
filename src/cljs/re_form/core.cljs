@@ -87,6 +87,11 @@
  (fn [db [_ form-name]]
    (assoc-in db [:re-form form-name :submitting] true)))
 
+(defn process-class [class]
+  (if (keyword? class)
+    (str/join " " (str/split (name class) \.))
+    class))
+
 (defn init [{:keys [form-name validate-fn value] :as form}]
   (when-not form-name
     (throw (js/Error. (str "No form name is provided for `re-form.form` component, props are: " (pr-str form)))))
@@ -109,9 +114,12 @@
     (fn [] (deinit (:form-name props)))
     :display-name (str (:form-name props))
     :reagent-render
-    (fn [{:keys [form-name value] :as props} & body]
+    (fn [{:keys [form-name value class] :as props} & body]
       [ctx/set-context {:form-name form-name :base-path []}
-       (into [:div.re-form] body)] )}))
+       (into [:div.re-form
+              (merge {:class (when class (process-class class))}
+                     (select-keys props [:on-key-down :auto-focus :tab-index]))]
+             body)] )}))
 
 (defn- validate-and-update-errors [form-name path validators val]
   (when-not (empty? validators)

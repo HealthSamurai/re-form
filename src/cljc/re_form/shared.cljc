@@ -20,10 +20,13 @@
 
 (defn- dissoc-by-path [m path]
   (let [path-butlast (butlast path)
-        path-last (last path)]
-    (if (integer? path-last)
-      (update-in m path-butlast dissoc-index path-last)
-      (update-in m path-butlast dissoc path-last))))
+        path-last (last path)
+        not-found (gensym "not-found")]
+    (if (= (get-in m path-butlast not-found) not-found)
+      m
+      (if (integer? path-last)
+        (update-in m path-butlast dissoc-index path-last)
+        (update-in m path-butlast dissoc path-last)))))
 
 (defn put-validation-errors [db form-name errors]
   (update-in db [:re-form form-name :errors] (fn [current-errs]

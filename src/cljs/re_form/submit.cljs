@@ -4,11 +4,6 @@
             [re-form.context :as ctx]
             [clojure.string :as str]))
 
-(defn- process-class [class]
-  (if (keyword? class)
-    (str/join " " (str/split (name class) \.))
-    class))
-
 (defn- submit-button* [{:keys [form-name prevent-default] :as props} & children]
   (let [form-errors (rf/subscribe [:re-form/form-errors form-name])
         form-value (rf/subscribe [:re-form/form-value form-name])
@@ -21,7 +16,7 @@
 
     (fn [{:keys [submit-fn class]}]
       (into [:button.submit {:type "submit"
-                             :class (process-class class)
+                             :class (fc/process-class class)
                              :on-click #(onclick % submit-fn)}]
             children))))
 
