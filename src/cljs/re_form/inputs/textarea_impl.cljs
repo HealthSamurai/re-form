@@ -4,9 +4,8 @@
 (def textarea-style
   [:.re-textarea {:resize ""}])
 
-(defn- style-onchange [visual-state event]
-  (let [node (.-target event)
-        rows (Math.ceil (/ (do (set! (.-rows node) 1)
+(defn- style-onchange [visual-state node]
+  (let [rows (Math.ceil (/ (do (set! (.-rows node) 1)
                                (.-scrollHeight node))
                            (:base-line-height @visual-state)))]
     (set! (.-rows node) rows)))
@@ -15,7 +14,7 @@
   (fn [event]
     (orig-fn (.. event -target -value))))
 
-(defn textarea [{:keys [value on-change lines-after]}]
+(defn textarea [{:keys [value on-change lines-after html-params]}]
   (let [visual-state (r/atom nil)]
     (r/create-class
      {
@@ -27,9 +26,14 @@
                                                           (clojure.string/replace #"\D" "")
                                                           js/parseInt))))
 
+      :component-did-update
+      (fn [this _ _]
+        (style-onchange visual-state (r/dom-node this)))
+
       :reagent-render
       (fn [{:keys [value on-change]}]
-        [:textarea.re-textarea {:value value
-                                :on-change (juxt (event->value on-change)
-                                                 (partial style-onchange
-                                                          visual-state))}])})))
+        [:textarea.re-textarea
+         (merge html-params
+                {:value value
+                 :on-change (juxt (event->value on-change)
+                                  #(style-onchange visual-state (.-target %)))})])})))
