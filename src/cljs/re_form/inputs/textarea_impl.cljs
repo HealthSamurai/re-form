@@ -31,7 +31,7 @@
         (style-onchange visual-state (r/dom-node this)))
 
       :reagent-render
-      (fn [{:keys [value on-change]}]
+      (fn [{:keys [value on-change html-params]}]
         [:textarea.re-textarea
          (merge html-params
                 {:value value
