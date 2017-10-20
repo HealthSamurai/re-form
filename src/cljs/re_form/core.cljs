@@ -116,11 +116,12 @@
 
     :display-name (str (:form-name props))
 
-    ;; :component-will-receive-props
-    ;; (fn [_ new-props]
-    ;;   (println new-props)
-    ;;   (deinit (:form-name new-props))
-    ;;   (init props))
+    :component-will-receive-props
+    (fn [_ coll]
+      (let [new-props (second coll)]
+        (println new-props)
+        (deinit (:form-name new-props))
+        (init new-props)))
 
     :reagent-render
     (fn [{:keys [form-name value class] :as props} & body]
