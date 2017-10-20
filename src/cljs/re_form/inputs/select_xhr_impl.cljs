@@ -8,48 +8,32 @@
   [:.re-select-xhr
    {:position "relative"
     :background-color "white"
-    :margin-left "5px"
-    :min-width "10em"
     :padding "2px 5px"
     :border "1px solid #ddd"}
-   [:&:hover {:cursor "pointer"
-              :border "1px solid #ccc"}]
-   [:.clear {:padding {:left (u/px 10)
-                       :right (u/px 10)
-                       :top (u/px 5)
-                       :bottom (u/px 5)}
-             :cursor "pointer"
-             :position "absolute"
-             :opactity 0.7
-             :top (u/px 0)
-             :right (u/px 0)
-             :color :red}
-    [:&:hover {:opacity 1 :background-color "#f1f1f1"}]]
-   [:.options
+
+   [:input
+    {:border "none"
+     :padding "0"
+     :width "100%"
+     :outline "none"}]
+
+   [:.suggestions
     {:position "absolute"
      :background-color "white"
-     :min-width "10em"
      :z-index 1000
      :left 0
-     :top (u/px 40)
+     :top (u/px 38)
      :width "auto"
-     :display "inline-block"
+     :display "block"
      :box-shadow "1px 1px 2px #ccc"
-     :max-height (u/px 500)
+     :max-height (u/px 300)
      :overflow-y "auto"
      :border "1px solid #ddd"}
-    [:.re-search {:display "inline-block"
-                  :width "90%"
-                  :margin "5px"}]
-    [:.option {:cursor "pointer"
-               :padding (u/px 10)}
+    [:.option {:cursor "pointer" :padding (u/px 10)}
      [:&.active {:background-color "#f1f1f1"}]
      [:&:hover {:background-color "#f1f1f1"}]]]])
 
-(defn- suggest-set-callback [state suggs]
-  (swap! state assoc :suggestions suggs))
-
-(defn debounced-callback [state suggest-fn in ms]
+(defn- debounced-callback [state suggest-fn in ms]
   (go-loop [last-val nil]
     (let [val (if (nil? last-val) (<! in) last-val)
           timer (timeout ms)
@@ -59,27 +43,26 @@
                   (recur nil))
         in (when new-val (recur new-val))))))
 
-(defn- on-change-update [ch node]
-  (let [query (.-textContent node)]
-    (when-not (empty? query)
-      (go (>! ch query)))))
+(defn- lookup-suggestions [ch query]
+  (when-not (empty? query)
+    (go (>! ch query))))
 
 (defn select-xhr-input [{:keys [suggest-fn]}]
-  (let [state (r/atom {:active false :suggestions []})
-        on-change-ch (chan)]
-    (debounced-callback state suggest-fn on-change-ch 100)
-    (r/create-class
-     {
-      :component-did-mount
-      (fn [this]
-        (let [node (-> (r/dom-node this)
-                       (.getElementsByClassName "choose-value")
-                       array-seq
-                       first)]
-          (swap! state assoc :node node)
-          (.addEventListener node "input" #(on-change-update on-change-ch node))))
+  (let [state (r/atom {:current-text nil
+                       :focused false
+                       :suggestions []})
 
-      :reagent-render
+        on-change-ch (chan)
+        handle-input-change
+        (fn [event]
+          (let [text (.-value (.-target event))]
+            (swap! state assoc :current-text text)
+            (lookup-suggestions on-change-ch text)))]
+
+    (debounced-callback state suggest-fn on-change-ch 100)
+
+    (r/create-class
+     {:reagent-render
       (fn [{:keys [value on-change value-fn label-fn match-fn suggest-fn placeholder]}]
         (let [label-fn (or label-fn pr-str)
               value-fn (or value-fn identity)
@@ -88,16 +71,18 @@
                                         (filter #(= (value-fn %) v))
                                         first label-fn)))]
           [:div.re-select-xhr
-           {:on-click (fn [_] (swap! state update :active not)
-                        (set! (.-textContent (:node @state)) "")
-                        (when (:active @state) (.focus (:node @state))))}
-           [:span.value {:style {:display (if (:active @state) "none" "inline")}} (match-fn value)]
-           [:span.choose-value {:contentEditable true
-                                :style {:display "inline-block"}}]
-           (when (:active @state)
-             [:div.options
-              (for [i (:suggestions @state)] ^{:key (label-fn i)}
-                [:div.option
-                 {:on-click (fn [_] (on-change (value-fn i)))
-                  :class (when (= value (value-fn i)) "active")}
+           [:input {:type "text"
+                    :on-change handle-input-change
+                    :on-focus #(swap! state assoc :focused true)
+                    :on-blur #(js/setTimeout (fn [] (swap! state assoc :focused false :current-text nil)) 100)
+                    :value (or (:current-text @state)
+                               (label-fn value))}]
+
+           (when (and (:focused @state) (not (empty? (:suggestions @state))))
+             [:div.suggestions
+              (for [i (:suggestions @state)] ^{:key (pr-str (value-fn i))}
+                [:div.option {:on-click (fn []
+                                         (when on-change
+                                           (on-change (value-fn i)))
+                                         (swap! state assoc :current-text nil))}
                  (label-fn i)])])]))})))

@@ -60,6 +60,7 @@
 
         form {:form-name :selects-form
               :value {:owner {:name "Mike"}
+                      :xhr {:code "R51" :display "Headache" :system "http://hl7.org/fhir/sid/icd-10"}
                       :other-owner {:name "Marat"}
                       :last-owner {:name "Max"}}}]
     (fn []
@@ -69,10 +70,14 @@
          [:h1 "Select widget"]
 
          [:label "XHR select:"]
-         [form/field {:value-fn #(get-in % [:resource :code])
-                      :label-fn #(get-in % [:resource :display])
+         [form/field {:value-fn identity
+                      :label-fn :display
                       :suggest-fn
-                      (fn [value] (go (:entry (:body (<! (http/get (gstring/format "https://ml.aidbox.io/$terminology/CodeSystem/$lookup?display=%s&system=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Ficd-10" value)))))))
+                      (fn [value] (go
+                                    (map (fn [e] (select-keys (:resource e) [:display :system :code]))
+                                         (:entry (:body
+                                                  (<! (http/get
+                                                       (gstring/format "https://ml.aidbox.io/$terminology/CodeSystem/$lookup?display=%s&system=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Ficd-10" value))))))))
                       :path [:xhr]
                       :input w/select-xhr-input}]
 
