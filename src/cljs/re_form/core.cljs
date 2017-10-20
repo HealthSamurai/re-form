@@ -110,16 +110,25 @@
   (reagent/create-class
    {:component-will-mount
     (fn [] (init props))
+
     :component-will-unmount
     (fn [] (deinit (:form-name props)))
+
     :display-name (str (:form-name props))
+
+    ;; :component-will-receive-props
+    ;; (fn [_ new-props]
+    ;;   (println new-props)
+    ;;   (deinit (:form-name new-props))
+    ;;   (init props))
+
     :reagent-render
     (fn [{:keys [form-name value class] :as props} & body]
       [ctx/set-context {:form-name form-name :base-path []}
        (into [:div.re-form
               (merge {:class (when class (process-class class))}
                      (select-keys props [:on-key-down :auto-focus :tab-index]))]
-             body)] )}))
+             body)])}))
 
 (defn- validate-and-update-errors [form-name path validators val]
   (when-not (empty? validators)

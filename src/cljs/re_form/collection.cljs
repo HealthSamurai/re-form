@@ -12,15 +12,22 @@
    (let [array (rf/subscribe [:re-form/input-value form-name path])]
      {:dispatch [:re-form/input-changed form-name (conj path (count @array)) new-item]})))
 
-(defn- add-button* [{:keys [form-name path new-item-value] :as props} & body]
-  [:div.add-button {:on-click (fn [] (rf/dispatch [:re-form/new-coll-item form-name path (or new-item-value {})]))}
+(defn- add-button* [{:keys [form-name path new-item-value] :as props} & [body]]
+  [:div.add-button
+   {:on-click (fn []
+                (rf/dispatch [:re-form/new-coll-item
+                              form-name
+                              path
+                              (or new-item-value {})]))}
    body])
 
 (defn add-button [props & body]
   (into [ctx/get-context props add-button*] body))
 
-(defn- del-button* [{:keys [form-name path] :as props} & body]
-  [:div.del-button {:on-click (fn [idx] (rf/dispatch [:re-form/input-removed form-name path]))}
+(defn- del-button* [{:keys [form-name path] :as props} & [body]]
+  [:div.del-button
+   {:on-click (fn [idx] (rf/dispatch [:re-form/input-removed form-name path]))
+    :key 'del-button}
    body])
 
 (defn del-button [props & body]
