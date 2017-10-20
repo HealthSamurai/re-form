@@ -119,7 +119,6 @@
     :component-will-receive-props
     (fn [_ coll]
       (let [new-props (second coll)]
-        (println new-props)
         (deinit (:form-name new-props))
         (init new-props)))
 
