@@ -159,11 +159,18 @@
                        :path [:birthdate-one]
                        :input w/calendar-input}]]
          [:div.form-row
-          [:label "Birth Date 2"]
+          [:label "Birth Date 2(iso)"]
           [form/field {:form-name :calendars-form
                        :path [:birthdate-two]
                        :type "date"
-                       :input w/text-input}]]]
+                       :input w/date-input}]]
+         [:div.form-row
+          [:label "Birth Date 2(us)"]
+          [form/field {:form-name :calendars-form
+                       :path [:birthdate-two]
+                       :type "date"
+                       :format "us"
+                       :input w/date-input}]]]
         [:div.col
          [form/form-data {:form-name :calendars-form}]]]])))
 
