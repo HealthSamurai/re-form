@@ -14,7 +14,7 @@
   (when x
     (if (= "us" fmt)
       (when-let [[_ m d y] (re-matches (get regexps "us") x)]
-        (str d "-" m "-" y))
+        (str y "-" m "-" d))
       (when (re-matches (get regexps "iso") x)
         x))))
 
@@ -35,21 +35,21 @@
                                           (dissoc :value)
                                           (assoc :show-error false)))))
         my-on-blur (fn [event on-blur]
-                     (swap! state assoc :show-error true)
+                     (when (:errors @state)
+                       (swap! state assoc :show-error true))
                      (on-blur))
         my-onchange (fn [event on-change]
                       (let [v (.. event -target -value)]
                         (swap! state assoc :value v)
                         (if-let [vv (parse fmt v)]
-                          (on-change vv)
+                          (do
+                            (on-change vv)
+                            (swap! state dissoc :errors))
                           (do
                             (swap! state assoc :errors
                                    (str "The format is: " (formats fmt)))))))]
     (r/create-class
-     {#_(:component-did-mount
-         (fn [this] (.log js/console "Mount")))
-
-      :component-will-receive-props
+     {:component-will-receive-props
       (fn [_ nextprops]
         (when-let [{v :value} (second nextprops)]
           (when-not (= v (:lastValue @state))
