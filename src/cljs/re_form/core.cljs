@@ -1,5 +1,5 @@
 (ns re-form.core
-  (:require-macros [reagent.ratom :refer [reaction]]
+  (:require-macros [reagent.ratom :refer [reaction run!]]
                    [cljs.core.async.macros :refer [go]])
   (:require [reagent.core :as reagent]
             [re-frame.core :as rf]
@@ -35,7 +35,10 @@
 (rf/reg-sub-raw
  :re-form/form-value
  (fn [db [_ form-name]]
-   (reaction @(reagent/cursor db [:re-form form-name :value]))))
+   ;; Related to this issues:
+   ;; https://github.com/reagent-project/reagent/issues/244
+   ;; https://github.com/reagent-project/reagent/issues/116
+   (run! @(reagent/cursor db [:re-form form-name :value]))))
 
 (rf/reg-sub-raw
  :re-form/is-form-submitting
