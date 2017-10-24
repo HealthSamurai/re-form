@@ -55,6 +55,13 @@
           {:form form :name :address}
           address-form]])))
 
+(defn suggest [value]
+  (go
+    (map (fn [e] (select-keys (:resource e) [:display :system :code]))
+         (:entry (:body
+                  (<! (http/get
+                       (gstring/format "https://ml.aidbox.io/$terminology/CodeSystem/$lookup?display=%s&system=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Ficd-10" value))))))))
+
 (defn select-page []
   (let [items [{:name "Nikolai"}
                {:name "Mike"}
@@ -69,49 +76,43 @@
                       :last-owner {:name "Max"}}}]
     (fn []
       [form/form form
+       [:h3 "Select widgets"]
+       [:hr]
        [:div.row
         [:div.col
-         [:h1 "Select widget"]
-
-         [:div.form-row 
-          (cmon/label-wrapper
-           {:label "XHR select:"
-            :upper-description "Example description"}
-           [form/field {:value-fn identity
-                        :label-fn :display
-                        :placeholder "Xhr select example"
-                        :suggest-fn
-                        (fn [value] (go
-                                      (map (fn [e] (select-keys (:resource e) [:display :system :code]))
-                                           (:entry (:body
-                                                    (<! (http/get
-                                                         (gstring/format "https://ml.aidbox.io/$terminology/CodeSystem/$lookup?display=%s&system=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Ficd-10" value))))))))
-                        :path [:xhr]
-                        :input w/select-xhr-input}])]
-
-
-         [:div.form-row
-          [:label "Owner: "]
-          [form/field {:items items
-                       :label-fn :name
-                       :path [:owner]
-                       :input w/radio-input}]]
-         [:div.form-row
-          [:label "Horizontal owner:"]
-          [form/field {:items items
-                       :label-fn :name
-                       :path [:other-owner]
-                       :input w/button-select-input}]]
-
-         [:div.form-row
-          [:label "Select"]
+         [:div.re-form-row
+          [:label "inputs/select-input"]
           [form/field {:items items
                        :label-fn :name
                        :path [:last-owner]
                        :input w/select-input}]]
 
-         [:div.form-row
-          [:div.col [form/form-data {:form-name :selects-form}]]]]]])))
+         [:div.re-form-row
+          [:label "inputs/select-xhr-input"]
+          [form/field {:value-fn identity
+                       :label-fn :display
+                       :placeholder "Xhr select example"
+                       :suggest-fn suggest
+                       :path [:xhr]
+                       :input w/select-xhr-input}]]
+
+         [:div.re-form-row
+          [:label "inputs/button-select-input"]
+          [form/field {:items items
+                       :label-fn :name
+                       :path [:other-owner]
+                       :input w/button-select-input}]]
+
+         [:div.re-form-row
+          [:div.col [form/form-data {:form-name :selects-form}]]]]
+        [:div.col
+         [:div.re-form-row
+          [:label "Owner: "]
+          [form/field {:items items
+                       :label-fn :name
+                       :path [:owner]
+                       :input w/radio-input}]]]
+        ]])))
 
 (defn switchbox-page []
   (let [form {:form-name :switches-form
@@ -144,11 +145,11 @@
           [:div.row
            [:div.col
             [:h1 "re-list widget"]
-            [:div.form-row
+            [:div.re-form-row
              [:label "Roles"]
              [form/re-list {:form form :name :roles}]]
 
-            [:div.form-row
+            [:div.re-form-row
              [:label "Roles"]
              [form/re-list {:form form :name :roles}]]]
 
@@ -165,19 +166,19 @@
        [:div.row
         [:div.col
          [:h1 "Calendar"]
-         [:div.form-row
+         [:div.re-form-row
 
           [:label "Birth Date"]
           [form/field {:form-name :calendars-form
                        :path [:birthdate-one]
                        :input w/calendar-input}]]
-         [:div.form-row
+         [:div.re-form-row
           [:label "Birth Date 2(iso)"]
           [form/field {:form-name :calendars-form
                        :path [:birthdate-two]
                        :type "date"
                        :input w/date-input}]]
-         [:div.form-row
+         [:div.re-form-row
           [:label "Birth Date 2(russian)"]
           [form/field {:form-name :calendars-form
                        :path [:birthdate-two]
@@ -185,7 +186,7 @@
                        :format "dd.mm.yyyy"
                        :input w/date-input}]]
 
-         [:div.form-row
+         [:div.re-form-row
           [:label "Birth Date 2(eu)"]
           [form/field {:form-name :calendars-form
                        :path [:birthdate-two]
@@ -194,7 +195,7 @@
                        :input w/date-input}]]
 
 
-         [:div.form-row
+         [:div.re-form-row
           [:label "Birth Date 2(us)"]
           [form/field {:form-name :calendars-form
                        :path [:birthdate-two]
@@ -202,7 +203,7 @@
                        :format "us"
                        :input w/date-input}]]]
 
-        [:div.form-row
+        [:div.re-form-row
            [:label "Birth Date empy"]
            [form/field {:form-name :calendars-form
                         :path [:empty]
@@ -248,7 +249,7 @@
         [:hr]
         [:div.row
          [:div.col
-          [:div.form-row
+          [:div.re-form-row
            [:label "Name or Family name: "]
            [form/field (if (= (:first-input-mode @state) :first)
                          {:input w/text-input
@@ -258,66 +259,68 @@
                           :path [:family-name]
                           :validators [(valid/min-count 5 count :message "Too short for a family name")]})]
 
-           [:button {:on-click (fn []
-                                 (swap! state (fn [s]
-                                                (if (= (:first-input-mode s) :first)
-                                                  (assoc s :first-input-mode :second)
-                                                  (assoc s :first-input-mode :first)))))}
+           " "
+           [:button {:on-click (fn [] (swap! state (fn [s]
+                                                     (if (= (:first-input-mode s) :first)
+                                                       (assoc s :first-input-mode :second)
+                                                       (assoc s :first-input-mode :first)))))}
             "Change path for that input"]]
 
-          [:div.form-row
+          [:div.re-form-row
            [:label "Email: "]
            [form/field {:path [:email]
                         :validators [(valid/email :message "email please")]
                         :input w/text-input}]]
 
-          [:div.form-row
+          [:div.re-form-row
            [:label "Password: "]
            (when (:password-mounted @state)
              [form/field {:path [:password]
                           :validators [(valid/min-count 8 count :message "Too short for a password")
                                        example-async-validator]
                           :input w/text-input
-                          :type "password"}])]
+                          :type "password"}])
+           " "
+           [:button {:on-click (fn []
+                                 (swap! state (fn [s]
+                                                (if (:password-mounted s)
+                                                  (assoc s :password-mounted false)
+                                                  (assoc s :password-mounted true)))))}
+            "Remove/add password input"]]
 
-          [:button {:on-click (fn []
-                                (swap! state (fn [s]
-                                               (if (:password-mounted s)
-                                                 (assoc s :password-mounted false)
-                                                 (assoc s :password-mounted true)))))}
-           "Remove/add password input"]
-
-          [:div.form-row
+          [:div.re-form-row
            [:label "Organization.name: "]
            [form/field {:path [:organization :name]
                         :input w/text-input
                         :validators [(valid/regex #".+ GmbH")]}]]
 
-          [:div.form-row
+          [:div.re-form-row
            [:label "Organization.url: "]
            [form/field {:path [:organization :url] :input w/text-input}]]
 
-          [:div.form-row
+          [:div.re-form-row
            [:label "group.0.name: "]
            [form/field {:path [:groups 0 :name]
                         :input w/text-input}]]
 
-          [:div.form-row
+          [:div.re-form-row
            [:label "group.1.name: "]
            [form/field {:path [:groups 1 :name]
                         :input w/text-input}]]
 
-          [:div.form-row
+          [:div.re-form-row
            [:label "Telecom: "]
            [fc/collection {:path [:telecom] :new-item-value {:system "phone"}}
             [form/field {:path [:value] :input w/text-input :validators [example-async-validator]}]]]
 
-          [:div.form-row
+          [:div.re-form-row
            [:label "Cities: "]
            [fc/collection {:path [:cities] :new-item-value ""}
             [form/field {:path [] :input w/text-input :validators [(valid/not-blank :message "Me not to be so blank!")]}]]]
 
-          [s/submit-button {:submit-fn #(js/alert (pr-str %))} "Submit!"]]
+          [:hr]
+          [:div.re-form-row
+           [s/submit-button {:submit-fn #(js/alert (pr-str %))} "Submit!"]]]
 
          [:div.col
           [form/form-data {:form-name :inputs-form}]]]]])))
@@ -469,8 +472,8 @@
              :font-weight :normal
              :font-size (u/px h3)
              :line-height (u/px* h3 1.5)}]
-       form/form-style
-       [:.form-row {:margin-top (u/px h2)}]
+       (form/form-style-fn form/default-base-consts)
+       [:.re-form-row {:margin-top (u/px h2)}]
        [:pre {:background-color "#f1f1f1" :padding "20px" :border "1px solid #ddd"} ]
        [:label {:display "block"
                 :margin-bottom (u/px 2)

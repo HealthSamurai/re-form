@@ -4,24 +4,22 @@
             [cljs.core.async :refer [<! chan timeout]]
             [garden.units :as u]))
 
+;; TODO it should be one style for selects
 (defn select-xhr-style
-  [{:keys [h h2 h3 selection-bg-color hover-bg-color border gray-color]}]
+  [{:keys [h h2 h3 radius selection-bg-color hover-bg-color border gray-color]}]
   [:.re-select-xhr
    {:position :relative
-    :border-radius (u/px 2)
-    :width (u/px 600)
-    :background-color :white
-    :vertical-align :middle
-    :padding [[(u/px 8) (u/px 12)]]
-    :border border}
+    :padding 0
+    :width "auto"
+    :display "inline-block"}
 
    [:input.query
-    {:border "none!important"
-     :font-size (u/px h)
-     :line-height (u/px (* h 1.5))
+    {:line-height (u/px h2)
      :position :relative
      :box-shadow "none"
-     :padding "0"
+     :padding [[(u/px-div (- h3 h2) 2) (u/px 12)]]
+     :border border
+     :border-radius (u/px radius)
      :outline "none"}]
 
    [:div.controls
@@ -35,18 +33,18 @@
      :background-color "white"
      :z-index 1000
      :left 0
-     :top (u/px+ (* 1.5 h) 16 10)
+     :top (u/px- h3 1)
      :width "auto"
      :display "block"
      :box-shadow "1px 1px 2px #ccc"
      :max-height (u/px 300)
      :overflow-y "auto"
-     :border "1px solid #ddd"}
+     :border border}
     [:.option {:cursor "pointer" :padding {:left (u/px h) :right (u/px h)}
                :line-height (u/px h3)}
 
-     [:&.active {:background-color "#f1f1f1"}]
-     [:&:hover {:background-color "#f1f1f1"}]]]])
+     [:&.active {:background-color hover-bg-color}]
+     [:&:hover {:background-color hover-bg-color}]]]])
 
 (defn- debounced-callback [state suggest-fn in ms]
   (go-loop [last-val nil]

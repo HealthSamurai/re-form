@@ -266,6 +266,9 @@
    :h 16
    :h2 24
    :h3 32
+   :w 8
+   :w2 16
+   :radius 2
    :selection-bg-color "#007bff"
    :hover-bg-color "#f1f1f1"
    :gray-color "rgba(52, 59, 81, 0.4)"
@@ -286,6 +289,8 @@
    inputs/codemirror-style])
 
 (defn form-style-fn [s]
-  (into [:* {:font-family "Roboto, sans-serif"}] (map #(% s) input-style-fns)))
+  (into [:* {:font-family "Roboto, sans-serif"}
+         [:.re-form-field {:display "inline-block"}]]
+        (map #(% s) input-style-fns)))
 
 (def form-style (form-style-fn default-base-consts))
