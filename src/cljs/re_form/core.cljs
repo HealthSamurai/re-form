@@ -234,7 +234,7 @@
 (defn field [props]
   [ctx/get-context props binded-field])
 
-(defn- error* [{:keys [form-name path error-paths] :as props}]
+(defn- errors* [{:keys [form-name path error-paths] :as props}]
   (let [flags @(rf/subscribe [:re-form/input-flags form-name path])
         is-form-submitting @(rf/subscribe [:re-form/is-form-submitting form-name])
         errors @(rf/subscribe [:re-form/input-errors form-name (into [path] error-paths)])]
@@ -243,8 +243,8 @@
             {:errors (if (or (:touched flags) is-form-submitting)
                        errors [])})]))
 
-(defn error [props]
-  [ctx/get-context props error*])
+(defn errors [props]
+  [ctx/get-context props errors*])
 
 (defn input [& args]
   (.error js/console "Warning! `re-form.input` is deprecated. Please use `re-form.field` instead. Caused by " (into ["re-form.input"] args))
