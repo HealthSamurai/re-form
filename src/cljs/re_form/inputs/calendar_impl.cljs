@@ -107,7 +107,7 @@
             [last-week])))
 
 
-(def re-calendar-style
+(defn re-calendar-style [_]
   [:.re-calendar {:display "inline-block"}
    [:.calendar-title {:padding-top "20px"
                       :display :flex

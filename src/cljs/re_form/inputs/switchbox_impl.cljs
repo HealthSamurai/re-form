@@ -4,14 +4,8 @@
    [garden.units :as u]
    [re-frame.core :as rf]))
  
-(def h 16)
-(def h2 24)
-(def h3 38)
-(def selection-bg-color "#007bff")
-(def hover-bg-color "#f1f1f1")
-(def border "1px solid #ddd")
-
-(def re-switch-box-style
+(defn re-switch-box-style
+  [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
   [:.re-switch
    {:font-decoration "none"}
    [:.re-label {:line-height (u/px h3)

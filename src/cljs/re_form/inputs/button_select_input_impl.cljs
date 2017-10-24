@@ -2,14 +2,8 @@
   (:require [reagent.core :as r]
             [garden.units :as u]))
 
-(def h 16)
-(def h2 24)
-(def h3 38)
-(def selection-bg-color "#007bff")
-(def hover-bg-color "#f1f1f1")
-(def border "1px solid #ddd")
-
-(def button-select-style
+(defn button-select-style
+  [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
   [:div.re-radio-buttons
    {:display "inline-block"
     :border border

@@ -234,7 +234,7 @@
 (defn field [props]
   [ctx/get-context props binded-field])
 
-(defn- error* [{:keys [form-name path error-paths] :as props}]
+(defn- errors* [{:keys [form-name path error-paths] :as props}]
   (let [flags @(rf/subscribe [:re-form/input-flags form-name path])
         is-form-submitting @(rf/subscribe [:re-form/is-form-submitting form-name])
         errors @(rf/subscribe [:re-form/input-errors form-name (into [path] error-paths)])]
@@ -243,8 +243,8 @@
             {:errors (if (or (:touched flags) is-form-submitting)
                        errors [])})]))
 
-(defn error [props]
-  [ctx/get-context props error*])
+(defn errors [props]
+  [ctx/get-context props errors*])
 
 (defn input [& args]
   (.error js/console "Warning! `re-form.input` is deprecated. Please use `re-form.field` instead. Caused by " (into ["re-form.input"] args))
@@ -260,9 +260,16 @@
        (when @errors
          [:pre (with-out-str (cljs.pprint/pprint @errors))])])))
 
-(def form-style
-  [:*
-   inputs/radio-input-style
+(def default-base-consts
+  {:h 16
+   :h2 24
+   :h3 38
+   :selection-bg-color "#007bff"
+   :hover-bg-color "#f1f1f1"
+   :border "1px solid #ddd"})
+
+(def input-style-fns
+  [inputs/radio-input-style
    inputs/file-upload-style
    inputs/button-select-style
    inputs/textarea-style
@@ -273,3 +280,8 @@
    inputs/checkbox-group-style
    inputs/select-xhr-style
    inputs/codemirror-style])
+
+(defn form-style-fn [s]
+  (into [:*] (map #(% s) input-style-fns)))
+
+(def form-style (form-style-fn default-base-consts))

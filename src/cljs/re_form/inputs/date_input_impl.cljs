@@ -34,10 +34,6 @@
                  :placeholder "yyyy-mm-dd"
                  :groups [:y :m :d]}})
 
-#_(def formats
-    {"us" "mm/dd/yyyy"
-     "iso" "yyyy-mm-dd"})
-
 (defn zip-date [names groups]
   (apply hash-map (interleave names groups)))
 
