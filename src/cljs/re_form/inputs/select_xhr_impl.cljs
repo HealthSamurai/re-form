@@ -11,11 +11,17 @@
     :padding "2px 5px"
     :border "1px solid #ddd"}
 
-   [:input
+   [:input.query
     {:border "none"
+     :position :relative
      :padding "0"
      :width "100%"
      :outline "none"}]
+   [:div.controls
+    {:position :absolute
+     :top "2px"
+     :color "#b6b6b6"
+     :right "20px"}]
 
    [:.suggestions
     {:position "absolute"
@@ -39,7 +45,9 @@
           timer (timeout ms)
           [new-val ch] (alts! [in timer])]
       (condp = ch
-        timer (do (swap! state assoc :suggestions  (<! (suggest-fn val)))
+        timer (do (swap! state assoc
+                         :suggestions (<! (suggest-fn val))
+                         :loading false)
                   (recur nil))
         in (when new-val (recur new-val))))))
 
@@ -47,7 +55,7 @@
   (when-not (empty? query)
     (go (>! ch query))))
 
-(defn select-xhr-input [{:keys [suggest-fn]}]
+(defn select-xhr-input [{:keys [suggest-fn on-change]}]
   (let [state (r/atom {:current-text nil
                        :focused false
                        :suggestions []})
@@ -57,7 +65,13 @@
         (fn [event]
           (let [text (.-value (.-target event))]
             (swap! state assoc :current-text text)
-            (lookup-suggestions on-change-ch text)))]
+            (if (empty? text)
+              (do
+                (swap! state assoc :current-text nil :suggestions [])
+                (on-change ""))
+              (do
+                (swap! state assoc :loading true)
+                (lookup-suggestions on-change-ch text)))))]
 
     (debounced-callback state suggest-fn on-change-ch 100)
     (.addEventListener (aget js/document "body" ) "click" #(when (:current-text @state) (close)))
@@ -71,13 +85,16 @@
                                         (filter #(= (value-fn %) v))
                                         first label-fn)))]
           [:div.re-select-xhr
-           [:input {:type "text"
-                    :on-change handle-input-change
-                    :on-focus #(swap! state assoc :focused true)
-                    :value (or (:current-text @state)
-                               (match-fn value))}]
-
-           (when (and (:focused @state) (not (empty? (:suggestions @state))))
+           [:input.query
+            {:type "text"
+             :on-change handle-input-change
+             :on-focus (fn [e] (swap! state assoc
+                                      :current-text nil :focused true :suggestions []))
+             :value (or (:current-text @state)
+                        (match-fn value))}]
+           (when (:loading @state)
+             [:div.controls "loading..."])
+           (when (and (:focused @state) (not-empty (:suggestions @state)))
              [:div.suggestions
               (for [i (:suggestions @state)] ^{:key (pr-str (value-fn i))}
                 [:div.option {:on-click #(do (when on-change (on-change (value-fn i)))

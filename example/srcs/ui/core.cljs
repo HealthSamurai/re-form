@@ -60,7 +60,6 @@
 
         form {:form-name :selects-form
               :value {:owner {:name "Mike"}
-                      :xhr {:code "R51" :display "Headache" :system "http://hl7.org/fhir/sid/icd-10"}
                       :other-owner {:name "Marat"}
                       :last-owner {:name "Max"}}}]
     (fn []
