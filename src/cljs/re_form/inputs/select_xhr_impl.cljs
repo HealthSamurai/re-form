@@ -20,8 +20,9 @@
     :border border}
 
    [:input.query
-    {:border "none"
+    {:border "none!important"
      :position :relative
+     :box-shadow "none"
      :padding "0"
      :width "100%"
      :outline "none"}]
