@@ -39,7 +39,7 @@
           timer (timeout ms)
           [new-val ch] (alts! [in timer])]
       (condp = ch
-        timer (do (swap! state assoc :suggestions (<! (suggest-fn val)))
+        timer (do (swap! state assoc :suggestions  (<! (suggest-fn val)))
                   (recur nil))
         in (when new-val (recur new-val))))))
 
@@ -51,7 +51,7 @@
   (let [state (r/atom {:current-text nil
                        :focused false
                        :suggestions []})
-
+        close #(swap! state assoc :focused false :current-text nil)
         on-change-ch (chan)
         handle-input-change
         (fn [event]
@@ -60,7 +60,7 @@
             (lookup-suggestions on-change-ch text)))]
 
     (debounced-callback state suggest-fn on-change-ch 100)
-
+    (.addEventListener (aget js/document "body" ) "click" #(when (:current-text @state) (close)))
     (r/create-class
      {:reagent-render
       (fn [{:keys [value on-change value-fn label-fn match-fn suggest-fn placeholder]}]
@@ -74,15 +74,12 @@
            [:input {:type "text"
                     :on-change handle-input-change
                     :on-focus #(swap! state assoc :focused true)
-                    :on-blur #(js/setTimeout (fn [] (swap! state assoc :focused false :current-text nil)) 100)
                     :value (or (:current-text @state)
-                               (label-fn value))}]
+                               (match-fn value))}]
 
            (when (and (:focused @state) (not (empty? (:suggestions @state))))
              [:div.suggestions
               (for [i (:suggestions @state)] ^{:key (pr-str (value-fn i))}
-                [:div.option {:on-click (fn []
-                                         (when on-change
-                                           (on-change (value-fn i)))
-                                         (swap! state assoc :current-text nil))}
+                [:div.option {:on-click #(do (when on-change (on-change (value-fn i)))
+                                             (close))}
                  (label-fn i)])])]))})))
