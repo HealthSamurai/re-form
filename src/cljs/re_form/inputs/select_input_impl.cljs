@@ -1,16 +1,9 @@
-
 (ns re-form.inputs.select-input-impl
   (:require [reagent.core :as r]
             [garden.units :as u]))
 
-(def h 16)
-(def h2 24)
-(def h3 38)
-(def selection-bg-color "#007bff")
-(def hover-bg-color "#f1f1f1")
-(def border "1px solid #ddd")
-
-(def select-input-style
+(defn select-input-style
+  [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
   [:.re-select
    {:position "relative"
     :background-color "white"

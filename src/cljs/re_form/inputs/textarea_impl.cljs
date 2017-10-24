@@ -1,7 +1,8 @@
 (ns re-form.inputs.textarea-impl
   (:require [reagent.core :as r]))
 
-(def textarea-style
+(defn textarea-style
+  [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
   [:.re-textarea {:resize ""}])
 
 (defn- style-onchange [visual-state node]

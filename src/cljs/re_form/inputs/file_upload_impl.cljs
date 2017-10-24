@@ -5,7 +5,8 @@
             [cljs.core.async :refer [<!]]))
 
 
-(def file-upload-style
+(defn file-upload-style
+  [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
   [:.file-upload {:padding "2px 5px"}
    [:.remove {:font-weight "500" :margin-right "5px"}
     [:&:hover {:cursor "pointer" :font-weight "600"}]]])

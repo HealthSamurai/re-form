@@ -1,10 +1,10 @@
 (ns re-form.inputs.codemirror-impl
   (:require [reagent.core :as r]))
 
-(def codemirror-style
+(defn codemirror-style
+  [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
   [:.text :.CodeMirror
-   {
-    :width "100%"
+   {:width "100%"
     :height "auto"
     :font-family  "sans-serif"
     :letter-spacing ".01rem;"
@@ -13,8 +13,7 @@
     :color "rgba(0,0,0,.8)"
     :font-size "18px;"
     :border "2px solid #eee"
-    :line-height 1.58}
-   ])
+    :line-height 1.58}])
 
 (defn- *codemirror-input [{:keys [value on-change complete-fn]}]
   (let [cm-atom (r/atom nil)]
