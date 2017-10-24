@@ -9,7 +9,7 @@
 (enable-console-print!)
 
 (figwheel/watch-and-reload
-  :websocket-url "ws://localhost:3000/figwheel-ws"
+  :websocket-url "ws://localhost:3002/figwheel-ws"
   :jsload-callback core/mount-root)
 
 (enable-re-frisk!)

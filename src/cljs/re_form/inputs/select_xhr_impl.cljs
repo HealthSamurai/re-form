@@ -4,12 +4,20 @@
             [cljs.core.async :refer [<! chan timeout]]
             [garden.units :as u]))
 
+(def h 16)
+(def h2 24)
+(def h3 38)
+(def selection-bg-color "#007bff")
+(def hover-bg-color "#f1f1f1")
+(def border "1px solid #ddd")
+
 (def select-xhr-style
   [:.re-select-xhr
    {:position "relative"
     :background-color "white"
-    :padding "2px 5px"
-    :border "1px solid #ddd"}
+    :padding {:left (u/px h) :right (u/px h)}
+    :line-height (u/px- h3 2)
+    :border border}
 
    [:input.query
     {:border "none"
@@ -17,6 +25,7 @@
      :padding "0"
      :width "100%"
      :outline "none"}]
+
    [:div.controls
     {:position :absolute
      :top "2px"
@@ -28,14 +37,16 @@
      :background-color "white"
      :z-index 1000
      :left 0
-     :top (u/px 38)
+     :top (u/px h3)
      :width "auto"
      :display "block"
      :box-shadow "1px 1px 2px #ccc"
      :max-height (u/px 300)
      :overflow-y "auto"
      :border "1px solid #ddd"}
-    [:.option {:cursor "pointer" :padding (u/px 10)}
+    [:.option {:cursor "pointer" :padding {:left (u/px h) :right (u/px h)}
+               :line-height (u/px h3)}
+
      [:&.active {:background-color "#f1f1f1"}]
      [:&:hover {:background-color "#f1f1f1"}]]]])
 

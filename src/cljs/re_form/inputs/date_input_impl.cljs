@@ -87,7 +87,7 @@
       :reagent-render
       (fn [{:keys [value on-change errors on-blur err-classes] :as props}]
         [:div
-         [:input (merge (dissoc props :errors)
+         [:input.re-input (merge (dissoc props :errors)
                         {:type "text" 
                          :placeholder (:placeholder fmt-obj)
                          :on-blur #(my-on-blur % on-blur)
