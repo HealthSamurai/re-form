@@ -268,19 +268,20 @@
    :hover-bg-color "#f1f1f1"
    :border "1px solid #ddd"})
 
-(def form-style
-  [:*
-   (inputs/radio-input-style default-base-consts)
-   (inputs/file-upload-style default-base-consts)
-   (inputs/button-select-style default-base-consts)
-   (inputs/textarea-style default-base-consts)
-   (inputs/calendar-style default-base-consts)
-   (inputs/switchbox-style default-base-consts)
-   (inputs/text-input-style default-base-consts)
-   (inputs/select-input-style default-base-consts)
-   (inputs/checkbox-group-style default-base-consts)
-   (inputs/select-xhr-style default-base-consts)
-   (inputs/codemirror-style default-base-consts)])
+(def input-style-fns
+  [inputs/radio-input-style
+   inputs/file-upload-style
+   inputs/button-select-style
+   inputs/textarea-style
+   inputs/calendar-style
+   inputs/switchbox-style
+   inputs/text-input-style
+   inputs/select-input-style
+   inputs/checkbox-group-style
+   inputs/select-xhr-style
+   inputs/codemirror-style])
 
-(defn form-style-fn
-  ([] ))
+(defn form-style-fn [s]
+  (into [:*] (map #(% s) input-style-fns)))
+
+(def form-style (form-style-fn default-base-consts))
