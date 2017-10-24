@@ -11,6 +11,7 @@
             [re-form.shared :as shared]
             [re-form.validators :as validators]
             [re-form.inputs :as inputs]
+            [re-form.inputs.common :as cmon]
             [re-form.context :as ctx]))
 
 (rf/reg-sub-raw
@@ -261,15 +262,18 @@
          [:pre (with-out-str (cljs.pprint/pprint @errors))])])))
 
 (def default-base-consts
-  {:h 16
+  {:m 12
+   :h 16
    :h2 24
-   :h3 38
+   :h3 32
    :selection-bg-color "#007bff"
    :hover-bg-color "#f1f1f1"
+   :gray-color "rgba(52, 59, 81, 0.4)"
    :border "1px solid #ddd"})
 
 (def input-style-fns
-  [inputs/radio-input-style
+  [cmon/label-wrapper-style
+   inputs/radio-input-style
    inputs/file-upload-style
    inputs/button-select-style
    inputs/textarea-style
@@ -282,6 +286,6 @@
    inputs/codemirror-style])
 
 (defn form-style-fn [s]
-  (into [:*] (map #(% s) input-style-fns)))
+  (into [:* {:font-family "Roboto, sans-serif"}] (map #(% s) input-style-fns)))
 
 (def form-style (form-style-fn default-base-consts))

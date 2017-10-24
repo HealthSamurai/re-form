@@ -5,12 +5,12 @@
 (defn select-input-style
   [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
   [:.re-select
-   {:position "relative"
-    :background-color "white"
-    :min-width "10em"
-    :padding-left (u/px h)
-    :padding-right (u/px h)
-    :line-height (u/px- h3 2)
+   {:position :relative
+    :background-color :white
+    :width (u/px 600)
+    :border-radius (u/px 2)
+    :padding [[(u/px 8) (u/px 12)]]
+    :line-height (u/px* h 1.5)
     :border "1px solid #ddd"}
    [:&:hover {:cursor "pointer"
               :border "1px solid #ccc"}]
@@ -31,7 +31,7 @@
      :min-width "10em"
      :z-index 1000
      :left 0
-     :top (u/px- h3 2)
+     :top (u/px+ (* 1.5 h) 16 10)
      :width "auto"
      :display "inline-block"
      :box-shadow "1px 1px 2px #ccc"

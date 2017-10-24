@@ -5,34 +5,37 @@
             [garden.units :as u]))
 
 (defn select-xhr-style
-  [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
+  [{:keys [h h2 h3 selection-bg-color hover-bg-color border gray-color]}]
   [:.re-select-xhr
-   {:position "relative"
-    :background-color "white"
-    :padding {:left (u/px h) :right (u/px h)}
-    :line-height (u/px- h3 2)
+   {:position :relative
+    :border-radius (u/px 2)
+    :width (u/px 600)
+    :background-color :white
+    :vertical-align :middle
+    :padding [[(u/px 8) (u/px 12)]]
     :border border}
 
    [:input.query
     {:border "none!important"
+     :font-size (u/px h)
+     :line-height (u/px (* h 1.5))
      :position :relative
      :box-shadow "none"
      :padding "0"
-     :width "100%"
      :outline "none"}]
 
    [:div.controls
     {:position :absolute
      :top "2px"
-     :color "#b6b6b6"
-     :right "20px"}]
+     :color gray-color 
+     :right (u/px 12)}]
 
    [:.suggestions
     {:position "absolute"
      :background-color "white"
      :z-index 1000
      :left 0
-     :top (u/px h3)
+     :top (u/px+ (* 1.5 h) 16 10)
      :width "auto"
      :display "block"
      :box-shadow "1px 1px 2px #ccc"
@@ -83,7 +86,7 @@
     (.addEventListener (aget js/document "body" ) "click" #(when (:current-text @state) (close)))
     (r/create-class
      {:reagent-render
-      (fn [{:keys [value on-change value-fn label-fn match-fn suggest-fn placeholder]}]
+      (fn [{:keys [value on-change value-fn label-fn match-fn suggest-fn placeholder icon]}]
         (let [label-fn (or label-fn pr-str)
               value-fn (or value-fn identity)
               match-fn (or match-fn
@@ -91,8 +94,10 @@
                                         (filter #(= (value-fn %) v))
                                         first label-fn)))]
           [:div.re-select-xhr
+           #_[:i.search-icon.material-icons "search"]
            [:input.query
             {:type "text"
+             :placeholder placeholder
              :on-change handle-input-change
              :on-focus (fn [e] (swap! state assoc
                                       :current-text nil :focused true :suggestions []))

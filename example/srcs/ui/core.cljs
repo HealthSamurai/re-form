@@ -19,6 +19,7 @@
    [clojure.string :as str]
    [ui.file-upload-page :as fup]
    [re-form.inputs :as w]
+   [re-form.inputs.common :as cmon]
    [re-form.inputs.completions :as completions]
    [re-form.submit :as s]
    [re-form.collection :as fc]
@@ -26,6 +27,7 @@
 
 (def h 16)
 (def h2 24)
+(def h3 38)
 
 (defn style [gcss]
   [:style (garden/css gcss)])
@@ -72,17 +74,20 @@
          [:h1 "Select widget"]
 
          [:div.form-row 
-          [:label "XHR select:"]
-          [form/field {:value-fn identity
-                       :label-fn :display
-                       :suggest-fn
-                       (fn [value] (go
-                                     (map (fn [e] (select-keys (:resource e) [:display :system :code]))
-                                          (:entry (:body
-                                                   (<! (http/get
-                                                        (gstring/format "https://ml.aidbox.io/$terminology/CodeSystem/$lookup?display=%s&system=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Ficd-10" value))))))))
-                       :path [:xhr]
-                       :input w/select-xhr-input}]]
+          (cmon/label-wrapper
+           {:label "XHR select:"
+            :upper-description "Example description"}
+           [form/field {:value-fn identity
+                        :label-fn :display
+                        :placeholder "Xhr select example"
+                        :suggest-fn
+                        (fn [value] (go
+                                      (map (fn [e] (select-keys (:resource e) [:display :system :code]))
+                                           (:entry (:body
+                                                    (<! (http/get
+                                                         (gstring/format "https://ml.aidbox.io/$terminology/CodeSystem/$lookup?display=%s&system=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Ficd-10" value))))))))
+                        :path [:xhr]
+                        :input w/select-xhr-input}])]
 
 
          [:div.form-row
@@ -441,6 +446,7 @@
    (style
     (let [nav-width 300]
       [:body
+       {:font-family "Roboto, sans-serif"}
        [:.topnav {:background-color "#3F51B5"
                   :color "white"}
         [:.brand {:display "inline-block"
@@ -459,11 +465,15 @@
                          :right (u/px 40)}
                 :background-color "#f1f1f1"
                 :padding (u/px 40)}]
-       [:h1 {:margin-bottom (u/px 30)}]
+       [:h1 {:margin-bottom (u/px 30)
+             :font-weight :normal
+             :font-size (u/px h3)
+             :line-height (u/px* h3 1.5)}]
        form/form-style
        [:.form-row {:margin-top (u/px h2)}]
        [:pre {:background-color "#f1f1f1" :padding "20px" :border "1px solid #ddd"} ]
        [:label {:display "block"
+                :margin-bottom (u/px 2)
                 :font-size (u/px h)
                 :line-height (u/px (/ (* h 3) 2))
                 :padding-right "10px"}]

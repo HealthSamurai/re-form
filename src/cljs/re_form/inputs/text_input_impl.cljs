@@ -7,8 +7,9 @@
   [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
   [:.re-input
    {:border border
-    :padding {:left (u/px h) :right (u/px h)}
-    :line-height (u/px h3)}])
+    :padding [[(u/px 8) (u/px 12)]]
+    :border-radius (u/px 2)
+    :line-height (u/px* h 1.5)}])
 
 (defn text-input [props]
   (let [my-onchange (fn [event on-change] (on-change (.. event -target -value)))]
