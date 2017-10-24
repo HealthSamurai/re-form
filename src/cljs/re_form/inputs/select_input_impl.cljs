@@ -12,6 +12,8 @@
     :padding-right (u/px h)
     :line-height (u/px- h3 2)
     :border "1px solid #ddd"}
+   [:span.triangle {:color "gray"
+                    :margin-left (u/px-div h 2)}]
    [:&:hover {:cursor "pointer"
               :border "1px solid #ccc"}]
    [:.clear {:padding {:left (u/px 10)
@@ -62,10 +64,12 @@
             [:span.value (match-fn value) #_(or (label-fn value) (value-fn value) (str value))]]
            [:span.choose-value
             (or (:placeholder props) "Select...")])
+         [:span.triangle "▾"]
          (when (:active @state)
            [:div.options
             (for [i items] ^{:key (pr-str i)}
               [:div.option
                {:on-click (fn [_] (on-change (value-fn i)))
                 :class (when (= value (value-fn i)) "active")}
-               (label-fn i)])])]))))
+               (label-fn i)
+               ])])]))))
