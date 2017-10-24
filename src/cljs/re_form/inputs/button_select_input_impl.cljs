@@ -25,12 +25,13 @@
                 :color "white"}]]])
 
 (defn button-select-input [_]
-  (fn [{:keys [value on-change label-fn items]}]
-    [:div.re-radio-buttons
-     (doall
-      (for [i items]
-        [:div.option
-         {:key (pr-str i)
-          :class (when (= i value) "active")
-          :on-click (partial on-change i)}
-         [:span.value (label-fn i)]]))]))
+  (fn [{:keys [value on-change label-fn value-fn items]}]
+    (let [value-fn (or value-fn identity)]
+      [:div.re-radio-buttons
+       (doall
+        (for [i items]
+          [:div.option
+           {:key (pr-str i)
+            :class (when (= (value-fn i) value) "active")
+            :on-click (partial on-change i)}
+           [:span.value (label-fn i)]]))])))
