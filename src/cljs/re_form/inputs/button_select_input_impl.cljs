@@ -2,32 +2,32 @@
   (:require [reagent.core :as r]
             [garden.units :as u]))
 
+(def h 16)
+(def h2 24)
+(def h3 38)
+(def selection-bg-color "#007bff")
+(def hover-bg-color "#f1f1f1")
+(def border "1px solid #ddd")
+
 (def button-select-style
   [:div.re-radio-buttons
    {:display "inline-block"
-    :box-shadow "0px 0px 3px #ddd"
-    :border-radius "15px";
-    :margin-left "10px"}
+    :border border
+    :border-radius (u/px 2)}
    [:div.option {:cursor "pointer"
                  :transition "background-color 200ms, color 100ms"
                  :background-color "white"
-                 :opacity 0.7
-                 :border-right "1px solid #ddd"
-                 :padding {:top (u/px 5)
-                           :left (u/px 10)
-                           :right (u/px 10)
-                           :bottom (u/px 5)}
+                 :border-right border
+                 :line-height (u/px- h3 2)
+                 :padding-left (u/px h)
+                 :padding-right (u/px h)
                  :display "inline-block"}
 
-    [:&:hover {:background-color "#f1f1f1"
-               :opacity 1}]
-    [:&:first-child {:border-radius "15px 0px 0px 15px"
-                     :padding-left (u/px 15)}]
-    [:&:last-child {:border-radius "0px 15px 15px 0px"
-                    :padding-right (u/px 15)
+    [:&:hover {:background-color hover-bg-color}]
+    [:&:first-child {:border-radius "2px 0px 0px 2px"}]
+    [:&:last-child {:border-radius "0px 2px 2px 0px"
                     :border-right "none"}]
-    [:&.active {:background-color "#007bff"
-                :opacity 1
+    [:&.active {:background-color selection-bg-color
                 :color "white"}]]])
 
 (defn button-select-input [_]

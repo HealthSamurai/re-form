@@ -24,6 +24,9 @@
    [re-form.collection :as fc]
    [re-form.context :as ctx]))
 
+(def h 16)
+(def h2 24)
+
 (defn style [gcss]
   [:style (garden/css gcss)])
 
@@ -60,7 +63,6 @@
 
         form {:form-name :selects-form
               :value {:owner {:name "Mike"}
-                      :xhr {:code "R51" :display "Headache" :system "http://hl7.org/fhir/sid/icd-10"}
                       :other-owner {:name "Marat"}
                       :last-owner {:name "Max"}}}]
     (fn []
@@ -69,38 +71,42 @@
         [:div.col
          [:h1 "Select widget"]
 
-         [:label "XHR select:"]
-         [form/field {:value-fn identity
-                      :label-fn :display
-                      :suggest-fn
-                      (fn [value] (go
-                                    (map (fn [e] (select-keys (:resource e) [:display :system :code]))
-                                         (:entry (:body
-                                                  (<! (http/get
-                                                       (gstring/format "https://ml.aidbox.io/$terminology/CodeSystem/$lookup?display=%s&system=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Ficd-10" value))))))))
-                      :path [:xhr]
-                      :input w/select-xhr-input}]
+         [:div.form-row 
+          [:label "XHR select:"]
+          [form/field {:value-fn identity
+                       :label-fn :display
+                       :suggest-fn
+                       (fn [value] (go
+                                     (map (fn [e] (select-keys (:resource e) [:display :system :code]))
+                                          (:entry (:body
+                                                   (<! (http/get
+                                                        (gstring/format "https://ml.aidbox.io/$terminology/CodeSystem/$lookup?display=%s&system=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Ficd-10" value))))))))
+                       :path [:xhr]
+                       :input w/select-xhr-input}]]
 
 
-         [:label "Owner: "]
-         [form/field {:items items
-                      :label-fn :name
-                      :path [:owner]
-                      :input w/radio-input}]
-         [:br]
-         [:br]
-         [:label "Horizontal owner:"]
-         [form/field {:items items
-                      :label-fn :name
-                      :path [:other-owner]
-                      :input w/button-select-input}]
-         [:br]
-         [:label "Select"]
-         [form/field {:items items
-                      :label-fn :name
-                      :path [:last-owner]
-                      :input w/select-input}]
-         [:div.col [form/form-data {:form-name :selects-form}]]]]])))
+         [:div.form-row
+          [:label "Owner: "]
+          [form/field {:items items
+                       :label-fn :name
+                       :path [:owner]
+                       :input w/radio-input}]]
+         [:div.form-row
+          [:label "Horizontal owner:"]
+          [form/field {:items items
+                       :label-fn :name
+                       :path [:other-owner]
+                       :input w/button-select-input}]]
+
+         [:div.form-row
+          [:label "Select"]
+          [form/field {:items items
+                       :label-fn :name
+                       :path [:last-owner]
+                       :input w/select-input}]]
+
+         [:div.form-row
+          [:div.col [form/form-data {:form-name :selects-form}]]]]]])))
 
 (defn switchbox-page []
   (let [form {:form-name :switches-form
@@ -260,13 +266,14 @@
                         :validators [(valid/email :message "email please")]
                         :input w/text-input}]]
 
-          [:label "Password: "]
-          (when (:password-mounted @state)
-            [form/field {:path [:password]
-                         :validators [(valid/min-count 8 count :message "Too short for a password")
-                                      example-async-validator]
-                         :input w/text-input
-                         :type "password"}])
+          [:div.form-row
+           [:label "Password: "]
+           (when (:password-mounted @state)
+             [form/field {:path [:password]
+                          :validators [(valid/min-count 8 count :message "Too short for a password")
+                                       example-async-validator]
+                          :input w/text-input
+                          :type "password"}])]
 
           [:button {:on-click (fn []
                                 (swap! state (fn [s]
@@ -411,7 +418,7 @@
       [:div.navigation
        (style [:.navigation {:padding {:top (u/px 20)
                                        :right (u/px 20)}
-                             :background-color "#f1f1f1"}
+                             :background-color "white"}
                [:a.navitem {:display "block"
                             :color "#888"
                             :border-left "6px solid #ddd"
@@ -450,16 +457,17 @@
        [:.pane {:margin {:left (u/px (+ nav-width 20))
                          :top (u/px 20)
                          :right (u/px 40)}
+                :background-color "#f1f1f1"
                 :padding (u/px 40)}]
        [:h1 {:margin-bottom (u/px 30)}]
        form/form-style
-       [:.form-row {:padding "5px 0px"}]
+       [:.form-row {:margin-top (u/px h2)}]
        [:pre {:background-color "#f1f1f1" :padding "20px" :border "1px solid #ddd"} ]
-       [:label {:width "10em"
-                :vertical-align "top"
-                :color "#888"
-                :display "inline-block" :text-align "right" :padding-right "10px"}]
-       [:.errors {:color "red" :margin-left "10em"}]]))
+       [:label {:display "block"
+                :font-size (u/px h)
+                :line-height (u/px (/ (* h 3) 2))
+                :padding-right "10px"}]
+       [:.errors {:color "red"}]]))
 
    [:div.topnav [:a.brand "re-form"]]
    [navigation]

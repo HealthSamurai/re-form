@@ -268,6 +268,7 @@
    inputs/textarea-style
    inputs/calendar-style
    inputs/switchbox-style
+   inputs/text-input-style
    inputs/select-input-style
    inputs/checkbox-group-style
    inputs/select-xhr-style

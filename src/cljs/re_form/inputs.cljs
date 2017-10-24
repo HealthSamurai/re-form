@@ -41,3 +41,4 @@
 (def checkbox-group-style ch-impl/checkbox-group-style)
 (def select-xhr-style xh-impl/select-xhr-style)
 (def codemirror-style cm-impl/codemirror-style)
+(def text-input-style tei-impl/text-input-style)

@@ -3,13 +3,21 @@
   (:require [reagent.core :as r]
             [garden.units :as u]))
 
+(def h 16)
+(def h2 24)
+(def h3 38)
+(def selection-bg-color "#007bff")
+(def hover-bg-color "#f1f1f1")
+(def border "1px solid #ddd")
+
 (def select-input-style
   [:.re-select
    {:position "relative"
     :background-color "white"
-    :margin-left "5px"
     :min-width "10em"
-    :padding "2px 5px"
+    :padding-left (u/px h)
+    :padding-right (u/px h)
+    :line-height (u/px- h3 2)
     :border "1px solid #ddd"}
    [:&:hover {:cursor "pointer"
               :border "1px solid #ccc"}]
@@ -30,7 +38,7 @@
      :min-width "10em"
      :z-index 1000
      :left 0
-     :top (u/px 40)
+     :top (u/px- h3 2)
      :width "auto"
      :display "inline-block"
      :box-shadow "1px 1px 2px #ccc"
@@ -39,7 +47,9 @@
                   :width "90%"
                   :margin "5px"}]
     [:.option {:cursor "pointer"
-               :padding (u/px 10)}
+               :padding-left (u/px h)
+               :padding-right (u/px h)
+               :line-height (u/px- h3 2)}
      [:&.active {:background-color "#f1f1f1"}]
      [:&:hover {:background-color "#f1f1f1"}]]]])
 

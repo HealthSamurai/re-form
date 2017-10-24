@@ -3,26 +3,31 @@
             [reagent.core :as r]
             [garden.units :as u]))
 
+
+(def h 16)
+(def h2 24)
+(def h3 38)
+(def selection-bg-color "#007bff")
+(def hover-bg-color "#f1f1f1")
+(def border "1px solid #ddd")
+
 (def checkbox-group-style
   [:.re-checkbox-group
    {:display "inline-block"}
    [:.re-checkbox {:cursor "pointer"
-                 :opacity 0.7
-                 :border-radius (u/px 15)
-                 :padding {:top (u/px 5)
-                           :left (u/px 10)
-                           :right (u/px 10)
-                           :bottom (u/px 5)}}
+                   :line-height (u/px h3)}
     [:.radio {:border "1px solid #ddd"
               :background-color "white"
               :display "inline-block"
               :vertical-align "middle"
-              :margin-right (u/px 5)
-              :width (u/px 20)
-              :height (u/px 20)}]
+              :margin-right (u/px-div h 2)
+              :margin-top (u/px -3)
+              :padding-top (u/px 6)
+              :width (u/px h2)
+              :height (u/px h2)}]
     [:&.active {}
-     [:.radio {:background-color "#007bff"}]]
-    [:&:hover {:opacity 1 :background-color "#f1f1f1"}]]])
+     [:.radio {:background-color selection-bg-color}]]
+    [:&:hover]]])
 
 (defn checkbox-group-input [_]
   (fn [{:keys [value on-change value-fn label-fn items] :as props}]
