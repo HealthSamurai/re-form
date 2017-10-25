@@ -25,5 +25,5 @@
 
 (ui-routes/reg-page
  :textarea {:title "Text Area"
-            :w 7
+            :w 23
             :cmp textarea-page})
