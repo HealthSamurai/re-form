@@ -9,6 +9,7 @@
    {:display "inline-block"}
    [:.re-input
     {:border border
+     :width "100%"
      :padding [[0 (u/px w)]]
      :border-radius (u/px radius)
      :line-height (u/px* h3)}]])

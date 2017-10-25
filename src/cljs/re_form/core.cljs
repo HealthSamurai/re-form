@@ -4,6 +4,7 @@
   (:require [reagent.core :as reagent]
             [re-frame.core :as rf]
             [garden.core :as garden]
+            [garden.units :as u]
             [clojure.string :as str]
             [cljs.core.async.impl.channels :as channels-impl]
             [cljs.core.async :refer [<! close!]]
@@ -292,10 +293,22 @@
    inputs/select-input-style
    inputs/checkbox-group-style
    inputs/select-xhr-style
+   inputs/re-select-input-style
    inputs/codemirror-style])
 
-(defn form-style-fn [s]
+(defn form-style-fn
+  [{:keys [m h gray-color] :as s}]
   (into [:* {:font-family "Roboto, sans-serif"}
+         [:.re-form-comp
+          {:margin-bottom (u/px h)}]
+         [:.re-form-label
+          {:font-size (u/px h)
+           :line-height (u/px* h 1.5)
+           :margin-bottom (u/px 3)}
+          [:&.sub
+           {:font-size (u/px m)
+            :line-height (u/px* m 1.5)
+            :color gray-color}]]
          [:.re-form-field {:display "inline-block"}]]
         (map #(% s) input-style-fns)))
 
