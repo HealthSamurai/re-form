@@ -33,5 +33,5 @@
           [:div.option
            {:key (pr-str i)
             :class (when (= (value-fn i) value) "active")
-            :on-click (partial on-change i)}
+            :on-click (fn [_] (on-change (value-fn i)))}
            [:span.value (label-fn i)]]))])))

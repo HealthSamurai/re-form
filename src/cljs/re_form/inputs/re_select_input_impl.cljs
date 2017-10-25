@@ -11,8 +11,8 @@
     :min-width "30em"
     :background-color :white
     :border-radius (u/px 2)
-    :padding [[(u/px-div (- h3 h2) 2) (u/px 12)]]
-    :line-height (u/px* h 1.5)
+    :padding [[(u/px-div h 2) (u/px 12)]]
+    :line-height (u/px h2)
     :border "1px solid #ddd"}
    [:span.triangle {:color "gray"
                     :margin-right (u/px-div h 2)}]
@@ -34,12 +34,12 @@
      :background-color "white"
      :z-index 1000
      :left (u/px -1)
-     :top (u/px h3)
+     :top (u/px* 5 (/ h 2))
      :width "100%"
      :display "inline-block"
      :box-shadow "1px 1px 2px #ccc"
      :border "1px solid #ddd"}
-    [:.search {:width "100%"}]
+    [:.re-search-search {:width "100%"}]
     [:.option {:cursor "pointer"
                :display "block"
                :padding-left (u/px h)
@@ -76,5 +76,5 @@
           (or (:placeholder props) "Select...")])
        (when (:active @state)
          [:div.options
-          [:input.search {:auto-focus true :on-change on-search}]
+          [:input.re-search-search {:auto-focus true :on-change on-search}]
           [options options-sub label-fn on-change]])])))
