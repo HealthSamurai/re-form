@@ -7,12 +7,13 @@
   (let [form {:form-name :calendars-form
               :value {:birthdate-one {:d 5 :m 3 :y 1980}
                       :birthdate-two "1995-04-17"
-                      :empty nil}}]
+                      :empty nil
+                      :time "16:20"}}]
     (fn []
       [form/form form
+       [:h1 "Calendar"]
        [:div.row
         [:div.col
-         [:h1 "Calendar"]
          [:div.re-form-row
 
           [:label "Birth Date"]
@@ -23,13 +24,11 @@
           [:label "Birth Date 2(iso)"]
           [form/field {:form-name :calendars-form
                        :path [:birthdate-two]
-                       :type "date"
                        :input w/date-input}]]
          [:div.re-form-row
           [:label "Birth Date 2(russian)"]
           [form/field {:form-name :calendars-form
                        :path [:birthdate-two]
-                       :type "date"
                        :format "dd.mm.yyyy"
                        :input w/date-input}]]
 
@@ -37,7 +36,6 @@
           [:label "Birth Date 2(eu)"]
           [form/field {:form-name :calendars-form
                        :path [:birthdate-two]
-                       :type "date"
                        :format "dd/mm/yyyy"
                        :input w/date-input}]]
 
@@ -46,17 +44,33 @@
           [:label "Birth Date 2(us)"]
           [form/field {:form-name :calendars-form
                        :path [:birthdate-two]
-                       :type "date"
                        :format "us"
                        :input w/date-input}]]]
+        [:div.col
+         [:div.re-form-row
+          [:label "Birth Date empy"]
+          [form/field {:form-name :calendars-form
+                       :path [:empty]
+                       :format "us"
+                       :input w/date-input}]]
 
-        [:div.re-form-row
-           [:label "Birth Date empy"]
-           [form/field {:form-name :calendars-form
-                        :path [:empty]
-                        :type "date"
-                        :format "us"
-                        :input w/date-input}]]
+         [:div.re-form-row
+          [:label "Time empy"]
+          [form/field {:form-name :calendars-form
+                       :path [:empty]
+                       :input w/time-input}]]
+         [:div.re-form-row
+          [:label "Time 24"]
+          [form/field {:form-name :calendars-form
+                       :path [:time]
+                       :input w/time-input}]]
+
+         [:div.re-form-row
+          [:label "Time 12"]
+          [form/field {:form-name :calendars-form
+                       :path [:time]
+                       :format "12h"
+                       :input w/time-input}]]]
 
 
         [:div.col
