@@ -1,6 +1,7 @@
 (ns re-form.collection
   (:require [reagent.core :as c]
             [re-frame.core :as rf]
+            [re-form.core :as re-form]
             [re-form.context :as ctx]))
 
 (defn- drop-idx [v idx]
@@ -33,10 +34,11 @@
 (defn del-button [props & body]
   (into [ctx/get-context props del-button*] body))
 
-(defn- collection* [{:keys [form-name path new-item-value] :as props} & body]
+(defn- collection* [{:keys [form-name path new-item-value class style] :as props} & body]
   (let [array (rf/subscribe [:re-form/input-value form-name path])]
     (fn [props & body]
-      [:div.collection
+      [:div.collection {:class (re-form/process-class class)
+                        :style style}
        (doall
         (for [[idx item] (map-indexed (fn [idx itm] [idx itm]) @array)]
           [:div.collection-item {:key idx}
