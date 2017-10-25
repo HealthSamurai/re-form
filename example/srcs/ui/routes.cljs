@@ -11,7 +11,6 @@
   (get @pages k))
 
 (defn routes []
-  (.log js/console "gen routes")
   (->> @pages
        (reduce (fn [acc [k v]]
                  (assoc acc (name k) {:. (assoc (dissoc v :cmp) :id k)})) {:. :index})))

@@ -67,7 +67,6 @@
                        :href (href (name i))} (:title p)]))])))
 
 (defn root-component []
-  (.log js/console "here")
   [:div
    (style
     (let [nav-width 300]

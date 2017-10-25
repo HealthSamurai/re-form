@@ -27,7 +27,9 @@
          {:name "Evgeny"}
          {:name "Slava"}]
         form {:form-name :example-form
-              :value {:name "Mike"}}]
+              :value {:name "Mike"
+                      :birthdate "1995-04-17"
+                      :time "16:20"}}]
     (fn []
       [form/form form
        [:h1 "Form builder"]
@@ -36,10 +38,10 @@
          [:div.re-form-comp
           [:label.re-form-label "Text input"]
           [:label.re-form-label.sub "Fields can also have a description"]
-          [form/field {:form-name :example-form :path [:name] :input w/text-input}]]
+          [form/field {:path [:name] :input w/text-input}]]
          [:div.re-form-comp
           [:label.re-form-label "Another text input"]
-          [form/field {:form-name :example-form :path [:name] :input w/text-input}]]
+          [form/field {:path [:name] :input w/text-input}]]
          [:div.re-form-comp
           [:label.re-form-label "Select input"]
           [form/field {:items select-items
@@ -49,7 +51,17 @@
          [:div.re-form-comp
           [:label.re-form-label "Textarea"]
           [form/field {:path [:area-one]
-                       :input w/textarea-input}]]]
+                       :input w/textarea-input}]]
+         [:div.re-form-comp
+          [:label.re-form-label "Birth Date 2(eu)"]
+          [form/field {:path [:birthdate]
+                       :format "dd/mm/yyyy"
+                       :input w/date-input}]]
+         [:div.re-form-comp
+          [:label.re-form-label "Time 12"]
+          [form/field {:path [:time]
+                       :format "12h"
+                       :input w/time-input}]]]
         [:div.col
          [:div.re-form-comp
           [:label.re-form-label "XHR select input"]
