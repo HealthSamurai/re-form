@@ -4,6 +4,7 @@
   (:require [reagent.core :as reagent]
             [re-frame.core :as rf]
             [garden.core :as garden]
+            [garden.units :as u]
             [clojure.string :as str]
             [cljs.core.async.impl.channels :as channels-impl]
             [cljs.core.async :refer [<! close!]]
@@ -67,6 +68,11 @@
    (shared/on-input-changed db form-name input-path v)))
 
 (rf/reg-event-db
+ :re-form/value-changed
+ (fn [db [_ form-name v]]
+   (assoc-in db [:re-form form-name :value] v)))
+
+(rf/reg-event-db
  :re-form/set-input-flags
  (fn [db [_ form-name input-path flags]]
    (update-in db [:re-form form-name :flags input-path] merge flags)))
@@ -122,9 +128,10 @@
 
     :component-will-receive-props
     (fn [_ coll]
-      (let [new-props (second coll)]
-        (deinit (:form-name new-props))
-        (init new-props)))
+      (let [{:keys [form-name value]} (second coll)
+            old-value @(rf/subscribe [:re-form/form-value form-name])]
+        (when-not (= old-value value)
+          (rf/dispatch [:re-form/value-changed form-name value]))))
 
     :reagent-render
     (fn [{:keys [form-name value class] :as props} & body]
@@ -289,8 +296,19 @@
    inputs/re-select-input-style
    inputs/codemirror-style])
 
-(defn form-style-fn [s]
+(defn form-style-fn
+  [{:keys [m h gray-color] :as s}]
   (into [:* {:font-family "Roboto, sans-serif"}
+         [:.re-form-comp
+          {:margin-bottom (u/px h)}]
+         [:.re-form-label
+          {:font-size (u/px h)
+           :line-height (u/px* h 1.5)
+           :margin-bottom (u/px 3)}
+          [:&.sub
+           {:font-size (u/px m)
+            :line-height (u/px* m 1.5)
+            :color gray-color}]]
          [:.re-form-field {:display "inline-block"}]]
         (map #(% s) input-style-fns)))
 

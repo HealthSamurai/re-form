@@ -1,19 +1,25 @@
 (ns re-form.inputs.codemirror-impl
-  (:require [reagent.core :as r]))
+  (:require [reagent.core :as r]
+            [garden.units :as u]))
 
 (defn codemirror-style
-  [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
-  [:.text :.CodeMirror
-   {:width "100%"
-    :height "auto"
-    :font-family  "sans-serif"
-    :letter-spacing ".01rem;"
-    :font-weight 400
-    :font-style "normal;"
-    :color "rgba(0,0,0,.8)"
-    :font-size "18px;"
-    :border "2px solid #eee"
-    :line-height 1.58}])
+  [{:keys [w h h2 h3 selection-bg-color hover-bg-color border]}]
+  [:*
+   [:div.cm-wrapper
+    {:width (u/px 244)}] ;; FIXME: discuss inputs' width policy
+   [:.text :.CodeMirror
+    {:width (u/percent 100)
+     :height :auto
+     :font-family  :inherit
+     :letter-spacing :inherit
+     :font-weight :inherit
+     :font-style :inherti
+     :color :inherit
+     :padding [[0 (u/px w)]]
+     :font-size :inherit
+     :border border
+     :border-radius (u/px 2)
+     :line-height :inherit}]])
 
 (defn- *codemirror-input [{:keys [value on-change complete-fn]}]
   (let [cm-atom (r/atom nil)]
