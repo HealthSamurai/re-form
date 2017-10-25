@@ -19,6 +19,8 @@
 (def file-upload-input fupl-impl/file-upload)
 (def textarea-input ta-impl/textarea)
 (def date-input date-impl/date-input)
+(def date-time-input date-impl/date-time-input)
+(def time-input date-impl/time-input)
 (def csv-input csv-impl/csv-input)
 (def text-input tei-impl/text-input)
 (def radio-input rad-impl/radio-input)

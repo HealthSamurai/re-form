@@ -5,8 +5,9 @@
 
 (defn text-input-style
   [{:keys [h h2 h3 w selection-bg-color hover-bg-color border radius]}]
-  [:.re-input-wrap
-   {:display "inline-block"}
+  [:*
+   [:.re-input-wrap
+    {:display "inline-block"}]
    [:.re-input
     {:border border
      :width "100%"
