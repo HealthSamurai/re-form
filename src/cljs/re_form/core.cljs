@@ -286,6 +286,7 @@
    inputs/select-input-style
    inputs/checkbox-group-style
    inputs/select-xhr-style
+   inputs/re-select-input-style
    inputs/codemirror-style])
 
 (defn form-style-fn [s]

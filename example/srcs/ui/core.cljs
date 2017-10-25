@@ -6,6 +6,8 @@
    [garden.color :as c]
    [garden.units :as u]
 
+   [frames.xhr]
+
    [re-frame.core :as rf]
    [route-map.core :as route-map]
    [re-form.core :as form]

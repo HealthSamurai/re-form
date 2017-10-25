@@ -10,6 +10,7 @@
             [re-form.inputs.button-select-input-impl :as bs-impl]
             [re-form.inputs.checkbox-group-impl :as ch-impl]
             [re-form.inputs.select-xhr-impl :as xh-impl]
+            [re-form.inputs.re-select-input-impl :as re-sel-impl]
             [re-form.inputs.codemirror-impl :as cm-impl]
             [re-form.inputs.date-input-impl :as date-impl]))
 
@@ -28,6 +29,7 @@
 (def checkbox-group-input ch-impl/checkbox-group-input)
 (def select-xhr-input xh-impl/select-xhr-input)
 (def codemirror-input cm-impl/codemirror-input)
+(def re-select-input re-sel-impl/re-select-input)
 
 ;; Styles
 
@@ -37,8 +39,9 @@
 (def calendar-style cal-impl/re-calendar-style)
 (def switchbox-style sw-impl/re-switch-box-style)
 (def button-select-style bs-impl/button-select-style)
-(def select-input-style se-impl/select-input-style)
 (def checkbox-group-style ch-impl/checkbox-group-style)
-(def select-xhr-style xh-impl/select-xhr-style)
 (def codemirror-style cm-impl/codemirror-style)
 (def text-input-style tei-impl/text-input-style)
+(def select-input-style se-impl/select-input-style)
+(def select-xhr-style xh-impl/select-xhr-style)
+(def re-select-input-style re-sel-impl/re-select-input-style)
