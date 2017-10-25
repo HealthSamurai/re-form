@@ -67,6 +67,11 @@
    (shared/on-input-changed db form-name input-path v)))
 
 (rf/reg-event-db
+ :re-form/value-changed
+ (fn [db [_ form-name v]]
+   (assoc-in db [:re-form form-name :value] v)))
+
+(rf/reg-event-db
  :re-form/set-input-flags
  (fn [db [_ form-name input-path flags]]
    (update-in db [:re-form form-name :flags input-path] merge flags)))
@@ -122,9 +127,10 @@
 
     :component-will-receive-props
     (fn [_ coll]
-      (let [new-props (second coll)]
-        (deinit (:form-name new-props))
-        (init new-props)))
+      (let [{:keys [form-name value]} (second coll)
+            old-value @(rf/subscribe [:re-form/form-value form-name])]
+        (when-not (= old-value value)
+          (rf/dispatch [:re-form/value-changed form-name value]))))
 
     :reagent-render
     (fn [{:keys [form-name value class] :as props} & body]

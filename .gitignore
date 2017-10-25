@@ -9,3 +9,5 @@ figwheel_server.log
 build/
 .lein-env
 *~
+.\#*
+\#*\#
