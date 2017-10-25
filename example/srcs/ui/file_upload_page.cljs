@@ -4,6 +4,7 @@
    [reagent.core :as reagent]
    [re-form.core :as form]
    [cljs-http.client :as http]
+   [ui.routes :as routes]
    [cljs.core.async :refer [<!]]
    [re-form.inputs :refer [file-upload-input]]))
 
@@ -36,3 +37,8 @@
        [:br]
        [:br]
        [:button {:on-click #(swap! state assoc :v {:foobar 42} )} "Set File Upload Value"]])))
+
+(routes/reg-page
+ :file_upload {:title "File Upload"
+               :w 22
+               :cmp file-upload-page})
