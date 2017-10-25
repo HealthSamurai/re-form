@@ -48,19 +48,24 @@
      [:&.active {:background-color hover-bg-color}]
      [:&:hover {:background-color hover-bg-color}]]]])
 
+(defn options [options-sub label-fn on-change]
+  [:div
+   (for [i @options-sub]
+     [:div.option 
+      {:key (pr-str i)
+       :on-click (fn [_] (on-change i))}
+      (label-fn i)])])
+
 (defn re-select-input [opts]
   (let [state (r/atom {:active false})
         on-search (fn [ev]
                     (when-let [se (:search-event opts)]
                       (rf/dispatch [(:event se) (.. ev -target -value) se])))
-
         activate (fn [_]
                    (when-let [se (:search-event opts)]
                      (rf/dispatch [(:event se) nil se]))
-                   (swap! state update :active not))
-
-        items (:options-sub opts)]
-    (fn [{:keys [value on-change label-fn value-fn] :as props}]
+                   (swap! state update :active not))]
+    (fn [{:keys [value on-change label-fn value-fn options-sub] :as props}]
       [:div.re-re-select
        {:on-click activate}
        [:span.triangle "▾"]
@@ -72,8 +77,4 @@
        (when (:active @state)
          [:div.options
           [:input.search {:auto-focus true :on-change on-search}]
-          (for [i @items]
-            [:div.option 
-             {:key (pr-str i)
-              :on-click (fn [_] (on-change i))}
-             (label-fn i)])])])))
+          [options options-sub label-fn on-change]])])))
