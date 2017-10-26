@@ -3,7 +3,8 @@
 
 (defn textarea-style
   [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
-  [:.re-textarea {:resize ""}])
+  [:.re-textarea {:resize ""
+                  :border border}])
 
 (defn- style-onchange [visual-state node]
   (let [rows (Math.ceil (/ (do (set! (.-rows node) 1)

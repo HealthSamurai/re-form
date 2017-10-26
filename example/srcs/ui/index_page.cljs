@@ -34,7 +34,7 @@
                       :time "16:20"}}]
     (fn []
       [form/form form
-       [:h1 "Form builder"]
+       [:h1 "Almost all components"]
        [:div.row
         [:div.col
          [:div.re-form-comp
