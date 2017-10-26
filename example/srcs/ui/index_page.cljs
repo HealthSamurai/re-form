@@ -28,6 +28,7 @@
          {:name "Slava"}]
         form {:form-name :example-form
               :value {:name "Mike"
+                      :multi #{{:name "Evgeny"}}
                       :birthdate "1995-04-17"
                       :time "16:20"}}]
     (fn []

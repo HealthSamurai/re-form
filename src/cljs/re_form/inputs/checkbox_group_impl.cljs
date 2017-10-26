@@ -6,20 +6,27 @@
 (defn checkbox-group-style
   [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
   [:.re-checkbox-group
-   {:display "inline-block"}
-   [:.re-checkbox {:cursor "pointer"
+   {:display :inline-block}
+   [:.re-checkbox {:cursor :pointer
                    :line-height (u/px h3)}
-    [:.radio {:border "1px solid #ddd"
-              :background-color "white"
-              :display "inline-block"
-              :vertical-align "middle"
-              :margin-right (u/px-div h 2)
+    [:.radio {:border border
+              :background-color :white
+              :border-radius (u/px 2)
+              :display :inline-flex
+              :align-items :center
+              :justify-content :center
+              :vertical-align :middle
+              :margin-right (u/px 12)
               :margin-top (u/px -3)
-              :padding-top (u/px 6)
               :width (u/px h2)
-              :height (u/px h2)}]
-    [:&.active {}
-     [:.radio {:background-color selection-bg-color}]]
+              :height (u/px h2)}
+     [:.inner-radio
+      {:width (u/px-div h2 1.5)
+       :height (u/px-div h2 1.5)
+       :display :none
+       :background-color selection-bg-color}]]
+    [:&.active
+     [:.radio [:.inner-radio {:display :inline-block}]]]
     [:&:hover]]])
 
 (defn checkbox-group-input [_]
@@ -38,5 +45,5 @@
           [:div.re-checkbox
            {:class (when (cont (setgen i)) "active")
             :on-click #(on-change (-> i setgen change-fn))}
-           [:span.radio]
+           [:span.radio [:div.inner-radio]]
            [:span.value (label-fn i)]]))])))
