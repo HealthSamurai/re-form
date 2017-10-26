@@ -30,6 +30,7 @@
               :value {:name "Mike"
                       :multi #{{:name "Evgeny"}}
                       :birthdate "1995-04-17"
+                      :last-owner {:name "Tim"}
                       :time "16:20"}}]
     (fn []
       [form/form form
@@ -90,7 +91,7 @@
          [:div.re-form-comp
           [:label.re-form-label "Button select input"]
           [:label.re-form-label.sub "Use it when there are less than 5 elements"]
-          [form/field {:items (take 5 select-items)
+          [form/field {:items (take 4 select-items)
                        :label-fn :name
                        :path [:last-owner]
                        :input w/button-select-input}]]
