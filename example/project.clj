@@ -85,8 +85,10 @@
                            :compiler
                            {:main "ui.prod"
                             :verbose true
-                            ;; :foreign-libs []
-                            ;; :externs []
+                            :externs ["resources/assets/codemirror-externs.js"]
+                            :libs ["https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/addon/hint/show-hint.js"]
+                            :foreign-libs [{:file "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.js"
+                                    :provides ["CodeMirror"]}]
                             :output-to "build/js/ui.js"
                             ;; :output-dir "build/js/out"
                             :optimizations :advanced
