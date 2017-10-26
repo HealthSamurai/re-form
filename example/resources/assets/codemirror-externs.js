@@ -5,6 +5,13 @@ var CodeMirrorObj = function() {
 
 };
 
+/*
+   Required for (when-not (.. cm -state -completionActive) ... )
+*/
+CodeMirrorObj.prototype.state = {
+    "completionActive": function() {}
+};
+
 /**
  * Get the current editor content.
  * @return {string}

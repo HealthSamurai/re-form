@@ -92,4 +92,4 @@
                             :output-to "build/js/ui.js"
                             ;; :output-dir "build/js/out"
                             :optimizations :advanced
-                            :pretty-print  false}}}}}})
+                            :pretty-print false}}}}}})
