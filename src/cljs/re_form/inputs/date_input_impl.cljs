@@ -2,17 +2,33 @@
   (:require [reagent.core :as r]
             [goog.string :as gstring]
             [goog.string.format]
+            [garden.units :as u]
             [re-form.inputs.calendar-impl :refer [re-calendar]]
             [clojure.string :as str]))
 (defn date-input-style
-  [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
-  [:.date-input
-   {:position :relative}
-   [:.calendar-dropdown
-    {:position :absolute
-     :z-index 1
+  [{:keys [w h h2 h3 selection-bg-color gray-color hover-bg-color border]}]
+  [:*
+   [:.dropdown-input
+    [:.calendar-dropdown
+     {:position :absolute
+      :z-index 1
+      :border border
+      :background-color :white}]]
+   [:.date-input
+    {:position :relative
      :border border
-     :background-color :white}]])
+     :display :flex
+     :align-items :center
+     :border-radius (u/px 2)}
+    [:i.material-icons {:display :inline-block
+                        :font-size (u/px h2)
+                        :vertical-align :middle
+                        :color gray-color
+                        :padding [[0 (u/px w)]]}]
+    [:input.re-input {:display :inline-block
+                      :border :none
+                      :padding-left 0
+                      :width (u/px- 244 h2 (* 3 w))}]]])
 
 (def formats
   {
@@ -96,14 +112,15 @@
 
       :reagent-render
       (fn [{:keys [with-dropdown value on-change errors on-blur err-classes] :as props}]
-        [:div.date-input
-         {:on-blur #(my-on-blur % on-blur)}
-         [:input.re-input (merge (dissoc props :errors :with-dropdown :format)
-                        {:type "text"
-                         :placeholder (:placeholder fmt-obj)
-                         :on-focus #(swap! state assoc :dropdown-visible true)
-                         :on-change #(my-onchange % on-change)
-                         :value (:value @state)})]
+        [:div.dropdown-input
+         [:div.date-input {:on-blur #(my-on-blur % on-blur)}
+          [:i.material-icons "today"]
+          [:input.re-input (merge (dissoc props :errors :with-dropdown :format)
+                                  {:type "text"
+                                   :placeholder (:placeholder fmt-obj)
+                                   :on-focus #(swap! state assoc :dropdown-visible true)
+                                   :on-change #(my-onchange % on-change)
+                                   :value (:value @state)})]]
          (when (and with-dropdown (:dropdown-visible @state))
            [:div.calendar-dropdown
             [re-calendar
@@ -150,11 +167,11 @@
       (fn [{:keys [value on-change errors on-blur err-classes] :as props}]
         [:div
          [:input.re-input (merge (dissoc props :errors)
-                        {:type "text"
-                         :placeholder (:placeholder fmt-obj)
-                         :on-blur #(my-on-blur % on-blur)
-                         :on-change #(my-onchange % on-change)
-                         :value (:value @state)})]
+                                 {:type "text"
+                                  :placeholder (:placeholder fmt-obj)
+                                  :on-blur #(my-on-blur % on-blur)
+                                  :on-change #(my-onchange % on-change)
+                                  :value (:value @state)})]
          [:div {:class (apply str (interpose "." err-classes))}
           (when-let [local-errors (:errors @state)]
             (str/join "\n" (conj errors local-errors)))]])})))
@@ -208,12 +225,14 @@
       :reagent-render
       (fn [{:keys [value on-change errors on-blur err-classes] :as props}]
         [:div
-         [:input.re-input (merge (dissoc props :errors)
-                        {:type "text"
-                         :placeholder (get placeholder fmt)
-                         :on-blur #(my-on-blur % on-blur)
-                         :on-change #(my-onchange % on-change)
-                         :value (:value @state)})]
+         [:div.date-input
+          [:i.material-icons "schedule"]
+          [:input.re-input (merge (dissoc props :errors)
+                                  {:type "text"
+                                   :placeholder (get placeholder fmt)
+                                   :on-blur #(my-on-blur % on-blur)
+                                   :on-change #(my-onchange % on-change)
+                                   :value (:value @state)})]]
          [:div {:class (apply str (interpose "." err-classes))}
           (when-let [local-errors (:errors @state)]
             (str/join "\n" (conj errors local-errors)))]])})))
