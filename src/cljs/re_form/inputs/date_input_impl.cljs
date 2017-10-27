@@ -145,10 +145,10 @@
       (when-let [[_ hp mp noonp] (re-matches #"(\d?\d):(\d\d) (\wM)" (str/upper-case x))]
         (let [h (+ (js/parseInt hp) (if (= noonp "PM") 12 0))
               m (js/parseInt mp)]
-          (when (and (< h 24) (< m 59) (some #(= % noonp) ["AM" "PM"]))
+          (when (and (< h 24) (< m 60) (some #(= % noonp) ["AM" "PM"]))
             (str (gstring/format "%02d" h) ":" (gstring/format "%02d" m)))))
       (when-let [[_ h m] (re-matches #"(\d\d):(\d\d)" x)]
-        (when (and (< h 24) (< m 59))
+        (when (and (< h 24) (< m 60))
           x)))))
 
 (defn time-unparse-time [fmt x]
