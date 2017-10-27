@@ -2,7 +2,17 @@
   (:require [reagent.core :as r]
             [goog.string :as gstring]
             [goog.string.format]
+            [re-form.inputs.calendar-impl :refer [re-calendar]]
             [clojure.string :as str]))
+(defn date-input-style
+  [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
+  [:.date-input
+   {:position :relative}
+   [:.calendar-dropdown
+    {:position :absolute
+     :z-index 1
+     :border border
+     :background-color :white}]])
 
 (def formats
   {
@@ -64,6 +74,10 @@
                        (swap! state assoc :value (unparse fmt (:lastValue @state)))
                        (swap! state dissoc :errors))
                      (on-blur))
+        will-recv-props (fn [v]
+                          (when-not (= v (:lastValue @state))
+                            (swap! state assoc :value (unparse fmt v) :lastValue v))
+                          v)
         my-onchange (fn [event on-change]
                       (let [v (.. event -target -value)]
                         (swap! state assoc :value v)
@@ -78,18 +92,24 @@
      {:component-will-receive-props
       (fn [_ nextprops]
         (when-let [{v :value} (second nextprops)]
-          (when-not (= v (:lastValue @state))
-            (swap! state assoc :value (unparse fmt v) :lastValue v))))
+          (will-recv-props v)))
 
       :reagent-render
-      (fn [{:keys [value on-change errors on-blur err-classes] :as props}]
-        [:div
-         [:input.re-input (merge (dissoc props :errors)
+      (fn [{:keys [with-dropdown value on-change errors on-blur err-classes] :as props}]
+        [:div.date-input
+         {:on-blur #(my-on-blur % on-blur)}
+         [:input.re-input (merge (dissoc props :errors :with-dropdown :format)
                         {:type "text"
                          :placeholder (:placeholder fmt-obj)
-                         :on-blur #(my-on-blur % on-blur)
+                         :on-focus #(swap! state assoc :dropdown-visible true)
                          :on-change #(my-onchange % on-change)
                          :value (:value @state)})]
+         (when (and with-dropdown (:dropdown-visible @state))
+           [:div.calendar-dropdown
+            [re-calendar
+             {:value (parse fmt (:value @state))
+              :on-change (comp #(swap! state assoc :dropdown-visible false)
+                               on-change will-recv-props)}]])
          [:div {:class (apply str (interpose "." err-classes))}
           (when-let [local-errors (:errors @state)]
             (str/join "\n" (conj errors local-errors)))]])})))

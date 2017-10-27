@@ -228,8 +228,9 @@
                         [:td {:key x :on-click #(choose-year x)}
                          x]))]))]]))))
 
-(defn re-calendar [props]
-  (let [state (r/atom {:mode :days})]
+(defn re-calendar [{:keys [value]}]
+  (let [state (r/atom {:mode :days
+                       :cal (parse-iso value)})]
     (r/create-class
      {:component-will-receive-props
       (fn [this next-props]

@@ -286,6 +286,7 @@
    inputs/radio-input-style
    inputs/file-upload-style
    inputs/button-select-style
+   inputs/date-input-style
    inputs/textarea-style
    inputs/calendar-style
    inputs/switchbox-style

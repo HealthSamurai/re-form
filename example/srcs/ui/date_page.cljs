@@ -15,9 +15,11 @@
         [:div.col
          [:div.re-form-row
 
-          [:label "Birth Date"]
+          [:label "Birth Date (dropdown)"]
           [form/field {:path [:birthdate]
-                       :input w/calendar-input}]]
+                       :format "dd.mm.yyyy"
+                       :with-dropdown true
+                       :input w/date-input}]]
          [:div.re-form-row
           [:label "Birth Date 2(iso)"]
           [form/field {:path [:birthdate]
