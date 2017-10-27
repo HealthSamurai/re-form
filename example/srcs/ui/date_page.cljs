@@ -5,8 +5,7 @@
 
 (defn datetime-page []
   (let [form {:form-name :calendars-form
-              :value {:birthdate-one {:d 5 :m 3 :y 1980}
-                      :birthdate-two "1995-04-17"
+              :value {:birthdate "1995-04-17"
                       :empty nil
                       :time "16:20"}}]
     (fn []
@@ -17,28 +16,28 @@
          [:div.re-form-row
 
           [:label "Birth Date"]
-          [form/field {:path [:birthdate-one]
+          [form/field {:path [:birthdate]
                        :input w/calendar-input}]]
          [:div.re-form-row
           [:label "Birth Date 2(iso)"]
-          [form/field {:path [:birthdate-two]
+          [form/field {:path [:birthdate]
                        :input w/date-input}]]
          [:div.re-form-row
           [:label "Birth Date 2(russian)"]
-          [form/field {:path [:birthdate-two]
+          [form/field {:path [:birthdate]
                        :format "dd.mm.yyyy"
                        :input w/date-input}]]
 
          [:div.re-form-row
           [:label "Birth Date 2(eu)"]
-          [form/field {:path [:birthdate-two]
+          [form/field {:path [:birthdate]
                        :format "dd/mm/yyyy"
                        :input w/date-input}]]
 
 
          [:div.re-form-row
           [:label "Birth Date 2(us)"]
-          [form/field {:path [:birthdate-two]
+          [form/field {:path [:birthdate]
                        :format "us"
                        :input w/date-input}]]]
         [:div.col

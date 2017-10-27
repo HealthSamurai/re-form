@@ -1,5 +1,7 @@
 (ns re-form.inputs.calendar-impl
-  (:require [reagent.core :as r]))
+  (:require [reagent.core :as r]
+            [goog.string :as gstring]
+            [goog.string.format]))
 
 (def months
   {0  {:name "January" :days 31}
@@ -159,6 +161,14 @@
         [:th "Fr"]
         [:th "Sa"]]])))
 
+(defn unparse-iso [{:keys [d m y]}]
+  (gstring/format "%04d-%02d-%02d" y (inc m) d))
+
+(defn parse-iso [x]
+  (when x
+    (let [[_ y m d] (re-matches #"(\d\d\d\d)-(\d\d)-(\d\d)" x)]
+      {:d (js/parseInt d) :m (dec (js/parseInt m)) :y (js/parseInt y)})))
+
 (defn calendar-days [state on-change v]
   (let [cal (:cal @state)
         data (get-month (:y cal) (:m cal))]
@@ -182,7 +192,7 @@
   (let [switch-mode (fn [m] (swap! state assoc :mode :year))
         choose-month (fn [m]
                        (swap! state (fn [s]
-                                      (-> s 
+                                      (-> s
                                           (assoc-in [:cal :m] m)
                                           (assoc :mode :days)
                                           (assoc :detached true)))))]
@@ -203,7 +213,7 @@
   (let [switch-mode (fn [_] (swap! state assoc :mode :month))
         choose-year (fn [y]
                        (swap! state (fn [x]
-                                      (-> x 
+                                      (-> x
                                           (assoc-in [:cal :y] y)
                                           (assoc :mode :days)
                                           (assoc :detached true)))))]
@@ -218,18 +228,24 @@
                         [:td {:key x :on-click #(choose-year x)}
                          x]))]))]]))))
 
-(defn re-calendar [{:keys [value on-change errors]}]
+(defn re-calendar [props]
   (let [state (r/atom {:mode :days})]
-    (fn [{:keys [value on-change errors]}]
-      (when-not (:detached @state)
-        (swap! state assoc :cal value))
-      [:div.re-calendar
-       (case (:mode @state)
-         :days
-         [calendar-days state on-change value]
+    (r/create-class
+     {:component-will-receive-props
+      (fn [this next-props]
+        (let [nvalue (-> next-props second :value)]
+          (when-not (:detached @state)
+            (swap! state assoc :cal (parse-iso nvalue)))))
 
-         :month
-         [calendar-month state]
+      :reagent-render
+      (fn [{:keys [value on-change errors]}]
+        [:div.re-calendar
+         (case (:mode @state)
+           :days
+           [calendar-days state (comp on-change unparse-iso) (parse-iso value)]
 
-         :year
-         [calendar-year state])])))
+           :month
+           [calendar-month state]
+
+           :year
+           [calendar-year state])])})))
