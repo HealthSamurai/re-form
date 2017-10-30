@@ -17,8 +17,12 @@
     [:.calendar-dropdown
      {:position :absolute
       :z-index 1
+      :display :flex
+      :justify-content :center
+      :width (u/px 238)
       :border border
-      :background-color :white}]]
+      :background-color :white}
+     [:.clickable {:cursor :pointer}]]]
    [:.date-input
     {:position :relative
      :border border
@@ -37,9 +41,11 @@
      [:&:focus
       {:outline :none}]]]])
 
+(def simple-regex #"^(\d\d)(\d\d)(\d\d\d\d)$")
 (def formats
   {
    "dd.mm.yyyy" {:regex #"^(\d\d)\.(\d\d)\.(\d\d\d\d)$"
+                 :simple-regex #"^(\d\d)(\d\d)$"
                  :placeholder "dd.mm.yyyy"
                  :delimiter "."
                  :groups [:d :m :y]}
@@ -74,7 +80,8 @@
 (defn parse [fmt x]
   (when x
     (when-let [f (formats fmt)]
-      (when-let [[_ & groups] (re-matches (:regex f) x)]
+      (when-let [[_ & groups] (or (re-matches (:regex f) x)
+                                  (re-matches simple-regex x))]
         (let [date-hm (zip-date (:groups f) groups)]
           (str (:y date-hm) "-" (:m date-hm) "-" (:d date-hm)))))))
 
@@ -103,6 +110,14 @@
         fmt-obj (get formats fmt)
         state (r/atom {:lastValue (:value opts) :value (unparse fmt (:value opts))})
         my-on-blur (fn [event on-blur]
+                     #_(when-let [dropdown (aget (.. event
+                                                     -target
+                                                     -parentNode
+                                                     -parentNode
+                                                     (getElementsByClassName "calendar-dropdown")) 0)]
+                         (when-not (.....)
+                           (swap! state assoc :dropdown-visible false)))
+
                      (when (:errors @state)
                        (swap! state assoc :value (unparse fmt (:lastValue @state)))
                        (swap! state dissoc :errors))
@@ -151,7 +166,7 @@
             {:on-click #(on-change (inc-iso value))}
             [:i.material-icons.date-chevrons "chevron_right"]])
          (when (and with-dropdown (:dropdown-visible @state))
-           [:div.calendar-dropdown
+           [:div.calendar-dropdown {:tab-index 0}
             [re-calendar
              {:value (parse fmt (:value @state))
               :on-change (comp #(swap! state assoc :dropdown-visible false)
@@ -255,7 +270,11 @@
       (fn [{:keys [value on-change errors on-blur err-classes] :as props}]
         [:div
          [:div.date-input
-          [:i.material-icons "schedule"]
+          [:i.material-icons
+           {:on-click
+            #(let [parent-node (.. % -target -parentNode)
+                   input (aget (.getElementsByClassName parent-node "re-input") 0)]
+               (.focus input))} "schedule"]
           [:input.re-input (merge (dissoc props :errors)
                                   {:type "text"
                                    :placeholder (get placeholder fmt)

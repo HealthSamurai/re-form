@@ -144,14 +144,14 @@
     (fn []
       [:thead
        [:tr
-        [:th {:on-click prev-month} "<"]
+        [:th.clickable {:on-click prev-month} "<"]
         [:th {:col-span 5} [:div.date {:on-click switch-mode}
-                            [:a {:on-click (switch-mode :month)}
+                            [:a.clickable {:on-click (switch-mode :month)}
                              (:name (get months (get-in @state [:cal :m])))]
                             " "
-                            [:a {:on-click (switch-mode :year)}
+                            [:a.clickable {:on-click (switch-mode :year)}
                              (get-in @state [:cal :y])]]]
-        [:th {:on-click next-month} ">"]]
+        [:th.clickable {:on-click next-month} ">"]]
        [:tr
         [:th "Su"]
         [:th "Mo"]
@@ -178,7 +178,7 @@
       (for [week data]
         [:tr {:key (let [f (first week)] (str (:m f) "-" (:d f)))}
          (for [day week]
-           [:td {:key (str (:m day) (:d day))
+           [:td.clickable {:key (str (:m day) (:d day))
                  :on-click (fn [_] (swap! state assoc :detached false)
                              (on-change day))
                  :class (str
@@ -199,13 +199,13 @@
     (fn []
       [:table
        [:thead
-        [:tr [:th {:col-span 4} [:div.date {:on-click switch-mode} (get-in @state [:cal :y]) ]]]]
+        [:tr [:th {:col-span 4} [:div.date.clickable {:on-click switch-mode} (get-in @state [:cal :y]) ]]]]
        [:tbody
         (doall (for [r (range 4)]
                  [:tr {:key r}
                   (for [idx (range 1 4)]
                     (let [m (dec (+ idx (* 3 r)))]
-                      [:td {:key idx :on-click #(choose-month m)}
+                      [:td.clickable {:key idx :on-click #(choose-month m)}
                        (subs (:name (get months m))
                              0 3)]))]))]])))
 
@@ -225,7 +225,7 @@
                    [:tr {:key r}
                     (for [idx (range 5)]
                       (let [x (+ (- y 11) idx (* 5 r))]
-                        [:td {:key x :on-click #(choose-year x)}
+                        [:td.clickable {:key x :on-click #(choose-year x)}
                          x]))]))]]))))
 
 (defn re-calendar [{:keys [value]}]
