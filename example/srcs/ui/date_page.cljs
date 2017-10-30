@@ -21,6 +21,13 @@
                        :with-dropdown true
                        :input w/date-input}]]
          [:div.re-form-row
+
+          [:label "Birth Date (chevrons)"]
+          [form/field {:path [:birthdate]
+                       :format "dd.mm.yyyy"
+                       :with-chevrons true
+                       :input w/date-input}]]
+         [:div.re-form-row
           [:label "Birth Date 2(iso)"]
           [form/field {:path [:birthdate]
                        :input w/date-input}]]

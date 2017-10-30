@@ -8,6 +8,11 @@
 (defn date-input-style
   [{:keys [w h h2 h3 selection-bg-color gray-color hover-bg-color border]}]
   [:*
+   [:.date-chevrons
+    {:display :inline-block
+     :font-size (u/px h2)
+     :cursor :pointer
+     :line-height (u/px* h2 1.5)}]
    [:.dropdown-input
     [:.calendar-dropdown
      {:position :absolute
@@ -17,7 +22,7 @@
    [:.date-input
     {:position :relative
      :border border
-     :display :flex
+     :display :inline-flex
      :align-items :center
      :border-radius (u/px 2)}
     [:i.material-icons {:display :inline-block
@@ -80,6 +85,17 @@
             (->> (mapv #(get date-hm %) (:groups fmt-to))
                  (str/join (:delimiter fmt-to)))))))))
 
+(defn f-iso [f x]
+  (let [date-obj (js/Date. x)]
+    (js/console.log date-obj)
+    (.setDate date-obj (f (.getDate date-obj)))
+    (gstring/format "%04d-%02d-%02d"
+                    (.getFullYear date-obj)
+                    (inc (.getMonth date-obj))
+                    (.getDate date-obj))))
+
+(def inc-iso (partial f-iso inc))
+(def dec-iso (partial f-iso dec))
 
 (defn date-input [opts]
   (let [fmt (or (:format opts) "iso")
@@ -111,16 +127,24 @@
           (will-recv-props v)))
 
       :reagent-render
-      (fn [{:keys [with-dropdown value on-change errors on-blur err-classes] :as props}]
+      (fn [{:keys [with-chevrons with-dropdown value on-change errors on-blur err-classes] :as props}]
         [:div.dropdown-input
+         (when with-chevrons
+           [:div.date-chevrons
+            {:on-click #(on-change (dec-iso value))}
+            [:i.material-icons "chevron_left"]])
          [:div.date-input {:on-blur #(my-on-blur % on-blur)}
           [:i.material-icons "today"]
-          [:input.re-input (merge (dissoc props :errors :with-dropdown :format)
+          [:input.re-input (merge (dissoc props :errors :with-dropdown :format :with-chevrons)
                                   {:type "text"
                                    :placeholder (:placeholder fmt-obj)
                                    :on-focus #(swap! state assoc :dropdown-visible true)
                                    :on-change #(my-onchange % on-change)
                                    :value (:value @state)})]]
+         (when with-chevrons
+           [:div.date-chevrons
+            {:on-click #(on-change (inc-iso value))}
+            [:i.material-icons.date-chevrons "chevron_right"]])
          (when (and with-dropdown (:dropdown-visible @state))
            [:div.calendar-dropdown
             [re-calendar
