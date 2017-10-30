@@ -109,6 +109,8 @@
   (let [fmt (or (:format opts) "iso")
         fmt-obj (get formats fmt)
         state (r/atom {:lastValue (:value opts) :value (unparse fmt (:value opts))})
+        #_(doc-click-listener (fn [e]
+                                (js/console.log "clicklistener" (.-target e))))
         my-on-blur (fn [event on-blur]
                      #_(when-let [dropdown (aget (.. event
                                                      -target
@@ -137,7 +139,16 @@
                             (swap! state assoc :errors
                                    (str "The format is: " (:placeholder fmt-obj)))))))]
     (r/create-class
-     {:component-will-receive-props
+     {
+      #_(:component-did-mount
+         (fn [_]
+           (.addEventListener js/document "click" doc-click-listener))
+
+         :component-will-unmount
+         (fn [_]
+           (.removeEventListener js/document "click" doc-click-listener)))
+
+      :component-will-receive-props
       (fn [_ nextprops]
         (when-let [{v :value} (second nextprops)]
           (will-recv-props v)))
