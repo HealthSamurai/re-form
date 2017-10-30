@@ -33,7 +33,9 @@
     [:input.re-input {:display :inline-block
                       :border :none
                       :padding-left 0
-                      :width (u/px- 244 h2 (* 3 w))}]]])
+                      :width (u/px- 244 h2 (* 3 w))}
+     [:&:focus
+      {:outline :none}]]]])
 
 (def formats
   {
@@ -87,7 +89,6 @@
 
 (defn f-iso [f x]
   (let [date-obj (js/Date. x)]
-    (js/console.log date-obj)
     (.setDate date-obj (f (.getDate date-obj)))
     (gstring/format "%04d-%02d-%02d"
                     (.getFullYear date-obj)
@@ -134,7 +135,11 @@
             {:on-click #(on-change (dec-iso value))}
             [:i.material-icons "chevron_left"]])
          [:div.date-input {:on-blur #(my-on-blur % on-blur)}
-          [:i.material-icons "today"]
+          [:i.material-icons
+           {:on-click
+            #(let [parent-node (.. % -target -parentNode)
+                   input (aget (.getElementsByClassName parent-node "re-input") 0)]
+               (.focus input))} "today"]
           [:input.re-input (merge (dissoc props :errors :with-dropdown :format :with-chevrons)
                                   {:type "text"
                                    :placeholder (:placeholder fmt-obj)
