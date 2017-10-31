@@ -25,7 +25,7 @@
    [:div.controls
     {:position :absolute
      :top "2px"
-     :color gray-color 
+     :color gray-color
      :right (u/px 12)}]
 
    [:.suggestions
@@ -54,7 +54,8 @@
       (condp = ch
         timer (do (swap! state assoc
                          :suggestions (<! (suggest-fn val))
-                         :loading false)
+                         :loading false
+                         :selected nil)
                   (recur nil))
         in (when new-val (recur new-val))))))
 
@@ -66,24 +67,69 @@
   (let [state (r/atom {:current-text nil
                        :focused false
                        :suggestions []})
-        close #(swap! state assoc :focused false :current-text nil)
+        close #(swap! state assoc
+                      :focused false
+                      :current-text nil
+                      :selected nil)
         on-change-ch (chan)
         handle-input-change
-        (fn [event]
-          (let [text (.-value (.-target event))]
-            (swap! state assoc :current-text text)
-            (if (empty? text)
-              (do
-                (swap! state assoc :current-text nil :suggestions [])
-                (on-change ""))
-              (do
-                (swap! state assoc :loading true)
-                (lookup-suggestions on-change-ch text)))))]
+        (fn [text]
+          (swap! state assoc
+                 :current-text text
+                 :selected nil)
+          (if (empty? text)
+            (do
+              (swap! state assoc :current-text nil :suggestions [])
+              (on-change ""))
+            (do
+              (swap! state assoc :loading true)
+              (lookup-suggestions on-change-ch text))))
+        arrow-handler (fn [e]
+                        (if-let [s (:selected @state)]
+                          (let [upd (fn [x]
+                                      (.. s -classList (remove "active"))
+                                      (.. x -classList (add "active"))
+                                      (swap! state assoc :selected x)
+                                      (let [sugs (:suggestions-container @state)]
+                                        (set! (.-scrollTop sugs)
+                                              (- (.-offsetTop x) (.-clientHeight sugs)
+                                                 (- (.-clientHeight x))))))]
+                            (case (.-keyCode e)
+                              38 (when-let [prev-sibl (.-previousSibling s)]
+                                   (upd prev-sibl))
+                              40 (when-let [next-sibl (.-nextSibling s)]
+                                   (upd next-sibl))
+                              13 (do (.click (:selected @state))
+                                     (swap! state dissoc :selected)
+                                     (.blur (:node @state)))
+                              (swap! state dissoc :selected)))
+                          (when-let [first-opt (aget (.getElementsByClassName
+                                                      (r/dom-node (:root-node @state))
+                                                      "option") 0)]
+                            (.. first-opt -classList (add "active"))
+                            (swap! state assoc :selected first-opt
+                                   :suggestions-container
+                                   (aget (.getElementsByClassName
+                                          (r/dom-node (:root-node @state))
+                                          "suggestions") 0)))))]
 
     (debounced-callback state suggest-fn on-change-ch 100)
     (.addEventListener (aget js/document "body" ) "click" #(when (:current-text @state) (close)))
     (r/create-class
-     {:reagent-render
+     {
+      :component-did-mount
+      (fn [this]
+        (let [input (aget (.getElementsByClassName (r/dom-node this) "query") 0)]
+          (swap! state assoc :node input)
+          (swap! state assoc :root-node this)
+          (.addEventListener input "keydown" arrow-handler)))
+
+      :component-will-unmount
+      (fn [this]
+        (let [input (aget (.getElementsByClassName (r/dom-node this) "query") 0)]
+          (.removeEventListener input "keydown" arrow-handler)))
+
+      :reagent-render
       (fn [{:keys [value on-change value-fn label-fn match-fn suggest-fn placeholder icon]}]
         (let [label-fn (or label-fn pr-str)
               value-fn (or value-fn identity)
@@ -92,11 +138,10 @@
                                         (filter #(= (value-fn %) v))
                                         first label-fn)))]
           [:div.re-select-xhr
-           #_[:i.search-icon.material-icons "search"]
            [:input.query
             {:type "text"
              :placeholder placeholder
-             :on-change handle-input-change
+             :on-change #(handle-input-change (.. % -target -value))
              :on-focus (fn [e] (swap! state assoc
                                       :current-text nil :focused true :suggestions []))
              :value (or (:current-text @state)
