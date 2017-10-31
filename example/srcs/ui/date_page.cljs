@@ -14,18 +14,18 @@
        [:div.row
         [:div.col
          [:div.re-form-row
+          [:label "Birth Date (all in one)"]
+          [form/field {:path [:birthdate]
+                       :format "dd.mm.yyyy"
+                       :with-chevrons true
+                       :with-dropdown true
+                       :input w/date-input}]]
+         [:div.re-form-row
 
           [:label "Birth Date (dropdown)"]
           [form/field {:path [:birthdate]
                        :format "dd.mm.yyyy"
                        :with-dropdown true
-                       :input w/date-input}]]
-         [:div.re-form-row
-
-          [:label "Birth Date (chevrons)"]
-          [form/field {:path [:birthdate]
-                       :format "dd.mm.yyyy"
-                       :with-chevrons true
                        :input w/date-input}]]
          [:div.re-form-row
           [:label "Birth Date 2(iso)"]
@@ -50,6 +50,12 @@
                        :format "us"
                        :input w/date-input}]]]
         [:div.col
+         [:div.re-form-row
+          [:label "Birth Date (chevrons)"]
+          [form/field {:path [:birthdate]
+                       :format "dd.mm.yyyy"
+                       :with-chevrons true
+                       :input w/date-input}]]
          [:div.re-form-row
           [:label "Birth Date empy"]
           [form/field {:path [:empty]

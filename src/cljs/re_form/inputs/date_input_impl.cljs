@@ -105,21 +105,22 @@
 (def inc-iso (partial f-iso inc))
 (def dec-iso (partial f-iso dec))
 
+(defn has-parent [x node]
+  (when x
+    (if (= (.-nodeName x) "body")
+      false
+      (or (.isEqualNode x node)
+          (recur (.-parentElement x) node)))))
+
 (defn date-input [opts]
   (let [fmt (or (:format opts) "iso")
         fmt-obj (get formats fmt)
         state (r/atom {:lastValue (:value opts) :value (unparse fmt (:value opts))})
-        #_(doc-click-listener (fn [e]
-                                (js/console.log "clicklistener" (.-target e))))
+        doc-click-listener (fn [e]
+                             (when (and (not (has-parent (.-target e) (:node @state)))
+                                        (:dropdown-visible @state))
+                               (swap! state assoc :dropdown-visible false)))
         my-on-blur (fn [event on-blur]
-                     #_(when-let [dropdown (aget (.. event
-                                                     -target
-                                                     -parentNode
-                                                     -parentNode
-                                                     (getElementsByClassName "calendar-dropdown")) 0)]
-                         (when-not (.....)
-                           (swap! state assoc :dropdown-visible false)))
-
                      (when (:errors @state)
                        (swap! state assoc :value (unparse fmt (:lastValue @state)))
                        (swap! state dissoc :errors))
@@ -140,13 +141,13 @@
                                    (str "The format is: " (:placeholder fmt-obj)))))))]
     (r/create-class
      {
-      #_(:component-did-mount
-         (fn [_]
-           (.addEventListener js/document "click" doc-click-listener))
+      :component-did-mount
+      (fn [this]
+        (swap! state assoc :node (r/dom-node this))
+        (.addEventListener js/document "click" doc-click-listener))
 
-         :component-will-unmount
-         (fn [_]
-           (.removeEventListener js/document "click" doc-click-listener)))
+      :component-will-unmount
+      #(.removeEventListener js/document "click" doc-click-listener)
 
       :component-will-receive-props
       (fn [_ nextprops]
