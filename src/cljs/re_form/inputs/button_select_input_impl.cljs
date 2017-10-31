@@ -6,6 +6,7 @@
   [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
   [:div.re-radio-buttons
    {:display "inline-block"
+    :outline :none
     :border border
     :border-radius (u/px 2)}
    [:div.option {:cursor "pointer"
@@ -25,13 +26,31 @@
                 :color "white"}]]])
 
 (defn button-select-input [_]
-  (fn [{:keys [value on-change label-fn value-fn items]}]
-    (let [value-fn (or value-fn identity)]
-      [:div.re-radio-buttons
-       (doall
-        (for [i items]
-          [:div.option
-           {:key (pr-str i)
-            :class (when (= (value-fn i) value) "active")
-            :on-click (fn [_] (on-change (value-fn i)))}
-           [:span.value (label-fn i)]]))])))
+  (let [arrow-handler (fn [e]
+                        (when-let [active (aget (.getElementsByClassName
+                                                 (.-target e) "active") 0)]
+                          (case (.-keyCode e)
+                            37 (when-let [prev-sibl (.-previousSibling active)]
+                                 (.click prev-sibl))
+                            39 (when-let [next-sibl (.-nextSibling active)]
+                                 (.click next-sibl))
+                            nil)))]
+    (r/create-class
+     {
+      :component-did-mount
+      (fn [this] (.addEventListener (r/dom-node this) "keydown" arrow-handler))
+
+      :component-will-unmount
+      (fn [this] (.removeEventListener (r/dom-node this) "keydown" arrow-handler))
+
+      :reagent-render
+      (fn [{:keys [value on-change label-fn value-fn items]}]
+        (let [value-fn (or value-fn identity)]
+          [:div.re-radio-buttons {:tab-index 0}
+           (doall
+            (for [i items]
+              [:div.option
+               {:key (pr-str i)
+                :class (when (= (value-fn i) value) "active")
+                :on-click (fn [_] (on-change (value-fn i)))}
+               [:span.value (label-fn i)]]))]))})))
