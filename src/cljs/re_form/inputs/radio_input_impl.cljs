@@ -5,7 +5,8 @@
 (defn radio-input-styles
   [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
   [:div.re-radio-group
-   {:display :inline-block}
+   {:display :inline-block
+    :outline :none}
    [:div.option {:cursor :pointer
                  :border-radius (u/px 2)
                  :line-height (u/px h3)
@@ -31,15 +32,33 @@
      [:.radio [:.inner-radio {:display :inline-block}]]]
     [:&:hover {:opacity 1 :background-color hover-bg-color}]]])
 
-(defn radio-input [{:keys [value on-change value-fn label-fn items] :as props}]
+(defn radio-input [{:keys [value-fn label-fn on-change] :as props}]
   (let [label-fn (or label-fn pr-str)
-        value-fn (or value-fn identity)]
-    [:div.re-radio-group
-     (doall
-      (for [i items]
-        [:div.option
-         {:key (pr-str i)
-          :class (when (= (value-fn i) value) "active")
-          :on-click #(on-change (value-fn i))}
-         [:span.radio [:div.inner-radio]]
-         [:span.value (label-fn i)]]))]))
+        value-fn (or value-fn identity)
+        arrow-handler (fn [e]
+                        (when-let [active (aget (.getElementsByClassName
+                                                 (.-target e) "active") 0)]
+                          (case (.-keyCode e)
+                            38 (when-let [prev-sibl (.-previousSibling active)]
+                                 (.click prev-sibl))
+                            40 (when-let [next-sibl (.-nextSibling active)]
+                                 (.click next-sibl))
+                            nil)))]
+
+    (r/create-class
+     {
+      :component-did-mount
+      (fn [this] (.addEventListener (r/dom-node this) "keydown" arrow-handler))
+
+      :component-will-unmount
+      (fn [this] (.removeEventListener (r/dom-node this) "keydown" arrow-handler))
+
+      :reagent-render
+      (fn [{:keys [value on-change items]}]
+        [:div.re-radio-group {:tab-index 0}
+         (for [i items] ^{:key (pr-str i)}
+           [:div.option
+            {:class (when (= (value-fn i) value) "active")
+             :on-click #(on-change (value-fn i))}
+            [:span.radio [:div.inner-radio]]
+            [:span.value (label-fn i)]])])})))
