@@ -63,6 +63,20 @@
   (when-not (empty? query)
     (go (>! ch query))))
 
+(defn scroll [container elem direction]
+  (let [elem-top (.-offsetTop elem)
+        elem-bot (+ elem-top (.-clientHeight elem))
+        view-top (.-scrollTop container)
+        view-bot (+ view-top (.-clientHeight container))]
+    (case direction
+          :down (when (> elem-bot view-bot)
+                  (set! (.-scrollTop container)
+                        (- elem-bot (.-clientHeight container))))
+          :up (when (< elem-top view-top)
+                  (set! (.-scrollTop container)
+                        elem-top))
+          nil)))
+
 (defn select-xhr-input [{:keys [suggest-fn on-change]}]
   (let [state (r/atom {:current-text nil
                        :focused false
@@ -86,19 +100,17 @@
               (lookup-suggestions on-change-ch text))))
         arrow-handler (fn [e]
                         (if-let [s (:selected @state)]
-                          (let [upd (fn [x]
+                          (let [upd (fn [x direction]
                                       (.. s -classList (remove "active"))
                                       (.. x -classList (add "active"))
                                       (swap! state assoc :selected x)
                                       (let [sugs (:suggestions-container @state)]
-                                        (set! (.-scrollTop sugs)
-                                              (- (.-offsetTop x) (.-clientHeight sugs)
-                                                 (- (.-clientHeight x))))))]
+                                        (scroll sugs x direction)))]
                             (case (.-keyCode e)
                               38 (when-let [prev-sibl (.-previousSibling s)]
-                                   (upd prev-sibl))
+                                   (upd prev-sibl :up))
                               40 (when-let [next-sibl (.-nextSibling s)]
-                                   (upd next-sibl))
+                                   (upd next-sibl :down))
                               13 (do (.click (:selected @state))
                                      (swap! state dissoc :selected)
                                      (.blur (:node @state)))
