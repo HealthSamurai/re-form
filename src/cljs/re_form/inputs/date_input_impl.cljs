@@ -10,6 +10,7 @@
   [:*
    [:.date-chevrons
     {:display :inline-block
+     :user-select :none
      :font-size (u/px h2)
      :cursor :pointer
      :line-height (u/px* h2 1.5)}]
@@ -96,11 +97,11 @@
 
 (defn f-iso [f x]
   (let [date-obj (js/Date. x)]
-    (.setDate date-obj (f (.getDate date-obj)))
+    (.setUTCDate date-obj (f (.getUTCDate date-obj)))
     (gstring/format "%04d-%02d-%02d"
-                    (.getFullYear date-obj)
-                    (inc (.getMonth date-obj))
-                    (.getDate date-obj))))
+                    (.getUTCFullYear date-obj)
+                    (inc (.getUTCMonth date-obj))
+                    (.getUTCDate date-obj))))
 
 (def inc-iso (partial f-iso inc))
 (def dec-iso (partial f-iso dec))
