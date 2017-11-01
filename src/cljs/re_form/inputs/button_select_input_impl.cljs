@@ -1,6 +1,7 @@
 (ns re-form.inputs.button-select-input-impl
   (:require [reagent.core :as r]
-            [garden.units :as u]))
+            [garden.units :as u]
+            [re-form.inputs.common :as cmn]))
 
 (defn button-select-style
   [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
@@ -27,8 +28,7 @@
 
 (defn button-select-input [_]
   (let [arrow-handler (fn [e]
-                        (when-let [active (aget (.getElementsByClassName
-                                                 (.-target e) "active") 0)]
+                        (when-let [active (cmn/f-child (.-target e) "active")]
                           (case (.-keyCode e)
                             37 (when-let [prev-sibl (.-previousSibling active)]
                                  (.click prev-sibl))

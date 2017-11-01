@@ -4,6 +4,7 @@
             [goog.string.format]
             [garden.units :as u]
             [re-form.inputs.calendar-impl :refer [re-calendar]]
+            [re-form.inputs.common :as cmn]
             [clojure.string :as str]))
 (defn date-input-style
   [{:keys [w h h2 h3 selection-bg-color gray-color hover-bg-color border]}]
@@ -166,7 +167,7 @@
           [:i.material-icons
            {:on-click
             #(let [parent-node (.. % -target -parentNode)
-                   input (aget (.getElementsByClassName parent-node "re-input") 0)]
+                   input (cmn/f-child parent-node "re-input")]
                (.focus input))} "today"]
           [:input.re-input (merge (dissoc props :errors :with-dropdown :format :with-chevrons)
                                   {:type "text"
@@ -286,7 +287,7 @@
           [:i.material-icons
            {:on-click
             #(let [parent-node (.. % -target -parentNode)
-                   input (aget (.getElementsByClassName parent-node "re-input") 0)]
+                   input (cmn/f-child parent-node "re-input")]
                (.focus input))} "schedule"]
           [:input.re-input (merge (dissoc props :errors)
                                   {:type "text"

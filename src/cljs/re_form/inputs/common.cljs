@@ -14,9 +14,32 @@
                       :margin-bottom (u/px 2)
                       :color gray-color}]])
 
-(defn label-wrapper
-  [{:keys [label upper-description bottom-description]} input]
-  [:div
-   [:label.re-label label]
-   [:label.re-small-label upper-description]
-   input])
+(defn f-child [parent-node classname]
+  "Shortcut to get first child of node matching the classname"
+  (aget (.getElementsByClassName parent-node classname) 0))
+
+(defn scroll
+  "Proper scrolling for custom dropdowns.
+
+     container -- usually a div with a scrollbar
+     elem -- currently 'active' child element that has to be visible
+     direction -- :up if selection goes up(selected previous), :down otherwise
+
+   Ex.
+     (scroll suggestions option :down) -- call it when
+       select option in suggesions div with down arrow"
+
+  [container elem direction]
+
+  (let [elem-top (.-offsetTop elem)
+        elem-bot (+ elem-top (.-clientHeight elem))
+        view-top (.-scrollTop container)
+        view-bot (+ view-top (.-clientHeight container))]
+    (case direction
+      :down (when (> elem-bot view-bot)
+              (set! (.-scrollTop container)
+                    (- elem-bot (.-clientHeight container))))
+      :up (when (< elem-top view-top)
+            (set! (.-scrollTop container)
+                  elem-top))
+      nil)))

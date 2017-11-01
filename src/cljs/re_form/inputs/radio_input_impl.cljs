@@ -1,6 +1,7 @@
 (ns re-form.inputs.radio-input-impl
   (:require [reagent.core :as r]
-            [garden.units :as u]))
+            [garden.units :as u]
+            [re-form.inputs.common :as cmn]))
 
 (defn radio-input-styles
   [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
@@ -36,8 +37,7 @@
   (let [label-fn (or label-fn pr-str)
         value-fn (or value-fn identity)
         arrow-handler (fn [e]
-                        (when-let [active (aget (.getElementsByClassName
-                                                 (.-target e) "active") 0)]
+                        (when-let [active (cmn/f-child (.-target e) "active")]
                           (case (.-keyCode e)
                             38 (when-let [prev-sibl (.-previousSibling active)]
                                  (.click prev-sibl))

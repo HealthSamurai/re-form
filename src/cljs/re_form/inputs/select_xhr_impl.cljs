@@ -2,7 +2,8 @@
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [reagent.core :as r]
             [cljs.core.async :refer [<! chan timeout]]
-            [garden.units :as u]))
+            [garden.units :as u]
+            [re-form.inputs.common :as cmn]))
 
 ;; TODO it should be one style for selects
 (defn select-xhr-style
@@ -63,20 +64,6 @@
   (when-not (empty? query)
     (go (>! ch query))))
 
-(defn scroll [container elem direction]
-  (let [elem-top (.-offsetTop elem)
-        elem-bot (+ elem-top (.-clientHeight elem))
-        view-top (.-scrollTop container)
-        view-bot (+ view-top (.-clientHeight container))]
-    (case direction
-          :down (when (> elem-bot view-bot)
-                  (set! (.-scrollTop container)
-                        (- elem-bot (.-clientHeight container))))
-          :up (when (< elem-top view-top)
-                  (set! (.-scrollTop container)
-                        elem-top))
-          nil)))
-
 (defn select-xhr-input [{:keys [suggest-fn on-change]}]
   (let [state (r/atom {:current-text nil
                        :focused false
@@ -105,7 +92,7 @@
                                       (.. x -classList (add "active"))
                                       (swap! state assoc :selected x)
                                       (let [sugs (:suggestions-container @state)]
-                                        (scroll sugs x direction)))]
+                                        (cmn/scroll sugs x direction)))]
                             (case (.-keyCode e)
                               38 (when-let [prev-sibl (.-previousSibling s)]
                                    (upd prev-sibl :up))
@@ -115,30 +102,27 @@
                                      (swap! state dissoc :selected)
                                      (.blur (:node @state)))
                               (swap! state dissoc :selected)))
-                          (when-let [first-opt (aget (.getElementsByClassName
-                                                      (r/dom-node (:root-node @state))
-                                                      "option") 0)]
+                          (when-let [first-opt (cmn/f-child (:root-node @state) "option")]
                             (.. first-opt -classList (add "active"))
                             (swap! state assoc :selected first-opt
                                    :suggestions-container
-                                   (aget (.getElementsByClassName
-                                          (r/dom-node (:root-node @state))
-                                          "suggestions") 0)))))]
+                                   (cmn/f-child (:root-node @state) "suggestions")))))]
 
     (debounced-callback state suggest-fn on-change-ch 100)
-    (.addEventListener (aget js/document "body" ) "click" #(when (:current-text @state) (close)))
+    (.addEventListener (.-body js/document) "click" #(when (:current-text @state) (close)))
     (r/create-class
      {
       :component-did-mount
       (fn [this]
-        (let [input (aget (.getElementsByClassName (r/dom-node this) "query") 0)]
+        (let [root-node (r/dom-node this)
+              input (cmn/f-child root-node "query")]
           (swap! state assoc :node input)
-          (swap! state assoc :root-node this)
+          (swap! state assoc :root-node root-node)
           (.addEventListener input "keydown" arrow-handler)))
 
       :component-will-unmount
       (fn [this]
-        (let [input (aget (.getElementsByClassName (r/dom-node this) "query") 0)]
+        (let [input (cmn/f-child (r/dom-node this) "query")]
           (.removeEventListener input "keydown" arrow-handler)))
 
       :reagent-render
