@@ -87,13 +87,19 @@
        [:div.row
         [:div.col
          [:div.re-form-row
-          [:label "Ultimate alpha select"]
-          [form/field {:label-fn :display #_(fn [x] [:span [:b (:dispaly x)] " " (:definition x)])
+          [:label "Ultimate (maybe) alpha select"]
+          [form/field {:label-fn :display
                        :path [:new-icd10]
                        :on-search #(rf/dispatch [::search-async %])
                        :options async-items
                        :validators [(v/not-blank)]
-                       :debounce-interval 200
+                       :debounce-interval 300
+                       :input w/select}]]
+         [:div.re-form-row
+          [:label "Ultimate alpha select (static)"]
+          [form/field {:label-fn identity
+                       :path [:new-superuser]
+                       :options ["One" "Two" "Three"]
                        :input w/select}]]
          [:div.re-form-row
           [:label "inputs/select-input"]

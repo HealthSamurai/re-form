@@ -6,44 +6,56 @@
             [garden.units :as u]))
 
 (defn select-style
-  [{:keys [h h2 h3 selection-bg-color hover-bg-color border error-border]}]
-  [:.re-re-select
-   {:position :relative
-    :display "inline-block"
-    :min-width "30em"
-    :background-color :white
-    :border-radius (u/px 2)
-    :padding [[(u/px-div h 2) (u/px 12)]]
-    :line-height (u/px h2)
-    :border border}
-   [:&.error
-    {:border error-border}]
-   [:span.triangle {:color "gray"
-                    :margin-right (u/px-div h 2)}]
-   [:&:hover {:cursor "pointer"
-              :border "1px solid #ccc"}]
-   [:.clear {:padding {:left (u/px 10)
-                       :right (u/px 10)
-                       :top (u/px 5)
-                       :bottom (u/px 5)}
-             :cursor "pointer"
-             :position "absolute"
-             :opactity 0.7
-             :top (u/px 0)
-             :right (u/px 0)
-             :color :red}
-    [:&:hover {:opacity 1 :background-color "#f1f1f1"}]]
+  [{:keys [radius w h h2 h3 selection-bg-color hover-bg-color border error-border]}]
+  [:.re-select-container
+   {:position :relative}
+   [:.re-re-select
+    {:display "inline-block"
+     :min-width "30em"
+     :background-color :white
+     :border-radius (u/px 2)
+     :padding [[(u/px-div h 2) (u/px 12)]]
+     :line-height (u/px h2)
+     :border border}
+    [:&.error
+     {:border error-border}]
+    [:span.triangle {:color "gray"
+                     :margin-right (u/px-div h 2)}]
+    [:&:hover {:cursor "pointer"
+               :border "1px solid #ccc"}]
+    [:.clear {:padding {:left (u/px 10)
+                        :right (u/px 10)
+                        :top (u/px 5)
+                        :bottom (u/px 5)}
+              :cursor "pointer"
+              :position "absolute"
+              :opactity 0.7
+              :top (u/px 0)
+              :right (u/px 0)
+              :color :red}
+     [:&:hover {:opacity 1 :background-color "#f1f1f1"}]]]
+   [:.re-search-search
+    {:border border
+     :width "100%"
+     :padding [[0 (u/px w)]]
+     :border-radius (u/px radius)
+     :line-height (u/px* h3)}
+    [:&.re-invisible
+     {:display :none :position :absolute}]]
    [:.options
     {:position "absolute"
      :background-color "white"
      :z-index 1000
      :left (u/px -1)
-     :top (u/px* 5 (/ h 2))
+     :top (u/px+ 10 (* 2 (+ 16 (* h 1.5))))
      :width "100%"
      :display "inline-block"
      :box-shadow "1px 1px 2px #ccc"
+     :max-height (u/px 500)
+     :overflow-y :auto
      :border "1px solid #ddd"}
-    [:.re-search-search {:width "100%"}]
+    [:&.no-input
+     {:top (u/px+ 10 (+ 16 (* h 1.5)))}]
     [:.option {:cursor "pointer"
                :display "block"
                :padding-left (u/px h)
@@ -64,39 +76,74 @@
 (defn select [{:keys [on-search debounce-interval on-blur]}]
   (let [state (r/atom {:active false})
         doc-click-listener (fn [e]
-                             (when (and (not (cmn/has-ancestor (.-target e) (:node @state)))
+                             (when (and (not (cmn/has-ancestor (.-target e) (:root-node @state)))
                                         (:active @state))
                                (on-blur e)
                                (swap! state assoc :active false)))
         search-fn (if debounce-interval
                     (debounce on-search debounce-interval)
-                    on-search)]
+                    on-search)
+        arrow-handler (fn [e]
+                        (if-let [s (:selected @state)]
+                          (let [upd (fn [x direction]
+                                      (.. s -classList (remove "active"))
+                                      (.. x -classList (add "active"))
+                                      (swap! state assoc :selected x)
+                                      (let [sugs (:suggestions-container @state)]
+                                        (cmn/scroll sugs x direction)))]
+                            (case (.-keyCode e)
+                              38 (when-let [prev-sibl (.-previousSibling s)]
+                                   (upd prev-sibl :up))
+                              40 (when-let [next-sibl (.-nextSibling s)]
+                                   (upd next-sibl :down))
+                              13 (do (.click (:selected @state))
+                                     (swap! state dissoc :selected)
+                                     #_(.blur (:node @state)))
+                              (swap! state dissoc :selected)))
+                          (when-let [first-opt (cmn/f-child (:root-node @state) "option")]
+                            (.. first-opt -classList (add "active"))
+                            (swap! state assoc :selected first-opt
+                                   :suggestions-container
+                                   (cmn/f-child (:root-node @state) "options")))))]
     (r/create-class
      {
       :component-did-mount
       (fn [this]
-        (swap! state assoc :node (r/dom-node this))
+        (let [root (r/dom-node this)]
+          (swap! state assoc :root-node root)
+          (when-let [input (cmn/f-child root "re-search-search")]
+            (swap! state assoc :input-node input)
+            (.addEventListener input "keydown" arrow-handler)))
         (.addEventListener js/document "click" doc-click-listener))
 
       :component-will-unmount
-      #(.removeEventListener js/document "click" doc-click-listener)
+      (fn [this]
+        (when-let [input (:input-node @state)]
+          (.removeEventListener input "keydown" arrow-handler))
+        (.removeEventListener js/document "click" doc-click-listener))
 
       :reagent-render
       (fn [{:keys [value on-change label-fn value-fn options errors] :as props}]
-        [:div.re-re-select
-         {:class (when-not (empty? errors) :error)}
-         [:div
-          {:on-click #(swap! state assoc :active true)}
-          [:span.triangle "▾"]
-          (if value
-            [:span.value
-             [:span.value (label-fn value)]]
-            [:span.choose-value
-             (or (:placeholder props) "Select...")])]
+        [:div.re-select-container
+         [:div.re-re-select
+          {:class (when-not (empty? errors) :error)}
+          [:div
+           {:on-click (fn [_] (do
+                                (when search-fn (js/setTimeout #(.focus (:input-node @state)) 10))
+                                (swap! state assoc :active true
+                                       :selected nil)))}
+           [:span.triangle "▾"]
+           (if value
+             [:span.value
+              [:span.value (label-fn value)]]
+             [:span.choose-value
+              (or (:placeholder props) "Select...")])]]
+         (when search-fn
+           [:input.re-search-search
+            {:tab-index 0
+             :class (when-not (:active @state) :re-invisible)
+             :on-change #(search-fn (.. % -target -value))}])
          (when (:active @state)
-           [:div.options
-            [:input.re-search-search
-             {:auto-focus true
-              :on-change #(search-fn (.. % -target -value))}]
+           [:div.options {:class (when-not search-fn :no-input)}
             [options-list options label-fn (comp #(swap! state assoc :active false)
                                                  on-change)]])])})))
