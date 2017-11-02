@@ -1,6 +1,7 @@
 (ns re-form.inputs.select-impl
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
+            [re-form.inputs.common :as cmn]
             [goog.functions :refer [debounce]]
             [garden.units :as u]))
 
@@ -59,23 +60,38 @@
 
 (defn select [{:keys [on-search debounce-interval]}]
   (let [state (r/atom {:active false})
+        doc-click-listener (fn [e]
+                             (when (and (not (cmn/has-ancestor (.-target e) (:node @state)))
+                                        (:active @state))
+                               (swap! state assoc :active false)))
         search-fn (if debounce-interval
                     (debounce on-search debounce-interval)
                     on-search)]
-    (fn [{:keys [value on-change label-fn value-fn options] :as props}]
-      [:div.re-re-select
-       [:div
-        {:on-click #(swap! state assoc :active true)}
-        [:span.triangle "▾"]
-        (if value
-          [:span.value
-           [:span.value (label-fn value)]]
-          [:span.choose-value
-           (or (:placeholder props) "Select...")])]
-       (when (:active @state)
-         [:div.options
-          [:input.re-search-search
-           {:auto-focus true
-            :on-change #(search-fn (.. % -target -value))}]
-          [options-list options label-fn (comp #(swap! state assoc :active false)
-                                               on-change)]])])))
+    (r/create-class
+     {
+      :component-did-mount
+      (fn [this]
+        (swap! state assoc :node (r/dom-node this))
+        (.addEventListener js/document "click" doc-click-listener))
+
+      :component-will-unmount
+      #(.removeEventListener js/document "click" doc-click-listener)
+
+      :reagent-render
+      (fn [{:keys [value on-change label-fn value-fn options] :as props}]
+        [:div.re-re-select
+         [:div
+          {:on-click #(swap! state assoc :active true)}
+          [:span.triangle "▾"]
+          (if value
+            [:span.value
+             [:span.value (label-fn value)]]
+            [:span.choose-value
+             (or (:placeholder props) "Select...")])]
+         (when (:active @state)
+           [:div.options
+            [:input.re-search-search
+             {:auto-focus true
+              :on-change #(search-fn (.. % -target -value))}]
+            [options-list options label-fn (comp #(swap! state assoc :active false)
+                                                 on-change)]])])})))

@@ -111,19 +111,12 @@
 (def inc-iso (partial f-iso inc))
 (def dec-iso (partial f-iso dec))
 
-(defn has-parent [x node]
-  (when x
-    (if (= (.-nodeName x) "body")
-      false
-      (or (.isEqualNode x node)
-          (recur (.-parentElement x) node)))))
-
 (defn date-input [opts]
   (let [fmt (or (:format opts) "iso")
         fmt-obj (get formats fmt)
         state (r/atom {:lastValue (:value opts) :value (unparse fmt (:value opts))})
         doc-click-listener (fn [e]
-                             (when (and (not (has-parent (.-target e) (:node @state)))
+                             (when (and (not (cmn/has-ancestor (.-target e) (:node @state)))
                                         (:dropdown-visible @state))
                                (swap! state assoc :dropdown-visible false)))
         my-on-blur (fn [event on-blur]

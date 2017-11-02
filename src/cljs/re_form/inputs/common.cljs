@@ -18,6 +18,14 @@
   "Shortcut to get first child of node matching the classname"
   (aget (.getElementsByClassName parent-node classname) 0))
 
+(defn has-ancestor [x node]
+  "Check if node `x` has ancestor `node`"
+  (when x
+    (if (= (.-nodeName x) "body")
+      false
+      (or (.isEqualNode x node)
+          (recur (.-parentElement x) node)))))
+
 (defn scroll
   "Proper scrolling for custom dropdowns.
 
