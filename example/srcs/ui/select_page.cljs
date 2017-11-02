@@ -87,6 +87,14 @@
        [:div.row
         [:div.col
          [:div.re-form-row
+          [:label "Ultimate alpha select"]
+          [form/field {:label-fn :display #_(fn [x] [:span [:b (:dispaly x)] " " (:definition x)])
+                       :path [:new-icd10]
+                       :on-search #(rf/dispatch [::search-async %])
+                       :options @async-items
+                       :debounce-interval 200
+                       :input w/select}]]
+         [:div.re-form-row
           [:label "inputs/select-input"]
           [form/field {:label-fn :name
                        :path [:last-owner]
