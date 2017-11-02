@@ -4,12 +4,14 @@
             [re-form.inputs.common :as cmn]))
 
 (defn button-select-style
-  [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
+  [{:keys [h h2 h3 selection-bg-color hover-bg-color border error-border]}]
   [:div.re-radio-buttons
    {:display "inline-block"
     :outline :none
     :border border
     :border-radius (u/px 2)}
+   [:&.error
+    {:border error-border}]
    [:div.option {:cursor "pointer"
                  :transition "background-color 200ms, color 100ms"
                  :background-color "white"
@@ -44,9 +46,12 @@
       (fn [this] (.removeEventListener (r/dom-node this) "keydown" arrow-handler))
 
       :reagent-render
-      (fn [{:keys [value on-change label-fn value-fn items]}]
+      (fn [{:keys [value on-change label-fn value-fn items errors on-blur]}]
         (let [value-fn (or value-fn identity)]
-          [:div.re-radio-buttons {:tab-index 0}
+          [:div.re-radio-buttons
+           {:tab-index 0
+            :on-blur on-blur
+            :class (when-not (empty? errors) :error)}
            (doall
             (for [i items]
               [:div.option

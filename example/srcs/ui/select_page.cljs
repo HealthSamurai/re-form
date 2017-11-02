@@ -3,6 +3,8 @@
                    [re-frame.core :as rf])
   (:require
    [clojure.string :as str]
+   [re-form.validators :as v]
+   [re-form.submit :as s]
    [re-frame.core :as rf]
    [goog.string :as gstring]
    [cljs-http.client :as http]
@@ -117,11 +119,21 @@
                        :input w/select-xhr-input}]]
 
          [:div.re-form-row
+          [:label "inputs/button-select-input (required)"]
+          [form/field {:items items
+                       :validators [(v/not-blank)]
+                       :label-fn :name
+                       :path [:empty-but-required]
+                       :input w/button-select-input}]]
+         [:div.re-form-row
           [:label "inputs/button-select-input"]
           [form/field {:items items
                        :label-fn :name
                        :path [:other-owner]
                        :input w/button-select-input}]]
+
+         [:div.re-form-row
+          [s/submit-button {:submit-fn #(js/alert (pr-str %))} "Submit!"]]
 
          [:div.re-form-row
           [:div.col [form/form-data {:form-name :selects-form}]]]]
