@@ -7,7 +7,7 @@
             [re-form.inputs.common :as cmn]
             [clojure.string :as str]))
 (defn date-input-style
-  [{:keys [w h h2 h3 selection-bg-color gray-color hover-bg-color border]}]
+  [{:keys [w h h2 h3 selection-bg-color gray-color hover-bg-color border error-border]}]
   [:*
    [:.date-chevrons
     {:display :inline-block
@@ -31,6 +31,8 @@
      :display :inline-flex
      :align-items :center
      :border-radius (u/px 2)}
+    [:&.error
+     {:border error-border}]
     [:i.material-icons {:display :inline-block
                         :font-size (u/px h2)
                         :vertical-align :middle
@@ -81,11 +83,13 @@
 
 (defn parse [fmt x]
   (when x
-    (when-let [f (formats fmt)]
-      (when-let [[_ & groups] (or (re-matches (:regex f) x)
-                                  (re-matches simple-regex x))]
-        (let [date-hm (zip-date (:groups f) groups)]
-          (str (:y date-hm) "-" (:m date-hm) "-" (:d date-hm)))))))
+    (if (empty? x)
+      x
+      (when-let [f (formats fmt)]
+        (when-let [[_ & groups] (or (re-matches (:regex f) x)
+                                    (re-matches simple-regex x))]
+          (let [date-hm (zip-date (:groups f) groups)]
+            (str (:y date-hm) "-" (:m date-hm) "-" (:d date-hm))))))))
 
 (defn unparse [fmt x]
   (when x
@@ -138,9 +142,8 @@
                           (do
                             (on-change vv)
                             (swap! state dissoc :errors))
-                          (do
-                            (swap! state assoc :errors
-                                   (str "The format is: " (:placeholder fmt-obj)))))))]
+                          (swap! state assoc :errors
+                                 (str "The format is: " (:placeholder fmt-obj))))))]
     (r/create-class
      {
       :component-did-mount
@@ -163,7 +166,8 @@
            [:div.date-chevrons
             {:on-click #(on-change (dec-iso value))}
             [:i.material-icons "chevron_left"]])
-         [:div.date-input {:on-blur #(my-on-blur % on-blur)}
+         [:div.date-input {:on-blur #(my-on-blur % on-blur)
+                           :class (when-not (empty? errors) :error)}
           [:i.material-icons
            {:on-click
             #(let [parent-node (.. % -target -parentNode)

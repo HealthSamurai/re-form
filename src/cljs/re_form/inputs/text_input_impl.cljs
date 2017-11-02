@@ -4,7 +4,7 @@
             [garden.units :as u]))
 
 (defn text-input-style
-  [{:keys [h h2 h3 w selection-bg-color hover-bg-color border radius]}]
+  [{:keys [h h2 h3 w selection-bg-color hover-bg-color border radius error-border]}]
   [:*
    [:.re-input-wrap
     {:display "inline-block"}]
@@ -13,7 +13,9 @@
      :width "100%"
      :padding [[0 (u/px w)]]
      :border-radius (u/px radius)
-     :line-height (u/px* h3)}]])
+     :line-height (u/px* h3)}
+    [:&.error
+     {:border error-border}]]])
 
 (defn text-input [props]
   (let [my-onchange (fn [event on-change] (on-change (.. event -target -value)))]
@@ -21,6 +23,7 @@
       [:div.re-input-wrap
        [:input.re-input (merge (dissoc props :errors)
                                {:type (or (:type props) "text")
+                                :class (when-not (empty? errors) :error)
                                 :on-change #(my-onchange % on-change)
                                 :value value})]
-       [errors-div errors]])))
+       #_[errors-div errors]])))

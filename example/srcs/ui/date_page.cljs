@@ -1,6 +1,7 @@
 (ns ui.date-page
   (:require [re-form.core :as form]
             [ui.routes :as ui-routes]
+            [re-form.validators :as v]
             [re-form.inputs :as w]))
 
 (defn datetime-page []
@@ -28,26 +29,27 @@
                        :with-dropdown true
                        :input w/date-input}]]
          [:div.re-form-row
-          [:label "Birth Date 2(iso)"]
+          [:label "Birth Date (iso)"]
           [form/field {:path [:birthdate]
                        :input w/date-input}]]
          [:div.re-form-row
-          [:label "Birth Date 2(russian)"]
+          [:label "Birth Date (russian)"]
           [form/field {:path [:birthdate]
                        :format "dd.mm.yyyy"
                        :input w/date-input}]]
 
          [:div.re-form-row
-          [:label "Birth Date 2(eu)"]
+          [:label "Birth Date (eu)"]
           [form/field {:path [:birthdate]
                        :format "dd/mm/yyyy"
                        :input w/date-input}]]
 
 
          [:div.re-form-row
-          [:label "Birth Date 2(us)"]
-          [form/field {:path [:birthdate]
+          [:label "Birth Date Required (us, required)"]
+          [form/field {:path [:birthdate-two]
                        :format "us"
+                       :validators [(v/not-blank)]
                        :input w/date-input}]]]
         [:div.col
          [:div.re-form-row
@@ -58,13 +60,13 @@
                        :input w/date-input}]]
          [:div.re-form-row
           [:label "Birth Date empy"]
-          [form/field {:path [:empty]
+          [form/field {:path [:empty-date]
                        :format "us"
                        :input w/date-input}]]
 
          [:div.re-form-row
           [:label "Time empy"]
-          [form/field {:path [:empty]
+          [form/field {:path [:empty-time]
                        :input w/time-input}]]
          [:div.re-form-row
           [:label "Time 24"]

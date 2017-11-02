@@ -279,7 +279,8 @@
    :selection-bg-color "#007bff"
    :hover-bg-color "#f1f1f1"
    :gray-color "rgba(52, 59, 81, 0.4)"
-   :border "1px solid #ddd"})
+   :border "1px solid #ddd"
+   :error-border "1px solid #db4040"})
 
 (def input-style-fns
   [cmon/label-wrapper-style
