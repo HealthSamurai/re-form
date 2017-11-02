@@ -6,7 +6,7 @@
             [garden.units :as u]))
 
 (defn select-style
-  [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
+  [{:keys [h h2 h3 selection-bg-color hover-bg-color border error-border]}]
   [:.re-re-select
    {:position :relative
     :display "inline-block"
@@ -15,7 +15,9 @@
     :border-radius (u/px 2)
     :padding [[(u/px-div h 2) (u/px 12)]]
     :line-height (u/px h2)
-    :border "1px solid #ddd"}
+    :border border}
+   [:&.error
+    {:border error-border}]
    [:span.triangle {:color "gray"
                     :margin-right (u/px-div h 2)}]
    [:&:hover {:cursor "pointer"
@@ -51,18 +53,20 @@
      [:&:hover {:background-color hover-bg-color}]]]])
 
 (defn options-list [options label-fn on-change]
-  [:div
-   (for [i options]
-     [:div.option
-      {:key (pr-str i)
-       :on-click (fn [_] (on-change i))}
-      (label-fn i)])])
+  (let [opts (if (instance? reagent.ratom/Reaction options) @options options)]
+    [:div
+     (for [i opts]
+       [:div.option
+        {:key (pr-str i)
+         :on-click (fn [_] (on-change i))}
+        (label-fn i)])]))
 
-(defn select [{:keys [on-search debounce-interval]}]
+(defn select [{:keys [on-search debounce-interval on-blur]}]
   (let [state (r/atom {:active false})
         doc-click-listener (fn [e]
                              (when (and (not (cmn/has-ancestor (.-target e) (:node @state)))
                                         (:active @state))
+                               (on-blur e)
                                (swap! state assoc :active false)))
         search-fn (if debounce-interval
                     (debounce on-search debounce-interval)
@@ -78,8 +82,9 @@
       #(.removeEventListener js/document "click" doc-click-listener)
 
       :reagent-render
-      (fn [{:keys [value on-change label-fn value-fn options] :as props}]
+      (fn [{:keys [value on-change label-fn value-fn options errors] :as props}]
         [:div.re-re-select
+         {:class (when-not (empty? errors) :error)}
          [:div
           {:on-click #(swap! state assoc :active true)}
           [:span.triangle "▾"]

@@ -91,7 +91,8 @@
           [form/field {:label-fn :display #_(fn [x] [:span [:b (:dispaly x)] " " (:definition x)])
                        :path [:new-icd10]
                        :on-search #(rf/dispatch [::search-async %])
-                       :options @async-items
+                       :options async-items
+                       :validators [(v/not-blank)]
                        :debounce-interval 200
                        :input w/select}]]
          [:div.re-form-row
