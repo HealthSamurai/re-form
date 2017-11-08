@@ -33,7 +33,7 @@
   (fn [{:keys [value on-change value-fn label-fn items] :as props}]
     (let [label-fn (or label-fn pr-str)
           value-fn (or value-fn identity)
-          setgen #(-> % vector set)
+          setgen #(-> % value-fn vector set)
           cont #(s/subset? % value)
           change-fn (fn [set-item]
                       (if (cont set-item)
