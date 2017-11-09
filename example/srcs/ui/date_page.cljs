@@ -77,7 +77,13 @@
           [:label "Time 12"]
           [form/field {:path [:time]
                        :format "12h"
-                       :input w/time-input}]]]
+                       :input w/time-input}]]
+         [:div.re-form-row
+          [:label "Datetime input"]
+          [form/field {:path [:date-time]
+                       :format-date "dd.mm.yyyy"
+                       :format-time "24h"
+                       :input w/date-time-input}]]]
 
 
         [:div.col

@@ -6,6 +6,7 @@
             [re-form.inputs.calendar-impl :refer [re-calendar]]
             [re-form.inputs.common :as cmn]
             [clojure.string :as str]))
+
 (defn date-input-style
   [{:keys [w h h2 h3 selection-bg-color gray-color hover-bg-color border error-border]}]
   [:*
@@ -81,7 +82,7 @@
 (defn zip-date [names groups]
   (apply hash-map (interleave names groups)))
 
-(defn parse [fmt x]
+(defn date-parse [fmt x]
   (when x
     (if (empty? x)
       x
@@ -91,7 +92,7 @@
           (let [date-hm (zip-date (:groups f) groups)]
             (str (:y date-hm) "-" (:m date-hm) "-" (:d date-hm))))))))
 
-(defn unparse [fmt x]
+(defn date-unparse [fmt x]
   (when x
     (when-let [f (formats "iso")]
       (when-let [[_ & groups] (re-matches (:regex f) x)]
@@ -114,24 +115,24 @@
 (defn date-input [opts]
   (let [fmt (or (:format opts) "iso")
         fmt-obj (get formats fmt)
-        state (r/atom {:lastValue (:value opts) :value (unparse fmt (:value opts))})
+        state (r/atom {:lastValue (:value opts) :value (date-unparse fmt (:value opts))})
         doc-click-listener (fn [e]
                              (when (and (not (cmn/has-ancestor (.-target e) (:node @state)))
                                         (:dropdown-visible @state))
                                (swap! state assoc :dropdown-visible false)))
         my-on-blur (fn [event on-blur]
                      (when (:errors @state)
-                       (swap! state assoc :value (unparse fmt (:lastValue @state)))
+                       (swap! state assoc :value (date-unparse fmt (:lastValue @state)))
                        (swap! state dissoc :errors))
                      (on-blur))
         will-recv-props (fn [v]
                           (when-not (= v (:lastValue @state))
-                            (swap! state assoc :value (unparse fmt v) :lastValue v))
+                            (swap! state assoc :value (date-unparse fmt v) :lastValue v))
                           v)
         my-onchange (fn [event on-change]
                       (let [v (.. event -target -value)]
                         (swap! state assoc :value v)
-                        (if-let [vv (parse fmt v)]
+                        (if-let [vv (date-parse fmt v)]
                           (do
                             (on-change vv)
                             (swap! state dissoc :errors))
@@ -179,59 +180,70 @@
          (when (and with-dropdown (:dropdown-visible @state))
            [:div.calendar-dropdown {:tab-index 0}
             [re-calendar
-             {:value (parse fmt (:value @state))
+             {:value (date-parse fmt (:value @state))
               :on-change (comp #(swap! state assoc :dropdown-visible false)
                                on-change will-recv-props)}]])
          [:div {:class (apply str (interpose "." err-classes))}
           (when-let [local-errors (:errors @state)]
             (str/join "\n" (conj errors local-errors)))]])})))
 
-(defn parse-time [fmt x]
-  )
+(defn local-tz-offset []
+  (let [local-tz (- (.getTimezoneOffset (js/Date.)))
+        hours (Math/floor (/ local-tz 60))
+        minutes (mod local-tz 60)]
+    (gstring/format "%s%02d:%02d" (if (neg? hours) "-" "+")
+                    (Math/abs hours) minutes)))
 
-(defn unparse-time [fmt x]
-  )
+(defn iso-dt [date time & {:keys [with-local-tz]}]
+  (gstring/format "%sT%s:00%s" date time (if with-local-tz
+                                           (local-tz-offset) "")))
 
-(defn date-time-input [opts]
-  (let [fmt (or (:format opts) "iso")
-        fmt-obj (get formats fmt)
-        state (r/atom {:lastValue (:value opts) :value (unparse-time fmt (:value opts))})
-        my-on-blur (fn [event on-blur]
-                     (when (:errors @state)
-                       (swap! state assoc :value (unparse-time fmt (:lastValue @state)))
-                       (swap! state dissoc :errors))
-                     (on-blur))
-        my-onchange (fn [event on-change]
-                      (let [v (.. event -target -value)]
-                        (swap! state assoc :value v)
-                        (if-let [vv (parse-time fmt v)]
-                          (do
-                            (on-change vv)
-                            (swap! state dissoc :errors))
-                          (do
-                            (swap! state assoc :errors
-                                   (str "The format is: " (:placeholder fmt-obj)))))))]
-    (r/create-class
-     {:component-will-receive-props
-      (fn [_ nextprops]
-        (when-let [{v :value} (second nextprops)]
-          (when-not (= v (:lastValue @state))
-            (swap! state assoc :value (unparse-time fmt v) :lastValue v))))
+#_((defn parse-time [fmt x]
+     )
 
-      :reagent-render
-      (fn [{:keys [value on-change errors on-blur err-classes] :as props}]
-        [:div
-         [:input.re-input (merge (dissoc props :errors)
-                                 {:type "text"
-                                  :placeholder (:placeholder fmt-obj)
-                                  :on-blur #(my-on-blur % on-blur)
-                                  :on-change #(my-onchange % on-change)
-                                  :value (:value @state)})]
-         [:div {:class (apply str (interpose "." err-classes))}
-          (when-let [local-errors (:errors @state)]
-            (str/join "\n" (conj errors local-errors)))]])})))
+   (defn unparse-time [fmt x]
+     )
 
-(defn time-parse-time [fmt x]
+   (defn date-time-input [opts]
+     (let [fmt (or (:format opts) "iso")
+           fmt-obj (get formats fmt)
+           state (r/atom {:lastValue (:value opts) :value (unparse-time fmt (:value opts))})
+           my-on-blur (fn [event on-blur]
+                        (when (:errors @state)
+                          (swap! state assoc :value (unparse-time fmt (:lastValue @state)))
+                          (swap! state dissoc :errors))
+                        (on-blur))
+           my-onchange (fn [event on-change]
+                         (let [v (.. event -target -value)]
+                           (swap! state assoc :value v)
+                           (if-let [vv (parse-time fmt v)]
+                             (do
+                               (on-change vv)
+                               (swap! state dissoc :errors))
+                             (do
+                               (swap! state assoc :errors
+                                      (str "The format is: " (:placeholder fmt-obj)))))))]
+       (r/create-class
+        {:component-will-receive-props
+         (fn [_ nextprops]
+           (when-let [{v :value} (second nextprops)]
+             (when-not (= v (:lastValue @state))
+               (swap! state assoc :value (unparse-time fmt v) :lastValue v))))
+
+         :reagent-render
+         (fn [{:keys [value on-change errors on-blur err-classes] :as props}]
+           [:div
+            [:input.re-input (merge (dissoc props :errors)
+                                    {:type "text"
+                                     :placeholder (:placeholder fmt-obj)
+                                     :on-blur #(my-on-blur % on-blur)
+                                     :on-change #(my-onchange % on-change)
+                                     :value (:value @state)})]
+            [:div {:class (apply str (interpose "." err-classes))}
+             (when-let [local-errors (:errors @state)]
+               (str/join "\n" (conj errors local-errors)))]])}))))
+
+(defn time-parse [fmt x]
   (when x
     (if (= fmt "12h")
       (when-let [[_ hp mp noonp] (re-matches #"(\d?\d):(\d\d) (\wM)" (str/upper-case x))]
@@ -243,8 +255,8 @@
         (when (and (< h 24) (< m 60))
           x)))))
 
-(defn time-unparse-time [fmt x]
-  (when x
+(defn time-unparse [fmt inp-x]
+  (when-let [x (str/join (take 5 inp-x))]
     (if (= fmt "12h")
       (when-let [[_ hp m] (re-matches #"(\d\d):(\d\d)" x)]
         (let [[h noon] (if (> hp 12) [(- hp 12) "PM"] [hp "AM"])]
@@ -254,16 +266,16 @@
 (defn time-input [opts]
   (let [fmt (or (:format opts) "24h")
         placeholder {"24h" "hh:mm" "12h" "hh:mm AM|PM"}
-        state (r/atom {:lastValue (:value opts) :value (time-unparse-time fmt (:value opts))})
+        state (r/atom {:lastValue (:value opts) :value (time-unparse fmt (:value opts))})
         my-on-blur (fn [event on-blur]
                      (when (:errors @state)
-                       (swap! state assoc :value (time-unparse-time fmt (:lastValue @state)))
+                       (swap! state assoc :value (time-unparse fmt (:lastValue @state)))
                        (swap! state dissoc :errors))
                      (on-blur))
         my-onchange (fn [event on-change]
                       (let [v (.. event -target -value)]
                         (swap! state assoc :value v)
-                        (if-let [vv (time-parse-time fmt v)]
+                        (if-let [vv (time-parse fmt v)]
                           (do
                             (on-change vv)
                             (swap! state dissoc :errors))
@@ -275,7 +287,7 @@
       (fn [_ nextprops]
         (when-let [{v :value} (second nextprops)]
           (when-not (= v (:lastValue @state))
-            (swap! state assoc :value (time-unparse-time fmt v) :lastValue v))))
+            (swap! state assoc :value (time-unparse fmt v) :lastValue v))))
 
       :reagent-render
       (fn [{:keys [value on-change errors on-blur err-classes] :as props}]
@@ -289,6 +301,72 @@
           [:input.re-input (merge (dissoc props :errors)
                                   {:type "text"
                                    :placeholder (get placeholder fmt)
+                                   :on-blur #(my-on-blur % on-blur)
+                                   :on-change #(my-onchange % on-change)
+                                   :value (:value @state)})]]
+         [:div {:class (apply str (interpose "." err-classes))}
+          (when-let [local-errors (:errors @state)]
+            (str/join "\n" (conj errors local-errors)))]])})))
+
+(defn date-time-unparse [date-fmt time-fmt x]
+  (let [[date time] (str/split x #"T")
+        unparsed-date (date-unparse date-fmt date)
+        unparsed-time (time-unparse time-fmt time)]
+    (when (and unparsed-date unparsed-time)
+      (str unparsed-date " " unparsed-time))))
+
+(defn date-time-parse [date-fmt time-fmt x]
+  (let [[date time] (str/split x #" " 2)
+        k (js/console.log date "niga" time)
+        parsed-date (date-parse date-fmt date)
+        parsed-time (time-parse time-fmt time)]
+    (when (and parsed-date parsed-time)
+      (iso-dt parsed-date parsed-time))))
+
+(defn date-time-input [opts]
+  (let [fmt-time (or (:format-time opts) "24h")
+        fmt-date (or (:format-date opts) "iso")
+        fmt-date-obj (get formats fmt-date)
+        fmt nil
+        plc-time {"24h" "hh:mm" "12h" "hh:mm AM|PM"}
+        placeholder (str (:placeholder fmt-date-obj) " " (get plc-time fmt-time))
+        state (r/atom {:lastValue (:value opts) :value
+                       (date-time-unparse fmt-date fmt-time (:value opts))})
+        my-on-blur (fn [event on-blur]
+                     (when (:errors @state)
+                       (swap! state assoc :value (date-time-unparse
+                                                  fmt-date fmt-time (:lastValue @state)))
+                       (swap! state dissoc :errors))
+                     (on-blur))
+        my-onchange (fn [event on-change]
+                      (let [v (.. event -target -value)]
+                        (swap! state assoc :value v)
+                        (if-let [vv (date-time-parse fmt-date fmt-time v)]
+                          (do
+                            (on-change vv)
+                            (swap! state dissoc :errors))
+                          (do
+                            (swap! state assoc :errors
+                                   (str "The format is: " placeholder))))))]
+    (r/create-class
+     {:component-will-receive-props
+      (fn [_ nextprops]
+        (when-let [{v :value} (second nextprops)]
+          (when-not (= v (:lastValue @state))
+            (swap! state assoc :value (date-time-unparse fmt-date fmt-time v) :lastValue v))))
+
+      :reagent-render
+      (fn [{:keys [value on-change errors on-blur err-classes] :as props}]
+        [:div
+         [:div.date-input
+          [:i.material-icons
+           {:on-click
+            #(let [parent-node (.. % -target -parentNode)
+                   input (cmn/f-child parent-node "re-input")]
+               (.focus input))} "schedule"]
+          [:input.re-input (merge (dissoc props :errors :format-date :format-time)
+                                  {:type "text"
+                                   :placeholder placeholder
                                    :on-blur #(my-on-blur % on-blur)
                                    :on-change #(my-onchange % on-change)
                                    :value (:value @state)})]]
