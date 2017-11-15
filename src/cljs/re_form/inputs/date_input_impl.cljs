@@ -160,7 +160,7 @@
            [:div.date-chevrons
             {:on-click #(on-change (dec-iso value))}
             [:i.material-icons "chevron_left"]])
-         [:div.date-input {:on-blur #(my-on-blur % on-blur)
+         [:div.date-input {:on-blur #(my-on-blur % (or on-blur identity))
                            :class (when-not (empty? errors) :error)}
           [:i.material-icons
            {:on-click
