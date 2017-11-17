@@ -317,7 +317,6 @@
 
 (defn date-time-parse [date-fmt time-fmt x]
   (let [[date time] (str/split x #" " 2)
-        k (js/console.log date "niga" time)
         parsed-date (date-parse date-fmt date)
         parsed-time (time-parse time-fmt time)]
     (when (and parsed-date parsed-time)
