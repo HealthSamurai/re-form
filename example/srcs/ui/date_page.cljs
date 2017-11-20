@@ -79,9 +79,16 @@
                        :format "12h"
                        :input w/time-input}]]
          [:div.re-form-row
-          [:label "Datetime input"]
+          [:label "Datetime input (UTC)"]
           [form/field {:path [:date-time]
                        :format-date "dd.mm.yyyy"
+                       :format-time "24h"
+                       :input w/date-time-input}]]
+         [:div.re-form-row
+          [:label "Datetime input (Moscow local)"]
+          [form/field {:path [:date-time]
+                       :format-date "dd.mm.yyyy"
+                       :timezone "Europe/Moscow"
                        :format-time "24h"
                        :input w/date-time-input}]]]
 

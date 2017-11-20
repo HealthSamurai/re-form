@@ -7,6 +7,7 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.9.521" :scope "provided"]
                  [cljsjs/react-with-addons "15.4.2-2"]
+                 [cljsjs/moment-timezone "0.5.11-1"]
                  [reagent "0.6.1" :exclusions [cljsjs/react]]
                  [re-frame "0.9.2" :exclusions [cljsjs/react]]
                  [reagent-utils "0.2.1" :exclusions [cljsjs/react]]

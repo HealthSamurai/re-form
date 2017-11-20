@@ -5,7 +5,8 @@
             [garden.units :as u]
             [re-form.inputs.calendar-impl :refer [re-calendar]]
             [re-form.inputs.common :as cmn]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [cljsjs.moment-timezone]))
 
 (defn date-input-style
   [{:keys [w h h2 h3 selection-bg-color gray-color hover-bg-color border error-border]}]
@@ -78,6 +79,14 @@
                  :delimiter "-"
                  :placeholder "yyyy-mm-dd"
                  :groups [:y :m :d]}})
+
+(defn to-utc [timezone local-datetime]
+  (let [converted (.. js/moment (tz local-datetime timezone) utc format)]
+    (subs converted 0 19)))
+
+(defn from-utc [timezone utc-datetime]
+  (let [converted (.. js/moment (tz utc-datetime "utc") (tz timezone) format)]
+    (subs converted 0 19)))
 
 (defn zip-date [names groups]
   (apply hash-map (interleave names groups)))
@@ -187,16 +196,19 @@
           (when-let [local-errors (:errors @state)]
             (str/join "\n" (conj errors local-errors)))]])})))
 
-(defn local-tz-offset []
-  (let [local-tz (- (.getTimezoneOffset (js/Date.)))
-        hours (Math/floor (/ local-tz 60))
-        minutes (mod local-tz 60)]
-    (gstring/format "%s%02d:%02d" (if (neg? hours) "-" "+")
-                    (Math/abs hours) minutes)))
+(defn iso-dt [date time] (gstring/format "%sT%s:00%s" date time ""))
 
-(defn iso-dt [date time & {:keys [with-local-tz]}]
-  (gstring/format "%sT%s:00%s" date time (if with-local-tz
-                                           (local-tz-offset) "")))
+#_(defn local-tz-offset []
+    (let [local-tz (- (.getTimezoneOffset (js/Date.)))
+          hours (Math/floor (/ local-tz 60))
+          minutes (mod local-tz 60)]
+      (gstring/format "%s%02d:%02d" (if (neg? hours) "-" "+")
+                      (Math/abs hours) minutes)))
+
+#_(defn iso-dt [date time & {:keys [with-local-tz]}]
+    (gstring/format "%sT%s:00%s" date time (if with-local-tz
+                                             (local-tz-offset) "")))
+
 
 #_((defn parse-time [fmt x]
      )
@@ -326,7 +338,9 @@
   (let [fmt-time (or (:format-time opts) "24h")
         fmt-date (or (:format-date opts) "iso")
         fmt-date-obj (get formats fmt-date)
-        fmt nil
+        timezone (:timezone opts)
+        to-utc-fn (if timezone (partial to-utc timezone) identity)
+        from-utc-fn (if timezone (partial from-utc timezone) identity)
         plc-time {"24h" "hh:mm" "12h" "hh:mm AM|PM"}
         placeholder (str (:placeholder fmt-date-obj) " " (get plc-time fmt-time))
         state (r/atom {:lastValue (:value opts) :value
@@ -342,7 +356,7 @@
                         (swap! state assoc :value v)
                         (if-let [vv (date-time-parse fmt-date fmt-time v)]
                           (do
-                            (on-change vv)
+                            (on-change (to-utc-fn vv))
                             (swap! state dissoc :errors))
                           (do
                             (swap! state assoc :errors
@@ -350,9 +364,12 @@
     (r/create-class
      {:component-will-receive-props
       (fn [_ nextprops]
-        (when-let [{v :value} (second nextprops)]
-          (when-not (= v (:lastValue @state))
-            (swap! state assoc :value (date-time-unparse fmt-date fmt-time v) :lastValue v))))
+        (when-let [{utc-v :value} (second nextprops)]
+          (let [v (from-utc-fn utc-v)]
+            (when-not (= v (:lastValue @state))
+              (swap! state assoc
+                     :value (date-time-unparse fmt-date fmt-time v)
+                     :lastValue v)))))
 
       :reagent-render
       (fn [{:keys [value on-change errors on-blur err-classes] :as props}]
@@ -363,7 +380,7 @@
             #(let [parent-node (.. % -target -parentNode)
                    input (cmn/f-child parent-node "re-input")]
                (.focus input))} "schedule"]
-          [:input.re-input (merge (dissoc props :errors :format-date :format-time)
+          [:input.re-input (merge (dissoc props :errors :format-date :format-time :timezone)
                                   {:type "text"
                                    :placeholder placeholder
                                    :on-blur #(my-on-blur % on-blur)
