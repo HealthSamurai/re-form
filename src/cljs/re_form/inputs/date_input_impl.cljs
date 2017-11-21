@@ -81,10 +81,9 @@
                  :groups [:y :m :d]}})
 
 (defn to-utc [timezone local-datetime]
-  (let [converted (.. js/moment (tz local-datetime timezone) utc format)]
-    (subs converted 0 19)))
+  (.. js/moment (tz local-datetime timezone) utc format))
 
-(defn from-utc [timezone utc-datetime]
+(defn to-local [timezone utc-datetime]
   (let [converted (.. js/moment (tz utc-datetime "utc") (tz timezone) format)]
     (subs converted 0 19)))
 
@@ -339,8 +338,8 @@
         fmt-date (or (:format-date opts) "iso")
         fmt-date-obj (get formats fmt-date)
         timezone (:timezone opts)
-        to-utc-fn (if timezone (partial to-utc timezone) identity)
-        from-utc-fn (if timezone (partial from-utc timezone) identity)
+        to-utc-fn (partial to-utc (or timezone "utc"))
+        to-local-fn (if timezone (partial to-local timezone) identity)
         plc-time {"24h" "hh:mm" "12h" "hh:mm AM|PM"}
         placeholder (str (:placeholder fmt-date-obj) " " (get plc-time fmt-time))
         state (r/atom {:lastValue (:value opts) :value
@@ -365,7 +364,7 @@
      {:component-will-receive-props
       (fn [_ nextprops]
         (when-let [{utc-v :value} (second nextprops)]
-          (let [v (from-utc-fn utc-v)]
+          (let [v (to-local-fn utc-v)]
             (when-not (= v (:lastValue @state))
               (swap! state assoc
                      :value (date-time-unparse fmt-date fmt-time v)
