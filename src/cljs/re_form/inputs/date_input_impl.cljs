@@ -26,6 +26,8 @@
       :width (u/px 238)
       :border border
       :background-color :white}
+     [:&.chevron-offset
+      {:margin-left (u/px h2)}]
      [:.clickable {:cursor :pointer}]]]
    [:.date-input
     {:position :relative
@@ -186,7 +188,9 @@
             {:on-click #(on-change (inc-iso value))}
             [:i.material-icons.date-chevrons "chevron_right"]])
          (when (and with-dropdown (:dropdown-visible @state))
-           [:div.calendar-dropdown {:tab-index 0}
+           [:div.calendar-dropdown
+            {:tab-index 0
+             :class (when with-chevrons :chevron-offset)}
             [re-calendar
              {:value (date-parse fmt (:value @state))
               :on-change (comp #(swap! state assoc :dropdown-visible false)
