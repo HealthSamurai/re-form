@@ -47,7 +47,8 @@
 
       :reagent-render
       (fn [{:keys [value on-change label-fn value-fn items errors on-blur]}]
-        (let [value-fn (or value-fn identity)]
+        (let [value-fn (or value-fn identity)
+              label-fn (or label-fn identity)]
           [:div.re-radio-buttons
            {:tab-index 0
             :on-blur on-blur
