@@ -18,8 +18,11 @@
 (rf/reg-sub-raw
  :re-form/input-value
  (fn [db [_ form-name path]]
-   (let [cur (reagent/cursor db (into [:re-form form-name :value] path))]
-     (reaction @cur))))
+   (if (some map? path)
+     (let [cur (reagent/cursor db [:re-form form-name :value])]
+       (reaction (shared/getin @cur path)))
+     (let [cur (reagent/cursor db (into [:re-form form-name :value] path))]
+       (reaction @cur)))))
 
 (rf/reg-sub-raw
  :re-form/input-flags
@@ -41,6 +44,13 @@
    ;; https://github.com/reagent-project/reagent/issues/244
    ;; https://github.com/reagent-project/reagent/issues/116
    (run! @(reagent/cursor db [:re-form form-name :value]))))
+
+
+(rf/reg-sub-raw
+ :re-form/form-data
+ (fn [db [_ form-name]]
+   (let [cur (reagent/cursor db [:re-form form-name]) ]
+     (reaction @cur))))
 
 (rf/reg-sub-raw
  :re-form/is-form-submitting

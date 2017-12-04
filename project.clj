@@ -41,7 +41,7 @@
                                   [figwheel-sidecar "0.5.10-SNAPSHOT"]
                                   [org.clojure/tools.nrepl "0.2.13"]
                                   [com.cemerick/piggieback "0.2.2-SNAPSHOT"]
-                                  [matcho "0.1.0-RC5"]
+                                  [matcho "0.1.0-RC6"]
                                   [pjstadig/humane-test-output "0.8.1"]]
 
                    :source-paths ["src/cljs" "src/cljc" "env/dev/clj"]

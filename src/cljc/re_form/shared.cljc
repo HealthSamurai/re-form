@@ -1,5 +1,88 @@
 (ns re-form.shared
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [clojure.set :as set]))
+
+
+(defn operand [ex]
+  (fn [e]
+    (if (coll? ex)
+      (get-in e ex)
+      (if (keyword? ex)
+        (get e ex)
+        ex))))
+
+(def cmp {:= = :< < :> > :<= <= :>= >=})
+
+
+(defn pred [[op l r]]
+  #((get cmp op)
+    ((operand l) %) ((operand r) %)))
+
+(defn comp-expr [expr]
+  (fn [coll]
+    (filter (pred expr) coll)))
+
+(defn and-expr [[op & exprs]]
+  (fn [coll]
+    (reduce #(%2 %1)
+            coll
+            (map comp-expr exprs) )))
+
+(defn or-expr [[op & exprs]]
+  (fn [coll]
+    (reduce #(concat %1 (%2 coll))
+            []
+            (map comp-expr exprs) )))
+
+(defn not-expr [[op l]]
+  (fn [coll]
+    (filter #(not ((operand l) %)) coll)))
+
+(defn query [m q]
+  (case (first q)
+    :and ((and-expr q) m)
+    :or  ((or-expr q) m)
+    :not ((not-expr q) m)
+    ((comp-expr q) m)))
+
+(defn getin [m path]
+  (reduce
+   (fn [acc p]
+     (if (map? p)
+       (let [res (query acc (:get p) )]
+         (if (empty? res)
+           (:set p)
+           (first res)))
+       (get acc p)))
+   m path))
+
+(defn indexof [x coll]
+  (first (keep-indexed #(when (= %2 x) %1) coll)))
+
+(defn find-idx [m expr]
+  (indexof (first (query m expr)) m))
+
+(defn setin [m [k & ks :as path] value]
+  (let [v (if ks
+            (if (map? k)
+              (setin (first (query m (:get k))) ks value)
+              (setin (get m k) ks value))
+            value)]
+    (cond
+      (integer? k)
+      (assoc (or m (vec (repeat k nil))) k v)
+
+      (map? k)
+      (let [v (merge (:set k) v)
+            idx (find-idx m (:get k))]
+        (if idx
+          (assoc m idx  v)
+          (conj m v)))
+
+      :else
+      (assoc m k v)
+      )))
+
 
 (defn- filter-vals [pred m]
   (into {} (filter (fn [[k v]] (pred v))
@@ -15,7 +98,7 @@
             (assoc-by-path (get m k) ks value)
             value)]
     (if (integer? k)
-      (assoc (or m (vec (replicate k nil))) k v)
+      (assoc (or m (vec (repeat k nil))) k v)
       (assoc (or m {}) k v))))
 
 (defn- dissoc-by-path [m path]
@@ -42,8 +125,8 @@
 
 (defn on-input-changed [db form-name input-path v]
   (-> db
-      (assoc-by-path (into [:re-form form-name :value] input-path) v)
-      (assoc-by-path [:re-form form-name :flags input-path :dirty] true)))
+      (setin (into [:re-form form-name :value] input-path) v)
+      (setin [:re-form form-name :flags input-path :dirty] true)))
 
 (defn on-input-removed [db form-name input-path]
   (-> (put-validation-errors db form-name {input-path []})

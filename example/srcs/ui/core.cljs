@@ -19,6 +19,7 @@
    [ui.index-page]
    [ui.styles-page]
    [ui.inputs-page]
+   [ui.complex-path-page]
    [ui.select-page]
    [ui.switchbox-page]
    [ui.date-page]
@@ -35,12 +36,13 @@
 (defn current-page []
   (let [current-route (rf/subscribe [:route-map/current-route])]
     (fn []
-      (let [{page :match params :params} @current-route]
-        (if page
-          (if-let [cmp (:cmp (ui-routes/resolve-page (:id page)))]
-            [:div [cmp params]]
-            [:div.not-found (str "Page not found [" (str page) "]" )])
-          [:div.not-found (str "Route not found ")])))))
+      [:div
+       (let [{page :match params :params} @current-route]
+         (if page
+           (if-let [cmp (:cmp (ui-routes/resolve-page (:id page)))]
+             [:div [cmp params]]
+             [:div.not-found (str "Page not found [" (str page) "]" )])
+           [:div.not-found (str "Route not found ")]))])))
 
 (defn navigation []
   (let [current-route (rf/subscribe [:route-map/current-route])]
@@ -117,13 +119,9 @@
   (let [fragment (.. js/window -location -hash)]
     (rf/dispatch [:fragment-changed fragment])))
 
-
 (defn mount-root []
   (reagent/render [root-component] (.getElementById js/document "app")))
 
 (defn init! []
-  (.log js/console "1")
   (rf/dispatch [::initialize])
-  (.log js/console "2")
   (mount-root))
-
