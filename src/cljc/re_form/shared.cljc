@@ -77,7 +77,7 @@
             idx (find-idx m (:get k))]
         (if idx
           (assoc m idx  v)
-          (conj m v)))
+          (conj (or m []) v)))
 
       :else
       (assoc m k v)
