@@ -11,7 +11,7 @@
      :min-width "30em"
      :background-color :white
      :border-radius (u/px 2)
-     :padding [[(u/px-div h 2) (u/px 12)]]
+     :padding [[(u/px 2) (u/px 12)]]
      :line-height (u/px h2)
     :border border}
    [:input {:border :none
@@ -53,6 +53,7 @@
                        (.-keyCode e))
                   (.preventDefault e)
                   (add-tag)))
+
         field-click-listener
         (fn [e]
           (when (.isEqualNode (.-target e) (:root-node @nodes))
@@ -73,10 +74,10 @@
 
       :reagent-render
       (fn [{:keys [value on-change]}]
-        (reset! inner-value value)
+        (reset! inner-value (set value))
         [:div.re-tags-container {:ref (fn [this] (swap! nodes assoc :root-node this))}
          (for [v value] ^{:key v}
-           [tag v #(on-change (s/difference value (setgen v)))])
+           [tag v #(on-change (s/difference (set value) (setgen v)))])
          [:input.new-tag {:type :text
                           :ref (fn [this] (swap! nodes assoc :input this))
                           :value @newtag
