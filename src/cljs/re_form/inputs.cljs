@@ -13,7 +13,8 @@
             [re-form.inputs.re-select-input-impl :as re-sel-impl]
             [re-form.inputs.select-impl :as select-impl]
             [re-form.inputs.codemirror-impl :as cm-impl]
-            [re-form.inputs.date-input-impl :as date-impl]))
+            [re-form.inputs.date-input-impl :as date-impl]
+            [re-form.inputs.tags-input-impl :as tags-impl]))
 
 ;; Widgets
 
@@ -34,6 +35,7 @@
 (def codemirror-input cm-impl/codemirror-input)
 (def re-select-input re-sel-impl/re-select-input)
 (def select select-impl/select)
+(def tags tags-impl/tags)
 
 ;; Styles
 
@@ -51,3 +53,4 @@
 (def select-xhr-style xh-impl/select-xhr-style)
 (def re-select-input-style re-sel-impl/re-select-input-style)
 (def select-style select-impl/select-style)
+(def tags-style tags-impl/tags-style)

@@ -307,7 +307,8 @@
    inputs/select-xhr-style
    inputs/re-select-input-style
    inputs/select-style
-   inputs/codemirror-style])
+   inputs/codemirror-style
+   inputs/tags-style])
 
 (defn form-style-fn
   [{:keys [m h gray-color] :as s}]

@@ -78,6 +78,7 @@
         async-items (rf/subscribe [::async-items])
         form {:form-name :selects-form
               :value {:owner {:name "Mike"}
+                      :tags #{"tags" "are" "unordered"}
                       :other-owner {:name "Marat"}
                       :last-owner {:name "Max"}}}]
     (fn []
@@ -158,7 +159,17 @@
           [form/field {:items items
                        :label-fn :name
                        :path [:owner]
-                       :input w/radio-input}]]]]])))
+                       :input w/radio-input}]]
+
+         [:div.re-form-row
+          [:label "Tags input (space separates):"]
+          [form/field {:path [:tags]
+                       :space-delimiter true
+                       :input w/tags}]]
+         [:div.re-form-row
+          [:label "Tags input:"]
+          [form/field {:path [:tags]
+                       :input w/tags}]]]]])))
 
 (ui-routes/reg-page
  :select {:title "Select"

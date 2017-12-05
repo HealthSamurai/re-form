@@ -12,6 +12,7 @@
                  [org.clojure/clojurescript "1.9.671" :scope "provided"] 
                  [cljsjs/react-with-addons "15.6.1-0"]
                  [cljsjs/moment-timezone "0.5.11-1"]
+                 [org.clojure/core.async "0.3.465"]
                  [reagent "0.7.0" :exclusions [cljsjs/react]]
                  [reagent-utils "0.2.1" :exclusions [cljsjs/react]]
                  [re-frame "0.9.4" :exclusions [cljsjs/react]]
