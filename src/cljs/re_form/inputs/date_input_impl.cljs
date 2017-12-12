@@ -126,11 +126,13 @@
   (let [fmt (or (:format opts) "iso")
         fmt-obj (get formats fmt)
         state (r/atom {:lastValue (:value opts) :value (date-unparse fmt (:value opts))})
+        input-state (r/atom "blur")
         doc-click-listener (fn [e]
                              (when (and (not (cmn/has-ancestor (.-target e) (:node @state)))
                                         (:dropdown-visible @state))
                                (swap! state assoc :dropdown-visible false)))
         my-on-blur (fn [event on-blur]
+                     (reset! input-state "blur")
                      (when (:errors @state)
                        (swap! state assoc :value (date-unparse fmt (:lastValue @state)))
                        (swap! state dissoc :errors))
@@ -164,25 +166,44 @@
           (will-recv-props v)))
 
       :reagent-render
-      (fn [{:keys [with-chevrons with-dropdown value on-change errors on-blur err-classes] :as props}]
+      (fn [{:keys [with-chevrons with-dropdown value on-change errors on-blur err-classes label placeholder] :as props}]
         [:div.dropdown-input
          (when with-chevrons
            [:div.date-chevrons
             {:on-click #(on-change (dec-iso value))}
             [:i.material-icons "chevron_left"]])
          [:div.date-input {:on-blur #(my-on-blur % (or on-blur identity))
-                           :class (when-not (empty? errors) :error)}
+                           :class (if label
+                                    (str "input-field")
+                                    (when-not (empty? errors) :error))}
           [:i.material-icons
            {:on-click
             #(let [parent-node (.. % -target -parentNode)
                    input (cmn/f-child parent-node "re-input")]
                (.focus input))} "today"]
           [:input.re-input (merge (dissoc props :errors :with-dropdown :format :with-chevrons)
+                                  (when label
+                                    {:class (str "validate " (when-not (empty? errors) "invalid"))})
                                   {:type "text"
-                                   :placeholder (:placeholder fmt-obj)
-                                   :on-focus #(swap! state assoc :dropdown-visible true)
+                                   :placeholder (if placeholder
+                                                  (when (or (not (empty? errors))
+                                                            (not (str/blank? value))
+                                                            (= "focus" @input-state))
+                                                    placeholder)
+                                                  (:placeholder fmt-obj))
+                                   :on-focus #(do
+                                                (reset! input-state "focus")
+                                                (swap! state assoc :dropdown-visible true))
                                    :on-change #(my-onchange % on-change)
-                                   :value (:value @state)})]]
+                                   :value (:value @state)})]
+          (when label
+            [:label {:data-error (cond
+                                   (seq errors)     (str/join " " errors)
+                                   (:errors @state) (:errors @state))
+                     :class (str (when (or (not (empty? errors))
+                                           (not (str/blank? value))
+                                           (= "focus" @input-state)) "active") " "
+                                 (when (= "focus" @input-state) "focus"))} label])]
          (when with-chevrons
            [:div.date-chevrons
             {:on-click #(on-change (inc-iso value))}
@@ -195,9 +216,10 @@
              {:value (date-parse fmt (:value @state))
               :on-change (comp #(swap! state assoc :dropdown-visible false)
                                on-change will-recv-props)}]])
-         [:div {:class (apply str (interpose "." err-classes))}
-          (when-let [local-errors (:errors @state)]
-            (str/join "\n" (conj errors local-errors)))]])})))
+         (when-not label
+           [:div {:class (apply str (interpose "." err-classes))}
+            (when-let [local-errors (:errors @state)]
+              (str/join "\n" (conj errors local-errors)))])])})))
 
 (defn iso-dt [date time] (gstring/format "%sT%s:00%s" date time ""))
 
