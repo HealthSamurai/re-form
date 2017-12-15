@@ -112,9 +112,11 @@
         (update-in m path-butlast dissoc path-last)))))
 
 (defn put-validation-errors [db form-name errors]
-  (update-in db [:re-form form-name :errors] (fn [current-errs]
-                                               (filter-vals (complement empty?)
-                                                            (merge current-errs errors)))))
+  (if (get-in db [:re-form form-name])
+    (update-in db [:re-form form-name :errors] (fn [current-errs]
+                                                 (filter-vals (complement empty?)
+                                                              (merge current-errs errors))))
+    db))
 
 (defn add-validation-errors [db form-name path errors]
   (update-in db [:re-form form-name :errors]
