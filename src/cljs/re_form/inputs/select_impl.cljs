@@ -16,6 +16,10 @@
      :padding [[(u/px-div h 2) (u/px 12)]]
      :line-height (u/px h2)
      :border border}
+    [:.flex {:display :inline-flex
+             :width (u/percent 100)}
+     [:.cross {:margin-left :auto
+               :color "#e1e1e1"}]]
     [:&.error
      {:border error-border}]
     [:span.triangle {:color "gray"
@@ -82,11 +86,17 @@
            :on-click (fn [_] (on-change i))}
           (label-fn i)]))]))
 
-(defn select [{:keys [on-search debounce-interval on-blur]}]
+(defn select [{:keys [on-search debounce-interval on-blur on-change]}]
   (let [state (r/atom {:active false})
         doc-click-listener (fn [e]
-                             (when (and (not (cmn/has-ancestor (.-target e) (:root-node @state)))
-                                        (:active @state))
+                             (when (or (and (not (cmn/has-ancestor
+                                                  (.-target e)
+                                                  (:root-node @state)))
+                                            (:active @state))
+                                       (=
+                                        (.-target e)
+                                        (cmn/f-child (:root-node @state)
+                                                     "cross")))
                                (on-blur e)
                                (swap! state assoc :active false)))
         search-fn (if debounce-interval
@@ -113,7 +123,9 @@
                             (.. first-opt -classList (add "active"))
                             (swap! state assoc :selected first-opt
                                    :suggestions-container
-                                   (cmn/f-child (:root-node @state) "options")))))]
+                                   (cmn/f-child (:root-node @state) "options")))))
+        reset-input (fn [e] (on-change nil))]
+
     (r/create-class
      {
       :component-did-mount
@@ -136,17 +148,18 @@
         [:div.re-select-container
          [:div.re-re-select
           {:class (when-not (empty? errors) :error)}
-          [:div
+          [:div.flex
            {:on-click (fn [_] (do
                                 (when search-fn (js/setTimeout #(.focus (:input-node @state)) 10))
                                 (swap! state assoc :active true
                                        :selected nil)))}
            [:span.triangle "▾"]
            (if value
-             [:span.value
-              [:span.value (label-fn value)]]
+             [:span.value (label-fn value)]
              [:span.choose-value
-              (or (:placeholder props) "Select...")])]]
+              (or (:placeholder props) "Select...")])
+           (when value
+             [:span.cross {:on-click reset-input} "❌"])]]
          (when search-fn
            [:input.re-search-search
             {:tab-index 0
