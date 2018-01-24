@@ -11,7 +11,6 @@
    {:position :relative}
    [:.re-re-select
     {:display "inline-block"
-     :min-width "30em"
      :background-color :white
      :border-radius (u/px 2)
      :padding [[(u/px-div h 2) (u/px 12)]]
@@ -37,6 +36,10 @@
    [:.re-search-search
     {:border border
      :width "100%"
+     :position :absolute
+     :z-index 1000
+     :left (u/px 0)
+     :top (u/px+ 10 (+ 16 (* h 1.5)))
      :padding [[0 (u/px w)]]
      :border-radius (u/px radius)
      :line-height (u/px* h3)}
@@ -46,7 +49,7 @@
     {:position "absolute"
      :background-color "white"
      :z-index 1000
-     :left (u/px -1)
+     :left (u/px 0)
      :top (u/px+ 10 (* 2 (+ 16 (* h 1.5))))
      :width "100%"
      :display "inline-block"
@@ -56,6 +59,10 @@
      :border "1px solid #ddd"}
     [:&.no-input
      {:top (u/px+ 10 (+ 16 (* h 1.5)))}]
+    [:.no-results
+     {:text-align :center
+      :padding (u/px 10)
+      :color :gray}]
     [:.option {:cursor "pointer"
                :display "block"
                :padding-left (u/px h)
@@ -67,11 +74,13 @@
 (defn options-list [options label-fn on-change]
   (let [opts (if (instance? reagent.ratom/Reaction options) @options options)]
     [:div
-     (for [i opts]
-       [:div.option
-        {:key (pr-str i)
-         :on-click (fn [_] (on-change i))}
-        (label-fn i)])]))
+     (if (empty? opts)
+       [:div.no-results "No results"]
+       (for [i opts]
+         [:div.option
+          {:key (pr-str i)
+           :on-click (fn [_] (on-change i))}
+          (label-fn i)]))]))
 
 (defn select [{:keys [on-search debounce-interval on-blur]}]
   (let [state (r/atom {:active false})
