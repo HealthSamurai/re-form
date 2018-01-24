@@ -14,7 +14,8 @@
             [re-form.inputs.select-impl :as select-impl]
             [re-form.inputs.codemirror-impl :as cm-impl]
             [re-form.inputs.date-input-impl :as date-impl]
-            [re-form.inputs.tags-input-impl :as tags-impl]))
+            [re-form.inputs.tags-input-impl :as tags-impl]
+            [re-form.inputs.webcam-impl :as webcam-impl]))
 
 ;; Widgets
 
@@ -36,6 +37,8 @@
 (def re-select-input re-sel-impl/re-select-input)
 (def select select-impl/select)
 (def tags tags-impl/tags)
+(def webcam webcam-impl/webcam)
+(def thumbs webcam-impl/thumbs)
 
 ;; Styles
 
@@ -54,3 +57,4 @@
 (def re-select-input-style re-sel-impl/re-select-input-style)
 (def select-style select-impl/select-style)
 (def tags-style tags-impl/tags-style)
+(def webcam-style webcam-impl/webcam-style)

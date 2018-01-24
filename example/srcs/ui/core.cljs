@@ -25,6 +25,7 @@
    [ui.date-page]
    [ui.checkbox-page]
    [ui.textarea-page]
+   [ui.webcam-page]
    ))
 
 (def h3 38)

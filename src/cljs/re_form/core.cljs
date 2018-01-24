@@ -308,7 +308,8 @@
    inputs/re-select-input-style
    inputs/select-style
    inputs/codemirror-style
-   inputs/tags-style])
+   inputs/tags-style
+   inputs/webcam-style])
 
 (defn form-style-fn
   [{:keys [m h gray-color] :as s}]
