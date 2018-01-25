@@ -25,11 +25,22 @@
  (fn [db [_ data]]
    (update db ::pics conj data)))
 
+(defn remove-nth [v i]
+  (into (subvec v 0 i) (subvec v (inc i))))
+
+(rf/reg-event-db
+ ::remove
+ (fn [db [_ i]]
+   (-> db
+       (update ::pics remove-nth i)
+       (update ::thumbs remove-nth i))))
+
 (defn webcam-page []
   (rf/dispatch [::init])
   (fn []
     [:div
-     [inputs/thumbs (rf/subscribe [::thumbs])]
+     [inputs/thumbs {:thumbs (rf/subscribe [::thumbs])
+                     :remove-fn #(rf/dispatch [::remove %])}]
      [inputs/webcam {:width 640
                      :divisor 5
                      :new-thumb #(rf/dispatch [::new-thumb %])

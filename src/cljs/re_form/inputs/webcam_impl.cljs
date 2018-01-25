@@ -1,6 +1,6 @@
 (ns re-form.inputs.webcam-impl
-  (:require [reagent.core :as r]))
-
+  (:require [reagent.core :as r]
+            [garden.units :as u]))
 
 ;; A widget to take webcam photos
 ;; `new-thumb` of `webcam` component is a function to process base64 thumbnails
@@ -13,13 +13,34 @@
 
 (defn webcam-style
   [{:keys [h h2 h3 selection-bg-color hover-bg-color border]}]
-  [:.re-webcam {}])
+  [:.thumbs
+   {:display :flex
+    :flex-wrap :wrap}
+   [:.thumbnail
+    {:display :inline-block
+     :margin (u/px 10)
+     :position :relative}
+    [:.cross {:display :none}]
+    [:&:hover
+     [:.cross
+      {:position :absolute
+       :top 0
+       :display :inline-block
+       :cursor :pointer
+       :color hover-bg-color
+       :right (u/px 5)}]]]])
 
-(defn thumbs [thumbs]
-  [:div
-   (for [t @thumbs]
-     [:img {:src t
-            :key t}])])
+(defn- thumbnail [data remove-fn]
+  [:div.thumbnail
+   [:img {:src data}]
+   [:span.cross
+    {:on-click remove-fn}
+    "❌"]])
+
+(defn thumbs [{:keys [thumbs remove-fn]}]
+  [:div.thumbs
+   (for [[i t] (map-indexed vector @thumbs)] ^{:key i}
+     [thumbnail t (partial remove-fn i)])])
 
 (defn- apply-display [nodes display]
   (doall (for [node nodes] (set! (.. node -style -display) display))))
@@ -72,7 +93,7 @@
 
       :reagent-render
       (fn [{:keys [upload-fn uploading]}]
-        [:div
+        [:div.re-webcam
          [:button {:ref #(swap! state assoc :snap %)
                    :style {:display :block}} "Take a shot"]
          [:button {:ref #(swap! state assoc :accept %)
