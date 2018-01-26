@@ -124,7 +124,9 @@
                             (swap! state assoc :selected first-opt
                                    :suggestions-container
                                    (cmn/f-child (:root-node @state) "options")))))
-        reset-input (fn [e] (on-change nil))]
+        reset-input (fn [e]
+                      (on-change nil)
+                      (set! (.-value (:input-node @state)) ""))]
 
     (r/create-class
      {
@@ -150,7 +152,9 @@
           {:class (when-not (empty? errors) :error)}
           [:div.flex
            {:on-click (fn [_] (do
-                                (when search-fn (js/setTimeout #(.focus (:input-node @state)) 10))
+                                (when search-fn
+                                  (js/setTimeout #(.focus (:input-node @state)) 10)
+                                  (search-fn (.-value (:input-node @state))))
                                 (swap! state assoc :active true
                                        :selected nil)))}
            [:span.triangle "▾"]
