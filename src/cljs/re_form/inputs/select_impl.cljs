@@ -126,7 +126,8 @@
                                    (cmn/f-child (:root-node @state) "options")))))
         reset-input (fn [e]
                       (on-change nil)
-                      (set! (.-value (:input-node @state)) ""))]
+                      (when search-fn
+                        (set! (.-value (:input-node @state)) "")))]
 
     (r/create-class
      {
