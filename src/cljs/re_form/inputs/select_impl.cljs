@@ -18,8 +18,9 @@
      :border border}
     [:.flex {:display :inline-flex
              :width (u/percent 100)}
-     [:.cross {:margin-left :auto
-               :color "#e1e1e1"}]]
+     [:i.cross {:margin-left :auto
+                :color "#e1e1e1"
+                :font-size (u/px h)}]]
     [:&.error
      {:border error-border}]
     [:span.triangle {:color "gray"
@@ -86,7 +87,7 @@
            :on-click (fn [_] (on-change i))}
           (label-fn i)]))]))
 
-(defn select [{:keys [on-search debounce-interval on-blur on-change]}]
+(defn select [{:keys [on-search debounce-interval on-blur on-change label-fn]}]
   (let [state (r/atom {:active false})
         doc-click-listener (fn [e]
                              (when (or (and (not (cmn/has-ancestor
@@ -127,7 +128,8 @@
         reset-input (fn [e]
                       (on-change nil)
                       (when search-fn
-                        (set! (.-value (:input-node @state)) "")))]
+                        (set! (.-value (:input-node @state)) "")))
+        label-fn (or label-fn identity)]
 
     (r/create-class
      {
@@ -147,7 +149,7 @@
         (.removeEventListener js/document "click" doc-click-listener))
 
       :reagent-render
-      (fn [{:keys [value on-change label-fn value-fn options errors] :as props}]
+      (fn [{:keys [value on-change value-fn options errors] :as props}]
         [:div.re-select-container
          [:div.re-re-select
           {:class (when-not (empty? errors) :error)}
@@ -164,7 +166,7 @@
              [:span.choose-value
               (or (:placeholder props) "Select...")])
            (when value
-             [:span.cross {:on-click reset-input} "❌"])]]
+             [:i.material-icons.cross {:on-click reset-input} "close"])]]
          (when search-fn
            [:input.re-search-search
             {:tab-index 0
