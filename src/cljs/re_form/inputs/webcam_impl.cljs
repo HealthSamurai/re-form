@@ -25,7 +25,7 @@
     :component-will-unmount #(reset! widget-state {})
     :reagent-render
     (fn [{:keys [upload-fn uploading]}]
-      [:div.re-webcam
+      [:div.re-webcam {:style {:padding "10px"}}
        [:video {:ref #(swap! widget-state assoc :video %)
                 :width width
                 :height height
@@ -45,7 +45,8 @@
      (set! (.. canvas -style -display) "block")
      (swap! widget-state assoc-in [:images image-name :data-uri] (.toDataURL canvas "image/png"))
      (.toBlob canvas #(do (swap! widget-state assoc-in [:images image-name :blob] %)
-                          (rf/dispatch (into (:on-image opts) [image-name])))))))
+                          (when-let [on-image-ev (:on-image opts)]
+                            (rf/dispatch (into on-image-ev [image-name]))))))))
 
 (rf/reg-event-fx
  :webcam/shot
