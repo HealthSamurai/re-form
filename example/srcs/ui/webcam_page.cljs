@@ -4,7 +4,8 @@
             [re-frame.core :as rf]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
-            [re-form.inputs :as inputs]))
+            [re-form.inputs :as inputs]
+            [garden.core :as garden]))
 
 (rf/reg-sub
  ::thumbs
@@ -43,26 +44,39 @@
        (update ::pics remove-nth i)
        (update ::thumbs remove-nth i))))
 
+(rf/reg-event-db
+ ::image-taken
+ (fn [db [_ name id]]
+   db))
+
+(def webcam-style
+  [:style
+   (garden/css
+    [:*
+     [:.buttons {:display :flex
+                 :justify-content :left}]])])
+
+(rf/reg-event-fx
+ ::submit
+ [(rf/inject-cofx :webcam/images)]
+ (fn [{:keys [db images]} [_ image-name]]
+   {}))
+
 (defn webcam-page []
   (rf/dispatch [::init])
   (fn []
     [:div
-     [:button.btn.btn-primary
-      {:on-click
-       (fn [_]
-         (go (doall (for [f @(rf/subscribe [::pics])]
-                      (http/post
-                       "http://localhost:8080/$upload"
-                       {:multipart-params
-                        {:file f}})))))}
-      "Upload"]
-     [inputs/thumbs {:thumbs (rf/subscribe [::thumbs])
-                     :remove-fn #(rf/dispatch [::remove %])}]
-     [inputs/webcam {:width 640
-                     :divisor 5
-                     :new-thumb #(rf/dispatch [::new-thumb %])
-                     :new-pic #(rf/dispatch [::new-pic %])
-                     :height 480}]]))
+     webcam-style
+     [inputs/webcam {:width 320
+                     :height 240
+                     :on-image [::image-taken]}]
+     [:div.buttons
+      [:button.btn.btn-primary {:on-click #(rf/dispatch [:webcam/shot {:name :my-photo}])}
+       "Photo"]
+      [:button.btn.btn-primary {:on-click #(rf/dispatch [:webcam/clear-history :my-photo])}
+       "Take new"]
+      [:button.btn.btn-primary {:on-click #(rf/dispatch [::submit :my-photo])}
+       "Submit"]]]))
 
 (ui-routes/reg-page
  :webcam {:title "Webcam capture"
