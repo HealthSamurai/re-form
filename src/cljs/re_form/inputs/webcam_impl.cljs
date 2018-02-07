@@ -18,11 +18,21 @@
               -mediaDevices
               (getUserMedia (clj->js {:video true}))
               (then (fn [stream]
+                      (swap! widget-state assoc-in [photo-name :video-tracks] (js->clj (.getVideoTracks stream)))
                       (set! (.-src video) (.. js/window
                                               -URL
                                               (createObjectURL stream)))
                       (.play video)))))))
-    :component-will-unmount #(reset! widget-state {})
+
+    :component-will-unmount
+    (fn [_]
+      ;; FIXME here we deinit all widgets at once
+      ;; assumption is they are all the part of one page
+      (let [tracks (mapcat :video-tracks (vals @widget-state))]
+        (doseq [t tracks]
+          (when t (.stop t)))
+        (reset! widget-state {})))
+
     :reagent-render
     (fn [{:keys [photo-name width height]}]
       [:div.re-webcam {:style {:padding "10px"}}
