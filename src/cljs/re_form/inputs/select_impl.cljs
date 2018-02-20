@@ -13,7 +13,7 @@
     {:display "inline-block"
      :background-color :white
      :border-radius (u/px 2)
-     :padding [[(u/px-div h 2) (u/px 12)]]
+     ;;:padding [[(u/px-div h 2) (u/px 12)]]
      :line-height (u/px h2)
      :border border}
     [:.flex {:display :inline-flex
