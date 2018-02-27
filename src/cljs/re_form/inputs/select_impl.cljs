@@ -87,7 +87,7 @@
            :on-click (fn [_] (on-change i))}
           (label-fn i)]))]))
 
-(defn select [{:keys [on-search debounce-interval on-blur on-change label-fn]}]
+(defn select [{:keys [on-search debounce-interval on-blur on-change label-fn search-by-enter]}]
   (let [state (r/atom {:active false})
         doc-click-listener (fn [e]
                              (when (or (and (not (cmn/has-ancestor
@@ -100,9 +100,10 @@
                                                      "cross")))
                                (on-blur e)
                                (swap! state assoc :active false)))
-        search-fn (if debounce-interval
-                    (debounce on-search debounce-interval)
-                    on-search)
+        search-fn (cond
+                    search-by-enter (fn [_] (swap! state dissoc :selected))
+                    debounce-interval (debounce on-search debounce-interval)
+                    :else on-search)
         arrow-handler (fn [e]
                         (if-let [s (:selected @state)]
                           (let [upd (fn [x direction]
@@ -117,14 +118,16 @@
                               40 (when-let [next-sibl (.-nextSibling s)]
                                    (upd next-sibl :down))
                               13 (do (.click (:selected @state))
-                                     (swap! state dissoc :selected)
-                                     #_(.blur (:node @state)))
+                                     (swap! state dissoc :selected))
                               (swap! state dissoc :selected)))
-                          (when-let [first-opt (cmn/f-child (:root-node @state) "option")]
-                            (.. first-opt -classList (add "active"))
-                            (swap! state assoc :selected first-opt
-                                   :suggestions-container
-                                   (cmn/f-child (:root-node @state) "options")))))
+                          (cond
+                            (and search-by-enter on-search (= 13 (.-keyCode e)))
+                            (on-search (.. e -target -value))
+                            :else (when-let [first-opt (cmn/f-child (:root-node @state) "option")]
+                              (.. first-opt -classList (add "active"))
+                              (swap! state assoc :selected first-opt
+                                     :suggestions-container
+                                     (cmn/f-child (:root-node @state) "options"))))))
         reset-input (fn [e]
                       (on-change nil)
                       (when search-fn
@@ -132,8 +135,7 @@
         label-fn (or label-fn identity)]
 
     (r/create-class
-     {
-      :component-did-mount
+     {:component-did-mount
       (fn [this]
         (let [root (r/dom-node this)]
           (swap! state assoc :root-node root)
@@ -174,5 +176,8 @@
              :on-change #(search-fn (.. % -target -value))}])
          (when (:active @state)
            [:div.options {:class (when-not search-fn :no-input)}
-            [options-list options label-fn (comp #(swap! state assoc :active false)
-                                                 on-change)]])])})))
+            (when search-by-enter [:div.no-results "Press enter for lookup"])
+            (if (= :loading options)
+              [:div.no-results "Loading..."]
+              [options-list options label-fn (comp #(swap! state assoc :active false)
+                                                   on-change)])])])})))
