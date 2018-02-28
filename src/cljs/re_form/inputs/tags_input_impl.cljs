@@ -10,10 +10,12 @@
    {:display "inline-block"
      :min-width "30em"
      :background-color :white
+     :padding [[(u/px 3) (u/px 12)]]
      :border-radius (u/px 2)
-     :padding [[(u/px 2) (u/px 12)]]
      :line-height (u/px h2)
     :border border}
+   [:&.empty-tags
+    {:padding [[(u/px 4) (u/px 12)]]}]
    [:input {:border :none
             :width (u/px 100)
             :outline :none}]
@@ -75,7 +77,9 @@
       :reagent-render
       (fn [{:keys [value on-change]}]
         (reset! inner-value (set value))
-        [:div.re-tags-container {:ref (fn [this] (swap! nodes assoc :root-node this))}
+        [:div.re-tags-container
+         {:class (when (empty? value) :empty-tags)
+          :ref (fn [this] (swap! nodes assoc :root-node this))}
          (for [v value] ^{:key v}
            [tag v #(on-change (s/difference (set value) (setgen v)))])
          [:input.new-tag {:type :text
