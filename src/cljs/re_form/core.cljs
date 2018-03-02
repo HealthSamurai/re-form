@@ -83,6 +83,13 @@
    (assoc-in db [:re-form form-name :value] v)))
 
 (rf/reg-event-db
+ :re-form/truncate-state
+ (fn [db [_ form-name keys]]
+   (reduce (fn [acc k]
+             (update-in acc [:re-form form-name] dissoc k))
+           db keys)))
+
+(rf/reg-event-db
  :re-form/set-input-flags
  (fn [db [_ form-name input-path flags]]
    (update-in db [:re-form form-name :flags input-path] merge flags)))
