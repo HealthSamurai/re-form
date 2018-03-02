@@ -21,7 +21,7 @@
   (let [my-onchange (fn [event on-change] (on-change (.. event -target -value)))]
     (fn [{:keys [value on-change errors] :as props}]
       [:div.re-input-wrap
-       [:input.re-input (merge (dissoc props :errors)
+       [:input.re-input (merge (dissoc props :errors :error-paths)
                                {:type (or (:type props) "text")
                                 :class (when-not (empty? errors) :error)
                                 :on-change #(my-onchange % on-change)

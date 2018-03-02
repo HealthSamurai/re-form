@@ -107,6 +107,11 @@
  (fn [db [_ form-name]]
    (assoc-in db [:re-form form-name :submitting] true)))
 
+(rf/reg-event-db
+ :re-form/end-submitting
+ (fn [db [_ form-name]]
+   (update-in db [:re-form form-name] dissoc :submitting)))
+
 (defn process-class [class]
   (if (keyword? class)
     (str/join " " (str/split (name class) \.))

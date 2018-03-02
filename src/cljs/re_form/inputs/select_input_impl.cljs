@@ -1,5 +1,6 @@
 (ns re-form.inputs.select-input-impl
   (:require [reagent.core :as r]
+            [re-form.inputs.common :as cmn]
             [garden.units :as u]))
 
 (defn select-input-style
@@ -48,30 +49,49 @@
      [:&.active {:background-color hover-bg-color}]
      [:&:hover {:background-color hover-bg-color}]]]])
 
-(defn select-input [_]
-  (let [state (r/atom {:active false})]
-    (fn [{:keys [class value on-change value-fn label-fn match-fn items] :as props}]
-      (let [label-fn (or label-fn pr-str)
-            value-fn (or value-fn identity)
-            match-fn (or match-fn
-                         (fn [v] (->> items
-                                      (filter #(= (value-fn %) v))
-                                      first label-fn)))]
-        [:div.re-select
-         {:on-click #(swap! state update :active not)
-          :class class}
-         [:span.triangle "▾"]
-         (if value
-           [:span.value
-            [:span.value (match-fn value) #_(or (label-fn value) (value-fn value) (str value))]]
-           [:span.choose-value
-            (or (:placeholder props) "Select...")])
-         
-         (when (:active @state)
-           [:div.options
-            (for [i items] ^{:key (pr-str i)}
-              [:div.option
-               {:on-click (fn [_] (on-change (value-fn i)))
-                :class (when (= value (value-fn i)) "active")}
-               (label-fn i)
-               ])])]))))
+(defn select-input [{:keys [on-blur]}]
+  (let [state (r/atom {:active false})
+        my-on-blur (or on-blur identity)
+        doc-click-listener
+        (fn [e]
+          (when (and (not (cmn/has-ancestor (.-target e) (:root-node @state)))
+                     (:active @state))
+            (my-on-blur e)
+            (swap! state assoc :active false)))]
+    (r/create-class
+     {
+      :component-did-mount
+      (fn [this]
+        (swap! state assoc :root-node (r/dom-node this))
+        (.addEventListener js/document "click" doc-click-listener))
+
+      :component-will-unmount
+      (fn [this]
+        (.removeEventListener js/document "click" doc-click-listener))
+
+      :reagent-render
+      (fn [{:keys [class value on-change value-fn label-fn match-fn items on-blur] :as props}]
+        (let [label-fn (or label-fn pr-str)
+              value-fn (or value-fn identity)
+              match-fn (or match-fn
+                           (fn [v] (->> items
+                                        (filter #(= (value-fn %) v))
+                                        first label-fn)))]
+          [:div.re-select
+           {:on-click #(swap! state update :active not)
+            :class class}
+           [:span.triangle "▾"]
+           (if value
+             [:span.value
+              [:span.value (match-fn value) #_(or (label-fn value) (value-fn value) (str value))]]
+             [:span.choose-value
+              (or (:placeholder props) "Select...")])
+
+           (when (:active @state)
+             [:div.options
+              (for [i items] ^{:key (pr-str i)}
+                [:div.option
+                 {:on-click (fn [_] (on-change (value-fn i)))
+                  :class (when (= value (value-fn i)) "active")}
+                 (label-fn i)
+                 ])])]))})))

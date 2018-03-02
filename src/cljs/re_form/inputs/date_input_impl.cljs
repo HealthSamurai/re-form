@@ -284,7 +284,10 @@
   (when x
     (if (= fmt "12h")
       (when-let [[_ hp mp noonp] (re-matches #"(\d?\d):(\d\d) (\wM)" (str/upper-case x))]
-        (let [h (+ (js/parseInt hp) (if (= noonp "PM") 12 0))
+        (let [h (as-> hp $
+                  (js/parseInt $)
+                  (if (= $ 12) 0 $)
+                  (+ $ (if (= noonp "PM") 12 0)))
               m (js/parseInt mp)]
           (when (and (< h 24) (< m 60) (some #(= % noonp) ["AM" "PM"]))
             (str (gstring/format "%02d" h) ":" (gstring/format "%02d" m)))))
@@ -296,7 +299,10 @@
   (when-let [x (str/join (take 5 inp-x))]
     (if (= fmt "12h")
       (when-let [[_ hp m] (re-matches #"(\d\d):(\d\d)" x)]
-        (let [[h noon] (if (> hp 12) [(- hp 12) "PM"] [hp "AM"])]
+        (let [hp (js/parseInt hp)
+              m (js/parseInt m)
+              [h noon] (if (>= hp 12) [(- hp 12) "PM"] [hp "AM"])
+              h (if (= 0 h) 12 h)]
           (str (gstring/format "%02d" h) ":" (gstring/format "%02d" m) " " noon)))
       x)))
 

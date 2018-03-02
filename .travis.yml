@@ -11,9 +11,12 @@ cache:
 script:
   #- lein test
   - cd example
-  - mkdir build
-  - cp -r resources/public/* build
   - lein with-profile prod cljsbuild once
+  - cp -r build/* resources/public/
+  - cd -
+  - mkdir build
+  - cp -r example/resources/public/* build/
+
 
 deploy:
   provider: pages
