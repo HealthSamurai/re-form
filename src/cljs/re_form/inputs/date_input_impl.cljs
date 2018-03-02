@@ -181,7 +181,7 @@
             #(let [parent-node (.. % -target -parentNode)
                    input (cmn/f-child parent-node "re-input")]
                (.focus input))} "today"]
-          [:input.re-input (merge (dissoc props :errors :with-dropdown :format :with-chevrons)
+          [:input.re-input (merge (dissoc props :errors :with-dropdown :format :with-chevrons :err-classes)
                                   (when label
                                     {:class (str "validate " (when-not (empty? errors) "invalid"))})
                                   {:type "text"
@@ -405,7 +405,7 @@
             #(let [parent-node (.. % -target -parentNode)
                    input (cmn/f-child parent-node "re-input")]
                (.focus input))} "schedule"]
-          [:input.re-input (merge (dissoc props :errors :format-date :format-time :timezone)
+          [:input.re-input (merge (dissoc props :errors :format-date :format-time :timezone :err-classes)
                                   {:type "text"
                                    :placeholder placeholder
                                    :on-blur #(my-on-blur % on-blur)
