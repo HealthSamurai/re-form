@@ -79,6 +79,7 @@
         form {:form-name :selects-form
               :value {:owner {:name "Mike"}
                       :tags #{"tags" "are" "unordered"}
+                      :select-tags #{"One"}
                       :other-owner {:name "Marat"}
                       :last-owner {:name "Max"}}}]
     (fn []
@@ -169,7 +170,26 @@
          [:div.re-form-row
           [:label "Tags input:"]
           [form/field {:path [:tags]
-                       :input w/tags}]]]]])))
+                       :input w/tags}]]
+
+         [:div.re-form-row
+          [:label "Tags select input:"]
+          [form/field {:label-fn :display
+                       :path [:multiple-icd10]
+                       :on-search #(rf/dispatch [::search-async %])
+                       :options async-items
+                       :validators [(v/not-blank)]
+                       :debounce-interval 300
+                       :multiselect true
+                       :input w/select}]]
+
+         [:div.re-form-row
+          [:label "Tags select input (static):"]
+          [form/field {:label-fn identity
+                       :path [:select-tags]
+                       :options ["One" "Two" "Three"]
+                       :multiselect true
+                       :input w/select}]]]]])))
 
 (ui-routes/reg-page
  :select {:title "Select"
