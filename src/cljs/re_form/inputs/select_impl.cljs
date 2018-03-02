@@ -2,8 +2,10 @@
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
             [re-form.inputs.common :as cmn]
+            [clojure.string :as str]
             [goog.functions :refer [debounce]]
-            [garden.units :as u]))
+            [garden.units :as u]
+            [clojure.set :as s]))
 
 (defn select-style
   [{:keys [radius w h h2 h3 selection-bg-color hover-bg-color border error-border]}]
@@ -16,6 +18,19 @@
      ;;:padding [[(u/px-div h 2) (u/px 12)]]
      :line-height (u/px h2)
      :border border}
+    [:.tag
+     {:border border
+      :position :relative
+      :display :inline-block
+      :padding {:left (u/px-div w 2)
+                :right (u/px w)}
+      :margin-right (u/px w)}
+     [:.tag-cross
+      {:position :absolute
+       :cursor :pointer
+       :font-size (u/px w)
+       :top 0
+       :right 0}]]
     [:.flex {:display :inline-flex
              :width (u/percent 100)}
      [:i.cross {:margin-left :auto
@@ -44,7 +59,7 @@
      :position :absolute
      :z-index 1000
      :left (u/px 0)
-     :top (u/px+ 10 (+ 16 (* h 1.5)))
+     :top (u/px 33) #_(u/px+ 10 (+ 16 (* h 1.5)))
      :padding [[0 (u/px w)]]
      :border-radius (u/px radius)
      :line-height (u/px* h3)}
@@ -55,7 +70,7 @@
      :background-color "white"
      :z-index 1000
      :left (u/px 0)
-     :top (u/px+ 10 (* 2 (+ 16 (* h 1.5))))
+     :top (u/px 67) #_(u/px+ 10 (* 2 (+ 16 (* h 1.5))))
      :width "100%"
      :display "inline-block"
      :box-shadow "1px 1px 2px #ccc"
@@ -87,7 +102,13 @@
            :on-click (fn [_] (on-change i))}
           (label-fn i)]))]))
 
-(defn select [{:keys [on-search debounce-interval on-blur on-change label-fn search-by-enter]}]
+(defn- tag [label on-delete]
+  [:span.tag label
+   [:i.tag-cross.material-icons
+    {:on-click on-delete} "close"]])
+
+(defn select [{:keys [on-search debounce-interval on-blur on-change
+                      label-fn search-by-enter multiselect]}]
   (let [state (r/atom {:active false})
         doc-click-listener (fn [e]
                              (when (or (and (not (cmn/has-ancestor
@@ -100,6 +121,7 @@
                                                      "cross")))
                                (on-blur e)
                                (swap! state assoc :active false)))
+        setgen #(-> % vector set)
         search-fn (cond
                     search-by-enter (fn [_] (swap! state dissoc :selected))
                     debounce-interval (debounce on-search debounce-interval)
@@ -124,15 +146,15 @@
                             (and search-by-enter on-search (= 13 (.-keyCode e)))
                             (on-search (.. e -target -value))
                             :else (when-let [first-opt (cmn/f-child (:root-node @state) "option")]
-                              (.. first-opt -classList (add "active"))
-                              (swap! state assoc :selected first-opt
-                                     :suggestions-container
-                                     (cmn/f-child (:root-node @state) "options"))))))
+                                    (.. first-opt -classList (add "active"))
+                                    (swap! state assoc :selected first-opt
+                                           :suggestions-container
+                                           (cmn/f-child (:root-node @state) "options"))))))
         reset-input (fn [e]
                       (on-change nil)
                       (when search-fn
                         (set! (.-value (:input-node @state)) "")))
-        label-fn (or label-fn identity)]
+        my-label-fn (or label-fn identity)]
 
     (r/create-class
      {:component-did-mount
@@ -163,11 +185,15 @@
                                 (swap! state assoc :active true
                                        :selected nil)))}
            [:span.triangle "▾"]
-           (if value
-             [:span.value (label-fn value)]
+           (if (and value (not (empty? value)))
+             [:span.value
+              (if multiselect
+                (for [v value] ^{:key v}
+                  [tag (my-label-fn v) #(on-change (s/difference (set value) (setgen v)))])
+                (my-label-fn value))]
              [:span.choose-value
               (or (:placeholder props) "Select...")])
-           (when value
+           (when (and value (not multiselect))
              [:i.material-icons.cross {:on-click reset-input} "close"])]]
          (when search-fn
            [:input.re-search-search
@@ -179,5 +205,8 @@
             (when search-by-enter [:div.no-results "Press enter for lookup"])
             (if (= :loading options)
               [:div.no-results "Loading..."]
-              [options-list options label-fn (comp #(swap! state assoc :active false)
-                                                   on-change)])])])})))
+              [options-list options my-label-fn
+               (comp #(swap! state assoc :active false)
+                     (if multiselect
+                       #(on-change (conj (set value) %))
+                       on-change))])])])})))
