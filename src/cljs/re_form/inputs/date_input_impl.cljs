@@ -375,7 +375,8 @@
         plc-time {"24h" "hh:mm" "12h" "hh:mm AM|PM"}
         placeholder (str (:placeholder fmt-date-obj) " " (get plc-time fmt-time))
         state (r/atom {:lastValue (:value opts) :value
-                       (date-time-unparse fmt-date fmt-time (:value opts))})
+                       (date-time-unparse fmt-date fmt-time
+                                          (to-local-fn (:value opts)))})
         my-on-blur (fn [event on-blur]
                      (when (:errors @state)
                        (swap! state assoc :value (date-time-unparse
@@ -403,7 +404,7 @@
                      :lastValue v)))))
 
       :reagent-render
-      (fn [{:keys [value on-change errors on-blur err-classes] :as props}]
+      (fn [{:keys [on-change errors on-blur err-classes] :as props}]
         [:div
          [:div.date-input
           [:i.material-icons
