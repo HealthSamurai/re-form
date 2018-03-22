@@ -22,16 +22,14 @@
    [:.tag
     {:border border
      :position :relative
-     :display :inline-block
+     :display :inline-flex
+     :align-items :center
      :padding {:left (u/px-div w 2)
-               :right (u/px w)}
+               :right (u/px 2)}
      :margin-right (u/px w)}
     [:.cross
-     {:position :absolute
-      :cursor :pointer
-      :font-size (u/px w)
-      :top 0
-      :right 0}]]])
+     {:cursor :pointer
+      :font-size (u/px h)}]]])
 
 (defn tag [label on-delete]
   [:span.tag label
