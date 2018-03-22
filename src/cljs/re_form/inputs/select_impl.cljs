@@ -114,10 +114,10 @@
                                                   (.-target e)
                                                   (:root-node @state)))
                                             (:active @state))
-                                       (=
-                                        (.-target e)
-                                        (cmn/f-child (:root-node @state)
-                                                     "cross")))
+                                       ((set (cmn/f-childn (:root-node @state)
+                                                           "cross"
+                                                           "tag-cross"))
+                                        (.-target e)))
                                (on-blur e)
                                (swap! state assoc :active false)))
         setgen #(-> % vector set)
