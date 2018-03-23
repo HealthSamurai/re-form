@@ -283,7 +283,7 @@
 (defn time-parse [fmt x]
   (when x
     (if (= fmt "12h")
-      (when-let [[_ hp mp noonp] (re-matches #"(\d?\d):(\d\d) (\wM)" (str/upper-case x))]
+      (when-let [[_ hp mp noonp] (re-matches #"(\d\d):(\d\d) (\wM)" (str/upper-case x))]
         (let [h (as-> hp $
                   (js/parseInt $)
                   (if (= $ 12) 0 $)
