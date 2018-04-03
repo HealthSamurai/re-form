@@ -69,7 +69,7 @@
                  :delimiter "/"
                  :placeholder "mm/dd/yyyy"
                  :groups [:m :d :y]}
-   "iso"        {:regex #"^(\d\d\d\d)-(\d\d)-(\d\d)$"
+   "iso"        {:regex #"^(\d\d\d\d)-(\d\d)-(\d\d).*$"
                  :delimiter "-"
                  :placeholder "yyyy-mm-dd"
                  :groups [:y :m :d]}
