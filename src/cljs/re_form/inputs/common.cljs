@@ -18,6 +18,10 @@
   "Shortcut to get first child of node matching the classname"
   (aget (.getElementsByClassName parent-node classname) 0))
 
+(defn f-childn [parent-node & classnames]
+  "Shortcut to get children of node matching the classname"
+  (flatten (map #(array-seq (.getElementsByClassName parent-node %)) classnames)))
+
 (defn has-ancestor [x node]
   "Check if node `x` has ancestor `node`"
   (when x

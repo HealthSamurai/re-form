@@ -21,16 +21,14 @@
     [:.tag
      {:border border
       :position :relative
-      :display :inline-block
+      :display :inline-flex
+      :align-items :center
       :padding {:left (u/px-div w 2)
-                :right (u/px w)}
+                :right (u/px 2)}
       :margin-right (u/px w)}
      [:.tag-cross
-      {:position :absolute
-       :cursor :pointer
-       :font-size (u/px w)
-       :top 0
-       :right 0}]]
+      {:cursor :pointer
+       :font-size (u/px h)}]]
     [:.flex {:display :inline-flex
              :width (u/percent 100)}
      [:i.cross {:margin-left :auto
@@ -103,7 +101,8 @@
           (label-fn i)]))]))
 
 (defn- tag [label on-delete]
-  [:span.tag label
+  [:span.tag
+   [:span label]
    [:i.tag-cross.material-icons
     {:on-click on-delete} "close"]])
 
@@ -115,10 +114,10 @@
                                                   (.-target e)
                                                   (:root-node @state)))
                                             (:active @state))
-                                       (=
-                                        (.-target e)
-                                        (cmn/f-child (:root-node @state)
-                                                     "cross")))
+                                       ((set (cmn/f-childn (:root-node @state)
+                                                           "cross"
+                                                           "tag-cross"))
+                                        (.-target e)))
                                (on-blur e)
                                (swap! state assoc :active false)))
         setgen #(-> % vector set)

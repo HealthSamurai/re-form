@@ -59,6 +59,22 @@
                           (when-let [on-image-ev (:on-image opts)]
                             (rf/dispatch (into on-image-ev [photo-name]))))))))
 
+(rf/reg-fx
+ :webcam/set-images
+ (fn [args]
+   (doall
+    (for [[photo-name src] (partition 2 args)]
+      (do
+        (let [{:keys [video canvas opts]} (get @widget-state photo-name)
+              context (.getContext canvas "2d")
+              img (js/Image.) ]
+          (set! (.-crossOrigin img) "anonymous")
+          (set! (.-onload img)
+                #(do (.drawImage context img 0 0 (:width opts) (:height opts))
+                     (set! (.. video -style -display) "none")
+                     (set! (.. canvas -style -display) "block")))
+          (set! (.-src img) src)))))))
+
 (rf/reg-event-fx
  :webcam/photo
  (fn [{db :db} [_ photo-name]]
