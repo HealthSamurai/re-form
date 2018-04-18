@@ -164,7 +164,8 @@
              body)])}))
 
 (defn- validate-and-update-errors [form-name path validators val]
-  (when-not (empty? validators)
+  (if (empty? validators)
+    (rf/dispatch [:re-form/validation-errors form-name {path nil}])
     (let [errors
           (reduce (fn [acc validator]
                     (if-let [res (validator val path)]
@@ -210,9 +211,9 @@
           (rf/dispatch [:re-form/input-removed form-name path]))
 
         update-binding
-        (fn [{new-soft-key :soft-key new-form :form-name new-path :path validators :validators :as new-state}]
-          (swap! state (fn [{soft-key :soft-key val :value err :errors path :path form :form-name :as curr-state}]
-                         (if (or (not= soft-key new-soft-key) (not= path new-path) (not= form new-form))
+        (fn [{new-form :form-name new-path :path validators :validators :as new-state}]
+          (swap! state (fn [{val :value err :errors path :path form :form-name :as curr-state}]
+                         (if (or (not= path new-path) (not= form new-form))
                            (do
                              (when (and form path)
                                (unbind-input form path))
@@ -223,12 +224,13 @@
                                ;; future validations
                                (add-watch new-val-subscr :binded-field run-validators)
 
-                               {:soft-key new-soft-key
-                                :form-name new-form
+                               {:form-name new-form
                                 :path new-path
                                 :value new-val-subscr
                                 :validators validators}))
-                           (assoc curr-state :validators validators)))))]
+                           (do
+                             (validate-and-update-errors new-form new-path validators @val)
+                             (assoc curr-state :validators validators))))))]
 
     (reagent/create-class
      {:display-name :binded-field
@@ -246,15 +248,14 @@
         (update-binding (second new-props)))
 
       :reagent-render
-      (fn [{:keys [key on-change form-name path on-blur error-paths] :as props}]
+      (fn [{:keys [on-change form-name path on-blur error-paths] :as props}]
         (let [flags @(rf/subscribe [:re-form/input-flags form-name path])
               is-form-submitting @(rf/subscribe [:re-form/is-form-submitting form-name])
               errors @(rf/subscribe [:re-form/input-errors form-name (into [path] error-paths)])]
           [:div.re-form-field {:class (->> flags
                                            (filter second)
                                            (map #(name (first %)))
-                                           (str/join " "))
-                               :key key}
+                                           (str/join " "))}
            [(:input props)
             (merge (dissoc props :form-name :path :input :validators)
                    {:value @(:value @state)
