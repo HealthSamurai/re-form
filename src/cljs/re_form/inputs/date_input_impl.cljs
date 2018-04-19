@@ -216,10 +216,10 @@
              {:value (date-parse fmt (:value @state))
               :on-change (comp #(swap! state assoc :dropdown-visible false)
                                on-change will-recv-props)}]])
-         (when-not label
-           [:div {:class (apply str (interpose "." err-classes))}
-            (when-let [local-errors (:errors @state)]
-              (str/join "\n" (conj errors local-errors)))])])})))
+         #_(when-not label
+             [:div {:class (apply str (interpose "." err-classes))}
+              (when-let [local-errors (:errors @state)]
+                (str/join "\n" (conj errors local-errors)))])])})))
 
 (defn iso-dt [date time] (gstring/format "%sT%s:00%s" date time ""))
 
