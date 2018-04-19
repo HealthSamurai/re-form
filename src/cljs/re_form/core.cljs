@@ -164,7 +164,8 @@
              body)])}))
 
 (defn- validate-and-update-errors [form-name path validators val]
-  (when-not (empty? validators)
+  (if (empty? validators)
+    (rf/dispatch [:re-form/validation-errors form-name {path nil}])
     (let [errors
           (reduce (fn [acc validator]
                     (if-let [res (validator val path)]
@@ -210,9 +211,9 @@
           (rf/dispatch [:re-form/input-removed form-name path]))
 
         update-binding
-        (fn [{new-form :form-name new-path :path validators :validators}]
+        (fn [{new-form :form-name new-path :path validators :validators :as new-state}]
           (swap! state (fn [{val :value err :errors path :path form :form-name :as curr-state}]
-                         (if (not (and (= new-path path) (= new-form form)))
+                         (if (or (not= path new-path) (not= form new-form))
                            (do
                              (when (and form path)
                                (unbind-input form path))
@@ -227,7 +228,9 @@
                                 :path new-path
                                 :value new-val-subscr
                                 :validators validators}))
-                           (assoc curr-state :validators validators)))))]
+                           (do
+                             (validate-and-update-errors new-form new-path validators @val)
+                             (assoc curr-state :validators validators))))))]
 
     (reagent/create-class
      {:display-name :binded-field
