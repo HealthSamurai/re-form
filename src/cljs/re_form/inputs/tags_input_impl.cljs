@@ -8,19 +8,20 @@
   [{:keys [radius w h h2 h3 selection-bg-color hover-bg-color border error-border]}]
   [:div.re-tags-container
    {:display "inline-block"
-     :min-width "30em"
-     :background-color :white
-     :padding [[(u/px 3) (u/px 12)]]
-     :border-radius (u/px 2)
-     :line-height (u/px h2)
+    :min-width "30em"
+    :background-color :white
+    :padding [[(u/px 3) (u/px 12)]]
+    :border-radius (u/px 2)
+    :line-height (u/px h2)
     :border border}
    [:&.empty-tags
     {:padding [[(u/px 4) (u/px 12)]]}]
    [:input {:border :none
-            :width (u/px 100)
-            :outline :none}]
+            :width (u/px 100)}]
    [:.tag
     {:border border
+     :color :inherit
+     :text-decoration :inherit
      :position :relative
      :display :inline-flex
      :align-items :center
@@ -31,10 +32,38 @@
      {:cursor :pointer
       :font-size (u/px h)}]]])
 
-(defn tag [label on-delete]
-  [:span.tag label
-   [:i.cross.material-icons
-    {:on-click on-delete} "close"]])
+(defn tag [label nodes on-delete]
+  (let [state (r/atom {})
+        keydown-listener
+        (fn [ev]
+          (cond
+
+            (#{46 8} (.-keyCode ev))
+            (let [ntag (.. ev -target -nextSibling)]
+              (on-delete)
+              (.focus ntag))
+
+            (#{32 13} (.-keyCode ev))
+            (do
+              (.focus (:input @nodes))
+              (.preventDefault ev))))]
+    (r/create-class
+     {:component-did-mount
+      (fn [this]
+        (.addEventListener (:root @state) "keydown" keydown-listener))
+
+      :component-will-unmount
+      (fn [this]
+        (.removeEventListener (:root @state) "keydown" keydown-listener))
+
+      :reagent-render
+      (fn [label nodes on-delete]
+        [:a.tag
+         {:href "javascript:void(0)"
+          :ref (fn [this] (swap! state assoc :root this))}
+         label
+         [:i.cross.material-icons
+          {:on-click on-delete} "close"]])})))
 
 (defn tags [{:keys [value on-change space-delimiter]}]
   (let [setgen #(-> % vector set)
@@ -81,8 +110,9 @@
          {:class (when (empty? value) :empty-tags)
           :ref (fn [this] (swap! nodes assoc :root-node this))}
          (for [v value] ^{:key v}
-           [tag v #(on-change (s/difference (set value) (setgen v)))])
+           [tag v nodes #(on-change (s/difference @inner-value (setgen v)))])
          [:input.new-tag {:type :text
                           :ref (fn [this] (swap! nodes assoc :input this))
+                          :on-blur add-tag
                           :value @newtag
                           :on-change #(reset! newtag (.. % -target -value))}]])})))
