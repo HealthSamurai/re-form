@@ -48,11 +48,13 @@
         (fn [e] (when (not (cmn/has-ancestor (.-target e) (:root-node @nodes)))
                   (add-tag)))
         keydown-listener
-        (fn [e] (when (.includes
-                       (apply array (cond-> [13 9 188] space-delimiter (conj 32)))
-                       (.-keyCode e))
-                  (.preventDefault e)
-                  (add-tag)))
+        (fn [e]
+          (when-not (= 9 (.-keyCode e))
+            (when (.includes
+                   (apply array (cond-> [13 9 188] space-delimiter (conj 32)))
+                   (.-keyCode e))
+              (.preventDefault e)
+              (add-tag))))
 
         field-click-listener
         (fn [e]
