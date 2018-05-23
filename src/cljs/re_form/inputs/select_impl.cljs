@@ -164,7 +164,6 @@
                         (set! (.-value (:input @nodes)) "")))
         open-popup (fn [_]
                      (when search-fn
-                       (reset! options [])
                        (js/setTimeout #(.focus (:input @nodes)) 0)
                        (search-fn (.-value (:input @nodes))))
                      (swap! state assoc :active true :selected nil))
