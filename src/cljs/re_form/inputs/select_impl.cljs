@@ -61,18 +61,18 @@
      :position :relative
      :z-index 1000
      :left (u/px 0)
-     :bottom (u/px- 1) #_(u/px+ 10 (+ 16 (* h 1.5)))
+     :bottom (u/px- 2) #_(u/px+ 10 (+ 16 (* h 1.5)))
      :padding [[0 (u/px w)]]
      :border-radius (u/px radius)
      :line-height (u/px* h3)}
     [:&.re-invisible
      {:display :none :position :absolute}]]
    [:.options
-    {:position :relative
+    {:position :absolute
      :background-color "white"
      :z-index 1000
      :left (u/px 0)
-     :bottom (u/px- 1) #_(u/px+ 10 (* 2 (+ 16 (* h 1.5))))
+     :top (u/px 72) #_(u/px+ 10 (* 2 (+ 16 (* h 1.5))))
      :width "100%"
      :display "inline-block"
      :box-shadow "1px 1px 2px #ccc"
@@ -80,7 +80,8 @@
      :overflow-y :auto
      :border "1px solid #ddd"}
     [:&.no-input
-     {:top (u/px+ 10 (+ 16 (* h 1.5)))}]
+     {:top (u/px+ 10 (+ 16 (* h 1.5)))
+      :bottom :unset}]
     [:.no-results
      {:text-align :center
       :padding (u/px 10)
@@ -192,7 +193,8 @@
      {:component-did-mount
       (fn [this]
         (swap! nodes assoc :root-node (r/dom-node this))
-        (.addEventListener (:input @nodes) "keydown" arrow-handler)
+        (when-let [i (:input @nodes)]
+          (.addEventListener i "keydown" arrow-handler))
         (.addEventListener (:focus-node @nodes) "keydown" outer-key-handler)
         (.addEventListener js/document "click" doc-click-listener)
         (when-let [focus-node (and (:auto-focus props) (:focus-node @nodes))]
@@ -200,7 +202,8 @@
 
       :component-will-unmount
       (fn [this]
-        (.removeEventListener (:input @nodes) "keydown" arrow-handler)
+        (when-let [i (:input @nodes)]
+          (.removeEventListener i "keydown" arrow-handler))
         (.removeEventListener (:focus-node @nodes) "keydown" outer-key-handler)
         (.removeEventListener js/document "click" doc-click-listener))
 
