@@ -32,20 +32,24 @@
      {:cursor :pointer
       :font-size (u/px h)}]]])
 
-(defn tag [label nodes on-delete]
+(defn tag [label input on-delete]
   (let [state (r/atom {})
         keydown-listener
         (fn [ev]
           (cond
 
             (#{46 8} (.-keyCode ev))
-            (let [ntag (.. ev -target -nextSibling)]
+            (let [ntag (.. ev -target -nextSibling)
+                  ptag (.. ev -target -prevSibling)]
               (on-delete)
-              (.focus ntag))
+              (cond
+                ntag (.focus ntag)
+                ptag (.focus ptag)
+                :default nil))
 
             (#{32 13} (.-keyCode ev))
             (do
-              (.focus (:input @nodes))
+              (.focus @input)
               (.preventDefault ev))))]
     (r/create-class
      {:component-did-mount
@@ -110,7 +114,8 @@
          {:class (when (empty? value) :empty-tags)
           :ref (fn [this] (swap! nodes assoc :root-node this))}
          (for [v value] ^{:key v}
-           [tag v nodes #(on-change (s/difference @inner-value (setgen v)))])
+           [tag v (r/cursor nodes [:input])
+            #(on-change (s/difference @inner-value (setgen v)))])
          [:input.new-tag {:type :text
                           :ref (fn [this] (swap! nodes assoc :input this))
                           :on-blur add-tag

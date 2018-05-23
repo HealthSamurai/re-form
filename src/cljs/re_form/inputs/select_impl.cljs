@@ -1,6 +1,7 @@
 (ns re-form.inputs.select-impl
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
+            [re-form.inputs.tags-input-impl :as ti]
             [re-form.inputs.common :as cmn]
             [clojure.string :as str]
             [goog.functions :refer [debounce]]
@@ -21,13 +22,15 @@
      :text-decoration "none"}
     [:.tag
      {:border border
+      :color :inherit
+      :text-decoration :inherit
       :position :relative
       :display :inline-flex
       :align-items :center
       :padding {:left (u/px-div w 2)
                 :right (u/px 2)}
       :margin-right (u/px w)}
-     [:.tag-cross
+     [:.cross
       {:cursor :pointer
        :font-size (u/px h)}]]
     [:.flex {:display :inline-flex
@@ -55,21 +58,21 @@
    [:.re-search-search
     {:border border
      :width "100%"
-     :position :absolute
+     :position :relative
      :z-index 1000
      :left (u/px 0)
-     :top (u/px 33) #_(u/px+ 10 (+ 16 (* h 1.5)))
+     :bottom (u/px- 1) #_(u/px+ 10 (+ 16 (* h 1.5)))
      :padding [[0 (u/px w)]]
      :border-radius (u/px radius)
      :line-height (u/px* h3)}
     [:&.re-invisible
      {:display :none :position :absolute}]]
    [:.options
-    {:position "absolute"
+    {:position :relative
      :background-color "white"
      :z-index 1000
      :left (u/px 0)
-     :top (u/px 67) #_(u/px+ 10 (* 2 (+ 16 (* h 1.5))))
+     :bottom (u/px- 1) #_(u/px+ 10 (* 2 (+ 16 (* h 1.5))))
      :width "100%"
      :display "inline-block"
      :box-shadow "1px 1px 2px #ccc"
@@ -108,15 +111,18 @@
     {:on-click on-delete} "close"]])
 
 (defn select [{:keys [on-search debounce-interval on-blur on-change
-                      label-fn search-by-enter multiselect] :as props}]
+                      label-fn search-by-enter multiselect options] :as props}]
   (let [state (r/atom {:active false})
+        nodes (r/atom {})
+        inner-value (r/atom nil)
         doc-click-listener (fn [e]
-                             (let [*state @state]
+                             (let [*state @state
+                                   *nodes @nodes]
                                (when (or (and (not (cmn/has-ancestor
                                                     (.-target e)
-                                                    (:root-node *state)))
+                                                    (:root-node *nodes)))
                                               (:active *state))
-                                         ((set (cmn/f-childn (:root-node *state)
+                                         ((set (cmn/f-childn (:root-node *nodes)
                                                              "cross"
                                                              "tag-cross"))
                                           (.-target e)))
@@ -147,65 +153,66 @@
                           (cond
                             (and search-by-enter on-search (= 13 (.-keyCode e)))
                             (on-search (.. e -target -value))
-                            :else (when-let [first-opt (cmn/f-child (:root-node @state) "option")]
+                            :else (when-let [first-opt (cmn/f-child (:root-node @nodes) "option")]
                                     (.. first-opt -classList (add "active"))
                                     (swap! state assoc :selected first-opt
                                            :suggestions-container
-                                           (cmn/f-child (:root-node @state) "options"))))))
+                                           (cmn/f-child (:root-node @nodes) "options"))))))
         reset-input (fn [e]
                       (on-change nil)
                       (when search-fn
-                        (set! (.-value (:input-node @state)) "")))
+                        (set! (.-value (:input @nodes)) "")))
         open-popup (fn [_]
-                     (do
-                       (when search-fn
-                         (js/setTimeout #(.focus (:input-node @state)) 0)
-                         (search-fn (.-value (:input-node @state))))
-                       (swap! state assoc :active true :selected nil)))
+                     (when search-fn
+                       (reset! options [])
+                       (js/setTimeout #(.focus (:input @nodes)) 0)
+                       (search-fn (.-value (:input @nodes))))
+                     (swap! state assoc :active true :selected nil))
 
         on-select (fn [value v]
                     (swap! state assoc :active false)
+                    (if-let [i (:input @nodes)]
+                      (set! (.-value i) ""))
                     (if multiselect
                       (on-change (conj (set value) v))
                       (on-change v))
 
-                    (when-let [focus-node (:focus-node @state)]
+                    (when-let [focus-node (:focus-node @nodes)]
                       (js/setTimeout #(when focus-node (.focus focus-node)) 0)))
 
 
-        my-label-fn (or label-fn identity)]
+        my-label-fn (or label-fn identity)
+
+        outer-key-handler
+        (fn [ev]
+          (when-not (#{46 8 9 16} (.-keyCode ev))
+            (open-popup ev)
+            (.preventDefault ev)))]
 
     (r/create-class
      {:component-did-mount
       (fn [this]
-        (let [root (r/dom-node this)]
-          (swap! state assoc :root-node root)
-          (when-let [input (cmn/f-child root "re-search-search")]
-            (swap! state assoc :input-node input)
-            (.addEventListener input "keydown" arrow-handler)))
+        (swap! nodes assoc :root-node (r/dom-node this))
+        (.addEventListener (:input @nodes) "keydown" arrow-handler)
+        (.addEventListener (:focus-node @nodes) "keydown" outer-key-handler)
         (.addEventListener js/document "click" doc-click-listener)
-        (when-let [focus-node (and (:auto-focus props) (:focus-node @state))]
-          (println "autofocus")
+        (when-let [focus-node (and (:auto-focus props) (:focus-node @nodes))]
           (js/setTimeout #(.focus focus-node) 0)))
 
       :component-will-unmount
       (fn [this]
-        (when-let [input (:input-node @state)]
-          (.removeEventListener input "keydown" arrow-handler))
+        (.removeEventListener (:input @nodes) "keydown" arrow-handler)
+        (.removeEventListener (:focus-node @nodes) "keydown" outer-key-handler)
         (.removeEventListener js/document "click" doc-click-listener))
 
       :reagent-render
       (fn [{:keys [value on-change value-fn options errors] :as props}]
-        [:div.re-select-container 
-         [:a.re-re-select
+        (reset! inner-value (set value))
+        [:div.re-select-container
+         [:div.re-re-select
           {:class (when-not (empty? errors) :error)
-           :tab-index (:tab-index props)
-           :ref (fn [focus-node] (swap! state assoc :focus-node focus-node))
-           :href "javascript:void(0)"
-           :on-key-press (fn [ev]
-                           (when (= 0 (.-keyCode ev))
-                             (open-popup ev)
-                             (.preventDefault ev)))
+           :tab-index 0 #_(:tab-index props)
+           :ref (fn [focus-node] (swap! nodes assoc :focus-node focus-node))
            :on-click (fn [ev] (open-popup ev))}
           [:div.flex
            [:span.triangle "▾"]
@@ -213,7 +220,8 @@
              [:span.value
               (if multiselect
                 (for [v value] ^{:key v}
-                  [tag (my-label-fn v) #(on-change (s/difference (set value) (setgen v)))])
+                  [ti/tag (my-label-fn v) (r/cursor nodes [:input])
+                   #(on-change (s/difference @inner-value (setgen v)))])
                 (my-label-fn value))]
              [:span.choose-value
               (or (:placeholder props) "Select...")])
@@ -222,6 +230,7 @@
          (when search-fn
            [:input.re-search-search
             {:tab-index 0
+             :ref (fn [this] (swap! nodes assoc :input this))
              :class (when-not (:active @state) :re-invisible)
              :on-change (fn [ev] (search-fn (.. ev -target -value)))}])
          (when (:active @state)
@@ -229,4 +238,6 @@
             (when search-by-enter [:div.no-results "Press enter for lookup"])
             (if (= :loading options)
               [:div.no-results "Loading..."]
-              [options-list options my-label-fn #(on-select value %)])])])})))
+              [options-list options my-label-fn
+               (fn [ev]
+                 (on-select value ev))])])])})))
