@@ -185,7 +185,7 @@
 
         outer-key-handler
         (fn [ev]
-          (when-not (#{46 8 9 16} (.-keyCode ev))
+          (when-not (or (#{46 8 9 18} (.-keyCode ev)) (.-altKey ev))
             (open-popup ev)
             (.preventDefault ev)))]
 
