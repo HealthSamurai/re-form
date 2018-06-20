@@ -46,7 +46,7 @@
                       :border :none
                       :padding-left 0
                       :width (u/px- 244 h2 (* 3 w))}
-     [:&:focus
+     #_[:&:focus
       {:outline :none}]]]])
 
 (def simple-regex #"^(\d\d)(\d\d)(\d\d\d\d)$")
@@ -172,10 +172,11 @@
            [:div.date-chevrons
             {:on-click #(on-change (dec-iso value))}
             [:i.material-icons "chevron_left"]])
-         [:div.date-input {:on-blur #(my-on-blur % (or on-blur identity))
-                           :class (if label
-                                    (str "input-field")
-                                    (when-not (empty? errors) :error))}
+         [:div.date-input
+          {:on-blur #(my-on-blur % (or on-blur identity))
+           :class (if label
+                    (str "input-field")
+                    (when-not (empty? errors) :error))}
           [:i.material-icons
            {:on-click
             #(let [parent-node (.. % -target -parentNode)
